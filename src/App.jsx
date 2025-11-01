@@ -10,7 +10,7 @@ function App() {
         <Route path="/landing" element={<Landing />} />
       </Routes>
     </Router>
-  );
+   );
 }
 
 export default App;

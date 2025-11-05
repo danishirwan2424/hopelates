@@ -1,6 +1,7 @@
 import React from "react";
 import Navigator from "../LandingPage_cmp/Navigator";
-import DonateImg from "../images/People3.jpg"; // 🖼️ Replace with your donation-related image
+import DonateImg from "../images/People3.jpg"; 
+import Footer from "../LandingPage_cmp/Footer";
 
 function Donations() {
   return (
@@ -67,7 +68,7 @@ function Donations() {
             {/* Option 1 */}
             <div className="bg-[#F8F8F8] p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
               <div className="text-4xl mb-4">💳</div>
-              <h3 className="text-[22px] font-semibold mb-2">Online Donation</h3>
+              <h3 className="text-[22px] text-black/60 font-semibold mb-2">Online Donation</h3>
               <p className="text-black/60 text-[15px]">
                 Donate securely through our website using credit/debit card or
                 online banking.
@@ -77,7 +78,7 @@ function Donations() {
             {/* Option 2 */}
             <div className="bg-[#F8F8F8] p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
               <div className="text-4xl mb-4">🏦</div>
-              <h3 className="text-[22px] font-semibold mb-2">Bank Transfer</h3>
+              <h3 className="text-[22px] text-black/60 font-semibold mb-2">Bank Transfer</h3>
               <p className="text-black/60 text-[15px]">
                 Send your contribution directly to our charity bank account for
                 maximum transparency.
@@ -87,7 +88,7 @@ function Donations() {
             {/* Option 3 */}
             <div className="bg-[#F8F8F8] p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
               <div className="text-4xl mb-4">📦</div>
-              <h3 className="text-[22px] font-semibold mb-2">Food Donations</h3>
+              <h3 className="text-[22px] text-black/60 font-semibold mb-2">Food Donations</h3>
               <p className="text-black/60 text-[15px]">
                 Contribute non-perishable food items and essentials to our
                 community pantry.
@@ -96,23 +97,8 @@ function Donations() {
           </div>
         </div>
       </section>
-
-      {/* 🟢 Call to Action */}
-      <section className="bg-[#019461] text-white py-20 px-12 text-center">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <h2 className="text-[38px] font-bold">Together, We Can End Hunger</h2>
-          <p className="text-white/80 text-[15px] leading-relaxed max-w-2xl mx-auto">
-            Whether you donate once or monthly, your generosity makes an impact
-            that lasts a lifetime. Join us in bringing hope to every meal shared.
-          </p>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="bg-white text-[#019461] font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-md hover:bg-gray-100 transition-all duration-200"
-          >
-            Become a Donor
-          </button>
-        </div>
-      </section>
+      
+      <Footer />
     </div>
   );
 }

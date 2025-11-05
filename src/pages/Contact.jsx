@@ -1,6 +1,7 @@
 import React from "react";
 import Navigator from "../LandingPage_cmp/Navigator";
-import ContactImg from "../images/People3.jpg"; // 🖼️ Replace with your contact-themed image
+import ContactImg from "../images/People3.jpg"; 
+import Footer from "../LandingPage_cmp/Footer";
 
 function Contact() {
   return (
@@ -122,6 +123,7 @@ function Contact() {
           </button>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

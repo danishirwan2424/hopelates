@@ -4,7 +4,8 @@ import peopleImg from "../images/People.png";
 import humanityImg1 from "../images/Humanity1.png"; 
 import humanityImg2 from "../images/Humanity2.png"; 
 import humanityImg3 from "../images/Humanity3.png"; 
-import peopleImg2 from "../images/People2.png"; // ✅ Use import instead of require
+import peopleImg2 from "../images/People2.png"; 
+import Footer from "../LandingPage_cmp/Footer"; 
 
 function Landing() {
   return (
@@ -143,8 +144,9 @@ function Landing() {
 
     </div>
   </div>
+  
 </div>
-
+<Footer />
     </div>
   );
 }

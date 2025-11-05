@@ -1,6 +1,7 @@
 import React from "react";
 import Navigator from "../LandingPage_cmp/Navigator";
-import People3 from "../images/People3.jpg"; // 🖼️ main image
+import People3 from "../images/People3.jpg"; 
+import Footer from "../LandingPage_cmp/Footer";
 
 function AboutUs() {
   return (
@@ -92,24 +93,8 @@ function AboutUs() {
           </div>
         </div>
       </section>
-
-      {/* 🟢 Join Us Section */}
-      <section className="bg-[#019461] text-white py-20 px-12 text-center">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <h2 className="text-[38px] font-bold">Join Us in Making a Difference</h2>
-          <p className="text-white/80 text-[15px] leading-relaxed max-w-2xl mx-auto">
-            Your involvement—whether through volunteering, donating, or
-            spreading awareness—fuels the impact we create. Together, we can
-            make the world a better place.
-          </p>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="bg-white text-[#019461] font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-md hover:bg-gray-100 transition-all duration-200"
-          >
-            Get Involved
-          </button>
-        </div>
-      </section>
+      
+      <Footer />
     </div>
   );
 }

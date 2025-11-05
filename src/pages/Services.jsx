@@ -1,5 +1,6 @@
 import React from "react";
 import Navigator from "../LandingPage_cmp/Navigator";
+import Footer from "../LandingPage_cmp/Footer";
 
 function Services() {
   const services = [
@@ -70,6 +71,7 @@ function Services() {
           </div>
         ))}
       </section>
+      <Footer />
     </div>
   );
 }

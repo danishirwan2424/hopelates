@@ -117,14 +117,14 @@ function Navigator() {
           <div className="flex flex-col leading-tight">
             <span className="text-sm text-gray-500">Join us now</span>
             <span
-              onClick={() => navigate("/donor")}
+              onClick={() => navigate("/src/pages/auth/Login.jsx")}
               className="text-black font-medium cursor-pointer hover:text-[#019461] transition-colors duration-200"
             >
               Become A Donor
             </span>
           </div>
           <button
-            onClick={() => navigate("/donate")}
+            onClick={() => navigate("/src/pages/auth/Login.jsx")}
             className="px-5 py-2 rounded-md text-white bg-[#019461] hover:bg-[#017a54] transition-colors duration-200 font-medium"
           >
             Donate Now

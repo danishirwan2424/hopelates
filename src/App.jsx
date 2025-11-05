@@ -99,7 +99,7 @@ function App() {
           <Route path="/signp" element={<PageWrapper><SignUp /></PageWrapper>} />
 
           {/* ✅ Fallback */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
         </Routes>
       </AnimatePresence>
     </Router>

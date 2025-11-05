@@ -71,7 +71,6 @@ function Services() {
           </div>
         ))}
       </section>
-      <Footer />
     </div>
   );
 }

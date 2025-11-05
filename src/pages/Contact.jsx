@@ -123,7 +123,6 @@ function Contact() {
           </button>
         </div>
       </section>
-      <Footer />
     </div>
   );
 }

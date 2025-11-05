@@ -6,10 +6,9 @@ import humanityImg1 from "../images/Humanity1.png";
 import humanityImg2 from "../images/Humanity2.png"; 
 import humanityImg3 from "../images/Humanity3.png"; 
 import peopleImg2 from "../images/People2.png"; 
-import Footer from "../LandingPage_cmp/Footer"; 
 
 function Landing() {
-  const navigate = useNavigate(); // 👈 Initialize navigate function
+  const navigate = useNavigate();
 
   const handleDonateClick = () => {
     navigate("/login"); // 👈 Redirect to login page
@@ -114,8 +113,6 @@ function Landing() {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }

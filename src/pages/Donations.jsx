@@ -97,8 +97,6 @@ function Donations() {
           </div>
         </div>
       </section>
-      
-      <Footer />
     </div>
   );
 }

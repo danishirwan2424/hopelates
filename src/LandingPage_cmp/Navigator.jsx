@@ -80,7 +80,7 @@ function Navigator() {
           <img
             src={logo}
             alt="Website Logo"
-            className="h-10 w-auto object-contain hover:scale-105 transition-transform duration-200"
+            className="h-15 w-auto object-contain hover:scale-105 transition-transform duration-200"
           />
         </div>
 

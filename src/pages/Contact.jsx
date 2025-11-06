@@ -106,23 +106,6 @@ function Contact() {
           </form>
         </div>
       </section>
-
-      {/* 🟢 Call to Action */}
-      <section className="bg-[#019461] text-white py-20 px-12 text-center">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <h2 className="text-[38px] font-bold">Let’s Build a Kinder World</h2>
-          <p className="text-white/80 text-[15px] leading-relaxed max-w-2xl mx-auto">
-            Have an idea to help your community? We’re open to partnerships,
-            collaborations, and volunteer efforts that spread hope.
-          </p>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="bg-white text-[#019461] font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-md hover:bg-gray-100 transition-all duration-200"
-          >
-            Get Involved
-          </button>
-        </div>
-      </section>
     </div>
   );
 }

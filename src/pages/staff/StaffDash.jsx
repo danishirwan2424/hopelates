@@ -47,7 +47,7 @@ function StaffDash() {
 
         {/* ===== Dashboard Panel ===== */}
         <div
-          className="flex-1 overflow-auto rounded-xl shadow-sm p-4 pb-1"
+          className="flex-1 overflow-auto rounded-xl shadow-sm p-4 pb-1" 
           style={{ backgroundColor: "#F2F1F1" }}
         >
           {/* Dashboard Header */}

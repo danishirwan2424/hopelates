@@ -64,3 +64,45 @@ body,
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
 }
+
+
+/* ===== Custom Checkbox Style ===== */
+input[type="checkbox"] {
+  /* Remove default appearance */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  width: 18px;
+  height: 18px;
+  background-color: #D9D9D9;
+  border: none;
+  border-radius: 4px;
+  /* optional: makes corners slightly rounded */
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* When checkbox is checked */
+input[type="checkbox"]:checked {
+  background-color: #000000;
+}
+
+/* White tick (✔) when checked */
+input[type="checkbox"]:checked::after {
+  content: "✔";
+  color: #ffffff;
+  font-size: 13px;
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+}
+
+/* Optional hover effect */
+input[type="checkbox"]:hover {
+  opacity: 0.8;
+}

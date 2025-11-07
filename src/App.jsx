@@ -23,6 +23,7 @@ import Contact from "./pages/Contact";
 
 // ✅ Staff Pages
 import StaffDash from "./pages/staff/StaffDash";
+import StaffApplication from "./pages/staff/StaffApplication";
 
 // ✅ Auth Pages
 import Login from "./pages/auth/Login";
@@ -50,19 +51,21 @@ function ScrollToTop() {
 
 // ✅ Page Animation Wrapper
 function PageWrapper({ children }) {
+  const { pathname } = useLocation();
   return (
     <motion.div
-      key={useLocation().pathname}
-      initial={{ opacity: 0, y: 15 }}
+      key={pathname}
+      initial={{ opacity: 1, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      transition={{ duration: 0.35, ease: "easeInOut" }}
+      exit={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0 }} // ⬅️ makes transitions instant
       className="min-h-screen"
     >
       {children}
     </motion.div>
   );
 }
+
 
 // ✅ Public Layout (Landing + Footer)
 function PublicLayout() {
@@ -112,6 +115,7 @@ function App() {
           {/* ✅ Staff Routes (No Navbar/Footer) */}
           <Route element={<StaffLayout />}>
             <Route path="/staff-dashboard" element={<StaffDash />} />
+            <Route path="/staff-application" element={<StaffApplication />} />
           </Route>
 
           {/* ✅ Auth Pages */}

@@ -29,7 +29,7 @@ import StaffApplication from "./pages/staff/StaffApplication";
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/Signup";
 
-// ✅ 404 Fallback
+// ✅ 404 Page
 const NotFound = () => (
   <div className="flex flex-col items-center justify-center h-screen text-center">
     <h1 className="text-4xl font-bold mb-2 text-gray-800">404</h1>
@@ -49,33 +49,46 @@ function ScrollToTop() {
   return null;
 }
 
-// ✅ Page Animation Wrapper
-function PageWrapper({ children }) {
-  const { pathname } = useLocation();
+// ✅ Animation Wrapper (Soft Fade-In with no double-render)
+function AnimatedPage({ children }) {
+  const location = useLocation();
+  const animatedPaths = [
+    "/landing",
+    "/about",
+    "/services",
+    "/donations",
+    "/contact",
+    "/login",
+    "/signup",
+  ];
+
+  const shouldAnimate = animatedPaths.includes(location.pathname);
+
   return (
-    <motion.div
-      key={pathname}
-      initial={{ opacity: 1, y: 0 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0 }} // ⬅️ makes transitions instant
-      className="min-h-screen"
-    >
-      {children}
-    </motion.div>
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.key} // use location key to handle transitions correctly
+        initial={shouldAnimate ? { opacity: 0 } : false}
+        animate={{ opacity: 1 }}
+        exit={shouldAnimate ? { opacity: 0 } : false}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="min-h-screen"
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
-
-// ✅ Public Layout (Landing + Footer)
+// ✅ Public Layout (Navbar + Footer)
 function PublicLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <Navbar />
       <main className="flex-grow">
-        <PageWrapper>
+        <AnimatedPage>
           <Outlet />
-        </PageWrapper>
+        </AnimatedPage>
       </main>
       <Footer />
     </div>
@@ -86,67 +99,56 @@ function PublicLayout() {
 function StaffLayout() {
   return (
     <div className="bg-gray-50 min-h-screen">
-      <PageWrapper>
-        <Outlet />
-      </PageWrapper>
+      <Outlet />
     </div>
   );
 }
 
-// ✅ App Router
+// ✅ Main App Router
 function App() {
   return (
     <Router>
       <ScrollToTop />
-      <AnimatePresence mode="wait">
-        <Routes>
-          {/* Redirect root → landing */}
-          <Route path="/" element={<Navigate to="/landing" />} />
+      <Routes>
+        {/* Redirect root → landing */}
+        <Route path="/" element={<Navigate to="/landing" />} />
 
-          {/* ✅ Public Routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/landing" element={<Landing />} />
-            <Route path="/about" element={<AboutUs />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/donations" element={<Donations />} />
-            <Route path="/contact" element={<Contact />} />
-          </Route>
+        {/* ✅ Public Routes (Soft Fade-In) */}
+        <Route element={<PublicLayout />}>
+          <Route path="/landing" element={<Landing />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/donations" element={<Donations />} />
+          <Route path="/contact" element={<Contact />} />
+        </Route>
 
-          {/* ✅ Staff Routes (No Navbar/Footer) */}
-          <Route element={<StaffLayout />}>
-            <Route path="/staff-dashboard" element={<StaffDash />} />
-            <Route path="/staff-application" element={<StaffApplication />} />
-          </Route>
+        {/* ✅ Staff Routes (no animation) */}
+        <Route element={<StaffLayout />}>
+          <Route path="/staff-dashboard" element={<StaffDash />} />
+          <Route path="/staff-application" element={<StaffApplication />} />
+        </Route>
 
-          {/* ✅ Auth Pages */}
-          <Route
-            path="/login"
-            element={
-              <PageWrapper>
-                <Login />
-              </PageWrapper>
-            }
-          />
-          <Route
-            path="/signp"
-            element={
-              <PageWrapper>
-                <SignUp />
-              </PageWrapper>
-            }
-          />
+        {/* ✅ Auth Pages (Soft Fade-In) */}
+        <Route
+          path="/login"
+          element={
+            <AnimatedPage>
+              <Login /> 
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/signUp"
+          element={
+            <AnimatedPage>
+              <SignUp />
+            </AnimatedPage>
+          }
+        />
 
-          {/* ✅ 404 Fallback */}
-          <Route
-            path="*"
-            element={
-              <PageWrapper>
-                <NotFound />
-              </PageWrapper>
-            }
-          />
-        </Routes>
-      </AnimatePresence>
+        {/* ✅ 404 Fallback */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </Router>
   );
 }

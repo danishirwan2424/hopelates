@@ -1,15 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import leaves from "../../images/leaves.jpg";
 import logo from "../../images/Logo2.png";
+import '../../index.css';
 
 function SignUp() {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
-    <div className="h-screen w-screen flex flex-col md:flex-row font-sans overflow-hidden">
+    <div className="h-screen w-screen flex flex-col md:flex-row font-sans overflow-hidden bg-white">
       {/* 🟢 Left Side - Form Section */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center bg-white px-8 md:px-16">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-8 md:px-16">
         <div className="w-full max-w-sm">
           {/* Title Section */}
           <div className="text-center mb-8">
@@ -18,73 +22,113 @@ function SignUp() {
               alt="HopeLates Logo"
               className="h-10 w-auto object-contain mx-auto mb-3"
             />
-            <h2 className="text-[30px] font-bold text-gray-900 leading-snug mb-3">
+            <h2 className="text-[30px] font-bold text-gray-800 leading-snug mb-3">
               Join HopeLates <br /> And Make a Difference
             </h2>
-            <p className="text-black/60 text-[14px]">
+            <p className="text-gray-500 text-[14px]">
               Create your account and start helping communities today.
             </p>
           </div>
 
           {/* Form */}
-          <form className="space-y-4">
+          <form className="space-y-4 text-left">
+            {/* Full Name */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">
+              <label className="block text-gray-600 text-sm font-medium mb-1">
                 Full Name
               </label>
               <input
                 type="text"
                 placeholder="Enter your full name"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#019461] focus:outline-none text-sm"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
               />
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">
+              <label className="block text-gray-600 text-sm font-medium mb-1">
                 Email Address
               </label>
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#019461] focus:outline-none text-sm"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
               />
             </div>
 
+            {/* Password */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">
+              <label className="block text-gray-600 text-sm font-medium mb-1">
                 Password
               </label>
-              <input
-                type="password"
-                placeholder="Create a password"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#019461] focus:outline-none text-sm"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
 
+            {/* Confirm Password */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">
+              <label className="block text-gray-600 text-sm font-medium mb-1">
                 Confirm Password
               </label>
-              <input
-                type="password"
-                placeholder="Confirm your password"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-[#019461] focus:outline-none text-sm"
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Buttons */}
             <div className="flex flex-col gap-3 pt-3">
               <button
                 type="submit"
-                className="bg-[#019461] text-white py-2.5 rounded-lg font-medium text-sm hover:bg-[#017b54] transition-colors duration-200"
+                className="bg-[#019461] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#017b54] transition-colors duration-200"
               >
                 Sign Up
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate("/landing")}
+                className="border border-[#019461] text-[#019461] py-2.5 rounded-lg text-sm font-medium hover:bg-[#019461] hover:text-white transition-colors duration-200"
+              >
+                Back to Home
               </button>
             </div>
           </form>
 
-          {/* 🟢 Login Redirect */}
-          <div className="text-center mt-5 text-[14px] text-gray-700">
+          {/* Login Redirect */}
+          <div className="text-center mt-5 text-[14px] text-gray-600">
             Already have an account?{" "}
             <button
               onClick={() => navigate("/login")}

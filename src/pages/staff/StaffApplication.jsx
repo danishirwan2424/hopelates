@@ -54,8 +54,8 @@ function StaffApplication() {
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-2 flex-shrink-0">
             {/* Pending */}
             <div className="bg-gradient-to-b from-[#11452E] to-[#278659] rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
-              <p className="text-[15px] mb-2">Pending</p>
-              <h2 className="text-[64px] font-bold leading-none">12</h2>
+              <p className="text-[15px] text-white mb-2">Pending</p>
+              <h2 className="text-[64px] text-white font-bold leading-none">12</h2>
             </div>
 
             {/* Approved */}
@@ -93,11 +93,11 @@ function StaffApplication() {
       </thead>
 
       {/* ===== Table Body ===== */}
-      <tbody>
+      <tbody classname="border-none">
         {applications.map((app) => (
           <tr
             key={app.id}
-            className="border-b hover:bg-gray-50 transition-colors"
+            className="hover:bg-gray-50 transition-colors"
           >
             <td className="py-3 px-4">
               <input type="checkbox" />

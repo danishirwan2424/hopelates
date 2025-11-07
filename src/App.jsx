@@ -26,7 +26,7 @@ import StaffDash from "./pages/staff/StaffDash";
 import StaffApplication from "./pages/staff/StaffApplication";
 
 // ✅ Auth Pages
-import Login from "./pages/auth/Login";
+import Login from "./pages/auth/Login"; 
 import SignUp from "./pages/auth/SignUp";
 
 // ✅ 404 Page

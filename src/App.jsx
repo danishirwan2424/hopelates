@@ -124,7 +124,7 @@ function App() {
             }
           />
           <Route
-            path="/signup"
+            path="/signp"
             element={
               <PageWrapper>
                 <SignUp />

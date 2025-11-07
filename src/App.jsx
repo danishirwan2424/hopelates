@@ -27,7 +27,7 @@ import StaffApplication from "./pages/staff/StaffApplication";
 
 // ✅ Auth Pages
 import Login from "./pages/auth/Login";
-import SignUp from "./pages/auth/Signup";
+import SignUp from "./pages/auth/SignUp";
 
 // ✅ 404 Page
 const NotFound = () => (

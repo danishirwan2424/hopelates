@@ -21,11 +21,14 @@ import Services from "./pages/Services";
 import Donations from "./pages/Donations";
 import Contact from "./pages/Contact";
 
+// ✅ Staff Pages
+import StaffDash from "./pages/staff/StaffDash";
+
 // ✅ Auth Pages
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/Signup";
 
-// ✅ Fallback Page
+// ✅ 404 Fallback
 const NotFound = () => (
   <div className="flex flex-col items-center justify-center h-screen text-center">
     <h1 className="text-4xl font-bold mb-2 text-gray-800">404</h1>
@@ -36,7 +39,7 @@ const NotFound = () => (
   </div>
 );
 
-// ✅ Smooth Scroll to Top on Route Change
+// ✅ Scroll to Top
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -45,7 +48,7 @@ function ScrollToTop() {
   return null;
 }
 
-// ✅ Page Transition Wrapper
+// ✅ Page Animation Wrapper
 function PageWrapper({ children }) {
   return (
     <motion.div
@@ -61,8 +64,8 @@ function PageWrapper({ children }) {
   );
 }
 
-// ✅ Persistent Layout
-function Layout() {
+// ✅ Public Layout (Landing + Footer)
+function PublicLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <Navbar />
@@ -76,6 +79,18 @@ function Layout() {
   );
 }
 
+// ✅ Staff Layout (No Navbar/Footer)
+function StaffLayout() {
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      <PageWrapper>
+        <Outlet />
+      </PageWrapper>
+    </div>
+  );
+}
+
+// ✅ App Router
 function App() {
   return (
     <Router>
@@ -85,8 +100,8 @@ function App() {
           {/* Redirect root → landing */}
           <Route path="/" element={<Navigate to="/landing" />} />
 
-          {/* ✅ Main Layout Routes */}
-          <Route element={<Layout />}>
+          {/* ✅ Public Routes */}
+          <Route element={<PublicLayout />}>
             <Route path="/landing" element={<Landing />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/services" element={<Services />} />
@@ -94,12 +109,38 @@ function App() {
             <Route path="/contact" element={<Contact />} />
           </Route>
 
-          {/* ✅ Auth Pages (No Navbar/Footer) */}
-          <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
-          <Route path="/signp" element={<PageWrapper><SignUp /></PageWrapper>} />
+          {/* ✅ Staff Routes (No Navbar/Footer) */}
+          <Route element={<StaffLayout />}>
+            <Route path="/staff-dashboard" element={<StaffDash />} />
+          </Route>
 
-          {/* ✅ Fallback */}
-          <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
+          {/* ✅ Auth Pages */}
+          <Route
+            path="/login"
+            element={
+              <PageWrapper>
+                <Login />
+              </PageWrapper>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <PageWrapper>
+                <SignUp />
+              </PageWrapper>
+            }
+          />
+
+          {/* ✅ 404 Fallback */}
+          <Route
+            path="*"
+            element={
+              <PageWrapper>
+                <NotFound />
+              </PageWrapper>
+            }
+          />
         </Routes>
       </AnimatePresence>
     </Router>

@@ -32,11 +32,12 @@ function NotFound() {
 
         {/* Button */}
         <button
-          onClick={() => navigate("/landing")}
-          className="bg-[#019461] text-white px-8 py-3 rounded-lg text-[15px] font-medium shadow-md hover:bg-[#017b54] transition-all duration-300 hover:shadow-lg"
+          onClick={() => navigate(-1)}
+          className="bg-[#019461] text-white px-8 py-3 rounded-lg text-[15px] font-medium         shadow-md hover:bg-[#017b54] transition-all duration-300 hover:shadow-lg"
         >
-          Back to Home
+          Go Back
         </button>
+
       </div>
 
       {/* Decorative Text */}

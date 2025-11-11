@@ -7,6 +7,7 @@ import {
   Navigate,
   useLocation,
   Outlet,
+  useNavigate
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -26,19 +27,34 @@ import StaffDash from "./pages/staff/StaffDash";
 import StaffApplication from "./pages/staff/StaffApplication";
 
 // ✅ Auth Pages
-import Login from "./pages/auth/Login"; 
+import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 
-// ✅ 404 Page
-const NotFound = () => (
-  <div className="flex flex-col items-center justify-center h-screen text-center">
-    <h1 className="text-4xl font-bold mb-2 text-gray-800">404</h1>
-    <p className="text-gray-600 mb-6">Oops! Page not found.</p>
-    <a href="/landing" className="text-[#019461] font-medium hover:underline">
-      Back to Home
-    </a>
-  </div>
-);
+// ✅ 404 Page (Fixed & Updated)
+const NotFound = () => {
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1); // ✅ Go to last page
+    } else {
+      navigate("/landing"); // ✅ Fallback when no history
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center h-screen text-center">
+      <h1 className="text-4xl font-bold mb-2 text-gray-800">404</h1>
+      <p className="text-gray-600 mb-6">Oops! Page not found.</p>
+      <a
+        onClick={handleGoBack}
+        className="text-[#019461] font-medium hover:underline cursor-pointer"
+      >
+        Go Back
+      </a>
+    </div>
+  );
+};
 
 // ✅ Scroll to Top
 function ScrollToTop() {
@@ -49,7 +65,7 @@ function ScrollToTop() {
   return null;
 }
 
-// ✅ Animation Wrapper (Soft Fade-In with no double-render)
+// ✅ Animation Wrapper
 function AnimatedPage({ children }) {
   const location = useLocation();
   const animatedPaths = [
@@ -67,7 +83,7 @@ function AnimatedPage({ children }) {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
-        key={location.key} // use location key to handle transitions correctly
+        key={location.key}
         initial={shouldAnimate ? { opacity: 0 } : false}
         animate={{ opacity: 1 }}
         exit={shouldAnimate ? { opacity: 0 } : false}
@@ -113,7 +129,7 @@ function App() {
         {/* Redirect root → landing */}
         <Route path="/" element={<Navigate to="/landing" />} />
 
-        {/* ✅ Public Routes (Soft Fade-In) */}
+        {/* ✅ Public Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/landing" element={<Landing />} />
           <Route path="/about" element={<AboutUs />} />
@@ -122,18 +138,18 @@ function App() {
           <Route path="/contact" element={<Contact />} />
         </Route>
 
-        {/* ✅ Staff Routes (no animation) */}
+        {/* ✅ Staff Routes */}
         <Route element={<StaffLayout />}>
           <Route path="/staff-dashboard" element={<StaffDash />} />
           <Route path="/staff-application" element={<StaffApplication />} />
         </Route>
 
-        {/* ✅ Auth Pages (Soft Fade-In) */}
+        {/* ✅ Auth Pages */}
         <Route
           path="/login"
           element={
             <AnimatedPage>
-              <Login /> 
+              <Login />
             </AnimatedPage>
           }
         />

@@ -25,10 +25,14 @@ import Contact from "./pages/Contact";
 // ✅ Staff Pages
 import StaffDash from "./pages/staff/StaffDash";
 import StaffApplication from "./pages/staff/StaffApplication";
+import StaffProfile from "./pages/staff/StaffProfile";
 
 // ✅ Auth Pages
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
+
+// ✅ Forms
+import Application from "./pages/forms/application";
 
 // ✅ 404 Page (Fixed & Updated)
 const NotFound = () => {
@@ -142,6 +146,7 @@ function App() {
         <Route element={<StaffLayout />}>
           <Route path="/staff-dashboard" element={<StaffDash />} />
           <Route path="/staff-application" element={<StaffApplication />} />
+          <Route path="/staff-profile" element={<StaffProfile />} />
         </Route>
 
         {/* ✅ Auth Pages */}
@@ -161,7 +166,14 @@ function App() {
             </AnimatedPage>
           }
         />
-
+        <Route
+          path="/application"
+          element={
+            <AnimatedPage>
+              <Application />
+            </AnimatedPage>
+          }
+        />
         {/* ✅ 404 Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>

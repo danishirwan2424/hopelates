@@ -32,7 +32,7 @@ import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 
 // ✅ Forms
-import Application from "./pages/forms/application";
+import Application_donate from "./pages/forms/ApplicationApply";
 
 // ✅ 404 Page (Fixed & Updated)
 const NotFound = () => {
@@ -170,7 +170,7 @@ function App() {
           path="/application"
           element={
             <AnimatedPage>
-              <Application />
+              <Application_donate />
             </AnimatedPage>
           }
         />

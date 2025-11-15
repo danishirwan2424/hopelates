@@ -5,10 +5,22 @@ import leaves from "../../images/leaves.jpg";
 import logo from "../../images/Logo2.png";
 import '../../index.css';
 
-
 function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    // Dummy authentication
+    if (email === "staff@email.com" && password === "password") {
+      navigate("/staff-dashboard");
+    } else {
+      alert("Invalid email or password");
+    }
+  };
 
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row font-sans overflow-hidden bg-white">
@@ -29,7 +41,7 @@ function Login() {
           </p>
 
           {/* Form */}
-          <form className="space-y-4 text-left">
+          <form className="space-y-4 text-left" onSubmit={handleLogin}>
             {/* Email */}
             <div>
               <label className="block text-gray-600 text-sm font-medium mb-1">
@@ -38,6 +50,8 @@ function Login() {
               <input
                 type="email"
                 placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#019461] focus:outline-none"
               />
             </div>
@@ -51,6 +65,8 @@ function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-[#019461] focus:outline-none"
                 />
                 <button
@@ -58,11 +74,7 @@ function Login() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>

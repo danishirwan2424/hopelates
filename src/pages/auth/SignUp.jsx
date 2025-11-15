@@ -108,6 +108,33 @@ function SignUp() {
               </div>
             </div>
 
+            {/* Role Selection */}
+            <div className="mb-4">
+              <p className="block text-gray-600 text-sm font-medium mb-2">I am a</p>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="donor"
+                    className="w-4 h-4 text-[#019461] focus:ring-[#019461] border-gray-300"
+                  />
+                  <span className="text-gray-700 text-sm">Donor</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="applicant"
+                    className="w-4 h-4 text-[#019461] focus:ring-[#019461] border-gray-300"
+                  />
+                  <span className="text-gray-700 text-sm">Applicant</span>
+                </label>
+              </div>
+            </div>
+
+
             {/* Buttons */}
             <div className="flex flex-col gap-3 pt-3">
               <button
@@ -115,14 +142,6 @@ function SignUp() {
                 className="bg-[#019461] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#017b54] transition-colors duration-200"
               >
                 Sign Up
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate("/landing")}
-                className="border border-[#019461] text-[#019461] py-2.5 rounded-lg text-sm font-medium hover:bg-[#019461] hover:text-white transition-colors duration-200"
-              >
-                Back to Home
               </button>
             </div>
           </form>

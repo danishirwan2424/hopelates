@@ -275,20 +275,20 @@ function StaffProfile() {
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
 
           {/* Cover + header */}
-          <div className="relative rounded-lg overflow-hidden mb-6">
+          <div className="relative rounded-lg overflow-hidden h-50">
             {/* Cover + header */}
 <div className="relative rounded-lg overflow-hidden mb-20">
 
   {/* --- Cover Banner --- */}
-  <div
-    className="h-48 w-full relative"
-    style={{
-      background:
-        staff.coverPhoto || coverPreview
-          ? `url(${coverPreview || staff.coverPhoto}) center/cover no-repeat`
-          : "#11452E",
-    }}
-  >
+<div
+  className="h-48 w-full relative"
+  style={{
+    background: staff.coverPhoto || coverPreview
+      ? `linear-gradient(to right, #278659, #11452E), url(${coverPreview || staff.coverPhoto}) center/cover no-repeat`
+      : "linear-gradient(to right, #278659, #11452E)",
+  }}
+>
+
     {/* ===== Profile Picture INSIDE Banner ===== */}
     <div className="absolute left-6 bottom-4 flex items-center">
       <div className="w-28 h-28 rounded-full border-4 border-white overflow-hidden shadow-lg">
@@ -407,176 +407,176 @@ function StaffProfile() {
 
       {/* ===== Edit Modal (simple) ===== */}
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-lg max-w-3xl w-full shadow-xl overflow-auto">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h4 className="text-lg font-semibold text-[#11452E]">Edit Profile</h4>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleCancel}
-                  className="px-3 py-1 rounded-md text-sm border"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="px-4 py-2 rounded-md text-sm bg-[#278659] text-white disabled:opacity-60"
-                >
-                  {saving ? "Saving..." : "Save changes"}
-                </button>
-              </div>
-            </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-1 w-full">
+  <div className="bg-white rounded-lg max-w-4xl shadow-xl overflow-auto max-h-[90vh]">
+    {/* Header */}
+    <div className="flex items-center justify-between p-4 border-b">
+      <h4 className="text-lg font-semibold text-[#11452E]">Edit Profile</h4>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleCancel}
+          className="px-3 py-1 rounded-md text-sm border hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-4 py-2 rounded-md text-sm bg-[#278659] text-white disabled:opacity-60 hover:bg-[#1f6b49]"
+        >
+          {saving ? "Saving..." : "Save changes"}
+        </button>
+      </div>
+    </div>
 
-            <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left: picture uploads + previews */}
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm font-semibold text-[#11452E] mb-2">Profile Photo</p>
-                  <div className="flex items-center gap-4">
-                    <div className="w-24 h-24 rounded-full overflow-hidden border" style={{ borderColor: "#278659" }}>
-                      <img
-                        src={profilePreview || staff.profileImage}
-                        alt="profile preview"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        id="profileFile"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleProfilePick}
-                        className="text-sm"
-                      />
-                      <div className="text-xs text-gray-500 mt-1">PNG/JPG, max 2MB</div>
-                    </div>
-                  </div>
-                </div>
+    {/* Content */}
+    <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Left: Profile and Cover Photo Side-by-Side */}
+      <div className="lg:col-span-1 flex flex-col gap-6">
+        {/* Profile Photo */}
+{/* Profile Photo */}
+<div className="flex flex-col items-center relative">
+  <p className="text-sm font-semibold text-[#11452E] mb-2">Profile Photo</p>
 
-                <div>
-                  <p className="text-sm font-semibold text-[#11452E] mb-2">Cover Photo</p>
-                  <div className="w-full h-28 bg-gray-100 rounded overflow-hidden border">
-                    <img
-                      src={coverPreview || staff.coverPhoto || ""}
-                      alt="cover preview"
-                      className={`w-full h-full object-cover ${!(coverPreview || staff.coverPhoto) ? "opacity-30" : ""}`}
-                    />
-                    {!coverPreview && !staff.coverPhoto && (
-                      <div className="flex items-center justify-center h-full text-sm text-gray-500">No cover</div>
-                    )}
-                  </div>
-                  <div className="mt-2">
-                    <input
-                      id="coverFile"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleCoverPick}
-                      className="text-sm"
-                    />
-                    <div className="text-xs text-gray-500 mt-1">Recommended 1200x300px</div>
-                  </div>
-                </div>
-              </div>
+  <div className="relative w-44 h-44">
+    {/* Profile Image */}
+    <img
+      src={profilePreview || staff.profileImage}
+      alt="profile preview"
+      className="w-full h-full object-cover rounded-full border-2 border-[#278659]"
+    />
 
-              {/* Right: editable fields */}
-              <div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-semibold text-[#11452E]">First Name</label>
-                    <input
-                      name="firstName"
-                      value={form.firstName || ""}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
+    {/* Pencil Icon overlay */}
+    <button
+      type="button"
+      onClick={() => document.getElementById("profileFile").click()}
+      className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow hover:bg-gray-100"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6 text-[#278659]"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6 3 3-6 6H9v-3z" />
+      </svg>
+    </button>
 
-                  <div>
-                    <label className="text-xs font-semibold text-[#11452E]">Last Name</label>
-                    <input
-                      name="lastName"
-                      value={form.lastName || ""}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
+    {/* Hidden File Input */}
+    <input
+      id="profileFile"
+      type="file"
+      accept="image/*"
+      onChange={handleProfilePick}
+      className="hidden"
+    />
+  </div>
+</div>
 
-                  <div>
-                    <label className="text-xs font-semibold text-[#11452E]">Phone</label>
-                    <input
-                      name="phone"
-                      value={form.phone || ""}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
 
-                  <div>
-                    <label className="text-xs font-semibold text-[#11452E]">Position</label>
-                    <input
-                      name="position"
-                      value={form.position || ""}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
+        
+      </div>
 
-                  <div>
-                    <label className="text-xs font-semibold text-[#11452E]">Joined Date</label>
-                    <input
-                      name="joinedDate"
-                      type="date"
-                      value={form.joinedDate || ""}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
+      {/* Right: Editable Fields */}
+      <div className="lg:col-span-2 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-semibold text-[#11452E]">First Name</label>
+            <input
+              name="firstName"
+              value={form.firstName || ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+            />
+          </div>
 
-                  <div>
-                    <label className="text-xs font-semibold text-[#11452E]">Gender</label>
-                    <select
-                      name="gender"
-                      value={form.gender || ""}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    >
-                      <option value="">Select</option>
-                      <option>Male</option>
-                      <option>Female</option>
-                    </select>
-                  </div>
+          <div>
+            <label className="text-xs font-semibold text-[#11452E]">Last Name</label>
+            <input
+              name="lastName"
+              value={form.lastName || ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+            />
+          </div>
 
-                  <div className="md:col-span-2">
-                    <label className="text-xs font-semibold text-[#11452E]">IC / Passport</label>
-                    <input
-                      name="ic"
-                      value={form.ic || ""}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
+          <div>
+            <label className="text-xs font-semibold text-[#11452E]">Phone</label>
+            <input
+              name="phone"
+              value={form.phone || ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+            />
+          </div>
 
-                  <div className="md:col-span-2">
-                    <label className="text-xs font-semibold text-[#11452E]">Address</label>
-                    <textarea
-                      name="address"
-                      rows="3"
-                      value={form.address || ""}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div>
+            <label className="text-xs font-semibold text-[#11452E]">Position</label>
+            <input
+              name="position"
+              value={form.position || ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+            />
+          </div>
 
-            {/* modal footer hints */}
-            <div className="p-4 border-t text-xs text-gray-500">
-              Changes will be saved to the server and an activity log entry will be created.
-            </div>
+          <div>
+            <label className="text-xs font-semibold text-[#11452E]">Joined Date</label>
+            <input
+              name="joinedDate"
+              type="date"
+              value={form.joinedDate || ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-[#11452E]">Gender</label>
+            <select
+              name="gender"
+              value={form.gender || ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+            >
+              <option value="">Select</option>
+              <option>Male</option>
+              <option>Female</option>
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="text-xs font-semibold text-[#11452E]">IC / Passport</label>
+            <input
+              name="ic"
+              value={form.ic || ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="text-xs font-semibold text-[#11452E]">Address</label>
+            <textarea
+              name="address"
+              rows="3"
+              value={form.address || ""}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+            />
           </div>
         </div>
+      </div>
+    </div>
+
+    {/* Footer */}
+    <div className="p-4 border-t text-xs text-gray-500">
+      Changes will be saved to the server and an activity log entry will be created.
+    </div>
+  </div>
+</div>
+
       )}
 
     </div>

@@ -10,7 +10,7 @@ import {
 
 function Footer() {
   return (
-    <footer className="bg-[#018C60] text-white font-inter mt-28">
+    <footer className="bg-[#018C60] text-white font-inter mt-0">
       {/* 🔹 Upper Footer Section */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 border-b border-white/20">
         {/* 🌿 Brand */}

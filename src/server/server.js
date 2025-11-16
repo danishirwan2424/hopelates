@@ -1,96 +1,63 @@
+// backend/server.js
 import express from "express";
+import nodemailer from "nodemailer";
 import cors from "cors";
 import dotenv from "dotenv";
-import pg from "pg";
-import mysql from "mysql2/promise";
-import mongoose from "mongoose";
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
+const PORT = 5000;
+
+app.use(cors({ origin: "http://localhost:5173" })); // React app port
 app.use(express.json());
 
-// =============================
-// 1️⃣ PostgreSQL Connection
-// =============================
-let pgPool;
-if (process.env.DB_TYPE === "postgres") {
-  pgPool = new pg.Pool({
-    user: process.env.PG_USER,
-    host: process.env.PG_HOST,
-    database: process.env.PG_DATABASE,
-    password: process.env.PG_PASSWORD,
-    port: process.env.PG_PORT,
+// Email endpoint
+app.post("/api/email/send", async (req, res) => {
+  const applicant = req.body;
+
+  // Configure transporter
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
   });
 
-  pgPool.connect()
-    .then(() => console.log("✅ Connected to PostgreSQL"))
-    .catch((err) => console.error("❌ PostgreSQL connection error:", err));
-}
-
-// =============================
-// 2️⃣ MySQL Connection
-// =============================
-let mysqlPool;
-if (process.env.DB_TYPE === "mysql") {
-  (async () => {
-    try {
-      mysqlPool = await mysql.createPool({
-        host: process.env.MYSQL_HOST,
-        user: process.env.MYSQL_USER,
-        password: process.env.MYSQL_PASSWORD,
-        database: process.env.MYSQL_DATABASE,
-        port: process.env.MYSQL_PORT,
-      });
-      console.log("✅ Connected to MySQL");
-    } catch (err) {
-      console.error("❌ MySQL connection error:", err);
-    }
-  })();
-}
-
-// =============================
-// 3️⃣ MongoDB Connection
-// =============================
-if (process.env.DB_TYPE === "mongodb") {
-  mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ Connected to MongoDB"))
-    .catch((err) => console.error("❌ MongoDB connection error:", err));
-}
-
-// =============================
-// API Routes
-// =============================
-
-// Example: Get users from whichever DB is active
-app.get("/users", async (req, res) => {
   try {
-    let users = [];
+    // Generate QR code URL
+    const QRCode = await import("qrcode");
+    const qrData = JSON.stringify({
+      name: applicant.name,
+      ic: applicant.ic,
+      phone: applicant.phone,
+      applicantId: applicant.id,
+    });
+    const qrImageUrl = await QRCode.toDataURL(qrData);
 
-    if (process.env.DB_TYPE === "postgres" && pgPool) {
-      const result = await pgPool.query("SELECT * FROM users");
-      users = result.rows;
-    } 
-    else if (process.env.DB_TYPE === "mysql" && mysqlPool) {
-      const [rows] = await mysqlPool.query("SELECT * FROM users");
-      users = rows;
-    } 
-    else if (process.env.DB_TYPE === "mongodb") {
-      const User = mongoose.model("User", new mongoose.Schema({ name: String, email: String }));
-      users = await User.find();
-    }
+    const mailOptions = {
+      from: `"Food Aid Team" <${process.env.EMAIL_USER}>`,
+      to: applicant.email,
+      subject: "Your Application is Approved ✅",
+      html: `
+        <p>Hi <strong>${applicant.name}</strong>,</p>
+        <p>Congratulations! Your application has been approved. Your aid will be sent within 7 days.</p>
+        <p>Here is your QR code:</p>
+        <img src="${qrImageUrl}" alt="QR Code" />
+        <p>Thank you!</p>
+      `,
+    };
 
-    res.json(users);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent:", info.messageId);
+    res.json({ success: true });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Database error");
+    res.json({ success: false, error: err.message });
   }
 });
 
-// =============================
-// Server Start
-// =============================
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

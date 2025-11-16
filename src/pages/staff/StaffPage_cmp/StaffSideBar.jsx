@@ -27,9 +27,9 @@ function StaffSideBar() {
     { name: "DASHBOARD", path: "/staff-dashboard", icon: DashboardIcon },
     { name: "APPLICATION", path: "/staff-application", icon: ApplicationIcon },
     { name: "DISTRIBUTION", path: "/staff-distribution", icon: DistributionIcon },
-    { name: "DONATION STOCK", path: "/staff-donation-stock", icon: DonationStockIcon },
+    { name: "DONATION STOCK", path: "/staff-donation", icon: DonationStockIcon },
     { name: "PROFILE", path: "/staff-profile", icon: ProfileIcon },
-    { name: "REPORTS", path: "/staff-reports", icon: ReportsIcon },
+    { name: "REPORTS", path: "/staff-report", icon: ReportsIcon },
   ];
 
   return (

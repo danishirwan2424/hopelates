@@ -26,6 +26,9 @@ import Contact from "./pages/Contact";
 import StaffDash from "./pages/staff/StaffDash";
 import StaffApplication from "./pages/staff/StaffApplication";
 import StaffProfile from "./pages/staff/StaffProfile";
+import StaffDistribution from "./pages/staff/StaffDistribution";
+import StaffDonation from "./pages/staff/StaffDonation";
+import StaffReport from "./pages/staff/StaffReport";
 
 // ✅ Auth Pages
 import Login from "./pages/auth/Login";
@@ -130,8 +133,11 @@ function App() {
         {/* ✅ Staff Routes */}
         <Route element={<StaffLayout />}>
           <Route path="/staff-dashboard" element={<StaffDash />} />
-          <Route path="/staff-application" element={<StaffApplication />} />
-          <Route path="/staff-profile" element={<StaffProfile />} />
+          <Route path="/staff-application" element={<StaffApplication />} /> 
+          <Route path="/staff-profile" element={<StaffProfile />} /> 
+          <Route path="/staff-distribution" element={<StaffDistribution />} />
+          <Route path="/staff-donation" element={<StaffDonation />} />
+          <Route path="/staff-report" element={<StaffReport />} />
         </Route>
 
         {/* ✅ Auth Pages (animated) */}

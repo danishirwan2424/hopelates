@@ -36,7 +36,7 @@ export const applications = [
     postcode: "75450",
     occupation: "Technician",
     salary: 1900,
-    email: "danish@example.com",
+    email: "danishirwaninfinite@gmail.com",
     household: 4,
     score: 75,
   },

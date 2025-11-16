@@ -5,9 +5,9 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
   Outlet,
-  useNavigate
+  useLocation,
+  useNavigate,
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -34,16 +34,12 @@ import SignUp from "./pages/auth/SignUp";
 // ✅ Forms
 import Application_donate from "./pages/forms/ApplicationApply";
 
-// ✅ 404 Page (Fixed & Updated)
+// ✅ 404 Page
 const NotFound = () => {
   const navigate = useNavigate();
-
   const handleGoBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1); // ✅ Go to last page
-    } else {
-      navigate("/landing"); // ✅ Fallback when no history
-    }
+    if (window.history.length > 1) navigate(-1);
+    else navigate("/landing");
   };
 
   return (
@@ -69,28 +65,17 @@ function ScrollToTop() {
   return null;
 }
 
-// ✅ Animation Wrapper
+// ✅ Animation Wrapper (for public & auth pages only)
 function AnimatedPage({ children }) {
   const location = useLocation();
-  const animatedPaths = [
-    "/landing",
-    "/about",
-    "/services",
-    "/donations",
-    "/contact",
-    "/login",
-    "/signup",
-  ];
-
-  const shouldAnimate = animatedPaths.includes(location.pathname);
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.key}
-        initial={shouldAnimate ? { opacity: 0 } : false}
+        initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={shouldAnimate ? { opacity: 0 } : false}
+        exit={{ opacity: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="min-h-screen"
       >
@@ -100,7 +85,7 @@ function AnimatedPage({ children }) {
   );
 }
 
-// ✅ Public Layout (Navbar + Footer)
+// ✅ Public Layout (Navbar + Footer + animation)
 function PublicLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
@@ -115,11 +100,11 @@ function PublicLayout() {
   );
 }
 
-// ✅ Staff Layout (No Navbar/Footer)
+// ✅ Staff Layout (No Navbar/Footer, instant render)
 function StaffLayout() {
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Outlet />
+      <Outlet /> {/* instantly render staff pages */}
     </div>
   );
 }
@@ -149,7 +134,7 @@ function App() {
           <Route path="/staff-profile" element={<StaffProfile />} />
         </Route>
 
-        {/* ✅ Auth Pages */}
+        {/* ✅ Auth Pages (animated) */}
         <Route
           path="/login"
           element={
@@ -174,6 +159,7 @@ function App() {
             </AnimatedPage>
           }
         />
+
         {/* ✅ 404 Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>

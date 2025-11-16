@@ -1,14 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import { Users, ClipboardList, Settings } from "lucide-react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-
-// Components
-import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
-
-// Chart.js Setup
 import { Doughnut, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -21,6 +14,12 @@ import {
   Title,
 } from "chart.js";
 
+import { applications } from "../dataExample/UserExp";
+
+// Components
+import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
+import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
+
 ChartJS.register(
   ArcElement,
   CategoryScale,
@@ -32,6 +31,42 @@ ChartJS.register(
 );
 
 function StaffDash() {
+  // ===== Animated Stats State =====
+  const [dailyTotal, setDailyTotal] = useState(0);
+  const [completedDist, setCompletedDist] = useState(0);
+  const [approvedApp, setApprovedApp] = useState(0);
+  const [pendingApp, setPendingApp] = useState(0);
+
+  // Totals
+  const totalDaily = applications.length;
+  const totalCompleted = applications.filter(a => a.status === "Completed").length;
+  const totalApproved = totalCompleted; // same as completed
+  const totalPending = applications.filter(a => a.status === "Pending").length;
+
+  // Animate numbers
+  useEffect(() => {
+    let dt = 0, cd = 0, ap = 0, pd = 0;
+    const step = 1;
+
+    const timer = setInterval(() => {
+      if (dt < totalDaily) dt += step;
+      if (cd < totalCompleted) cd += step;
+      if (ap < totalApproved) ap += step;
+      if (pd < totalPending) pd += step;
+
+      setDailyTotal(dt > totalDaily ? totalDaily : dt);
+      setCompletedDist(cd > totalCompleted ? totalCompleted : cd);
+      setApprovedApp(ap > totalApproved ? totalApproved : ap);
+      setPendingApp(pd > totalPending ? totalPending : pd);
+
+      if (dt >= totalDaily && cd >= totalCompleted && ap >= totalApproved && pd >= totalPending) {
+        clearInterval(timer);
+      }
+    }, 30);
+
+    return () => clearInterval(timer);
+  }, [totalDaily, totalCompleted, totalApproved, totalPending]);
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* ===== Sidebar ===== */}
@@ -42,48 +77,44 @@ function StaffDash() {
       {/* ===== Main Content ===== */}
       <div className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-0 h-screen overflow-hidden">
         <div className="flex flex-col flex-1 min-h-0">
-        {/* Top Search/Panel Bar */}
-        <StaffPanelBar />
+          <StaffPanelBar />
 
-        {/* ===== Dashboard Panel ===== */}
-        <div
-          className="flex-1 overflow-auto rounded-xl shadow-sm p-4 pb-1" 
-          style={{ backgroundColor: "#F2F1F1" }}
-        >
-          {/* Dashboard Header */}
-          <h1 className="text-[20px] text-gray-800">Dashboard</h1>
-          <h3 className="text-[12px] text-black opacity-[50%] mb-2">
-            Plan, prioritize and accomplish your task with ease
-          </h3>
+          <div
+            className="flex-1 overflow-auto rounded-xl shadow-sm p-4 pb-1"
+            style={{ backgroundColor: "#F2F1F1" }}
+          >
+            {/* Dashboard Header */}
+            <h1 className="text-[20px] text-gray-800">Dashboard</h1>
+            <h3 className="text-[12px] text-black opacity-[50%] mb-2">
+              Plan, prioritize and accomplish your task with ease
+            </h3>
 
-          {/* ===== Stats Panels ===== */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-2">
-            {/* Daily Total Application */}
-            <div className="bg-gradient-to-b from-[#11452E] to-[#278659] rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
-              <p className="text-[15px] text-white mb-2">Daily Total Application</p>
-              <h2 className="text-[64px] font-bold text-white leading-none">239</h2>
+            {/* ===== Stats Panels ===== */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-2">
+              <div className="bg-gradient-to-b from-[#11452E] to-[#278659] rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
+                <p className="text-[15px] text-white mb-2">Daily Total Application</p>
+                <h2 className="text-[64px] font-bold text-white leading-none">{dailyTotal}</h2>
+              </div>
+
+              <div className="bg-white rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
+                <p className="text-[15px] text-black mb-2">Completed Distributions</p>
+                <h2 className="text-[64px] font-bold text-black leading-none">{completedDist}</h2>
+              </div>
+
+              <div className="bg-white rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
+                <p className="text-[15px] text-black mb-2">Application Approved</p>
+                <h2 className="text-[64px] font-bold text-black leading-none">{approvedApp}</h2>
+              </div>
+
+              <div className="bg-white rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
+                <p className="text-[15px] text-black mb-2">Pending Approvement</p>
+                <h2 className="text-[64px] font-bold text-black leading-none">{pendingApp}</h2>
+              </div>
             </div>
 
-            {/* Completed Distributions */}
-            <div className="bg-white rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
-              <p className="text-[15px] text-black mb-2">Completed Distributions</p>
-              <h2 className="text-[64px] font-bold text-black leading-none">104</h2>
-            </div>
-
-            {/* Application Approved */}
-            <div className="bg-white rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
-              <p className="text-[15px] text-black mb-2">Application Approved</p>
-              <h2 className="text-[64px] font-bold text-black leading-none">234</h2>
-            </div>
-
-            {/* Pending Approvement */}
-            <div className="bg-white rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
-              <p className="text-[15px] text-black mb-2">Pending Approvement</p>
-              <h2 className="text-[64px] font-bold text-black leading-none">5</h2>
-            </div>
-          </div>
-
-          {/* ===== Charts Panels ===== */}
+            {/* Charts, Stock & Calendar panels remain unchanged... */}
+            {/* <Your existing JSX code here> */}
+                      {/* ===== Charts Panels ===== */}
           <div className="flex flex-wrap gap-2 mb-2">
             {/* Applicants Category (Doughnut) */}
             <div className="bg-white rounded-[15px] shadow-md h-[283px] w-[283px] p-4 flex flex-col">
@@ -276,8 +307,8 @@ function StaffDash() {
             </div>
           </div>
 
-          <Outlet />
-        </div>
+            <Outlet />
+          </div>
         </div>
       </div>
     </div>

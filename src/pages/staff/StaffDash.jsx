@@ -14,7 +14,7 @@ import {
   Title,
 } from "chart.js";
 
-import { applications } from "../dataExample/UserExp";
+import { applications, statusCounts, months, monthlyApplicants } from "../dataExample/UserExp";
 
 // Components
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
@@ -29,6 +29,7 @@ ChartJS.register(
   Legend,
   Title
 );
+
 
 function StaffDash() {
   // ===== Animated Stats State =====
@@ -125,11 +126,11 @@ function StaffDash() {
               <div className="flex-1 flex items-center justify-center">
                 <Doughnut
                   data={{
-                    labels: ["Approved", "Pending", "Rejected"],
+                    labels: ["Completed", "Pending", "Rejected"],
                     datasets: [
                       {
                         label: "Applicants",
-                        data: [60, 25, 15],
+                        data: [statusCounts.Completed, statusCounts.Pending, statusCounts.Rejected],
                         backgroundColor: ["#278659", "#11452E", "#9BC6B3"],
                         borderWidth: 1,
                       },
@@ -137,10 +138,7 @@ function StaffDash() {
                   }}
                   options={{
                     plugins: {
-                      legend: {
-                        position: "bottom",
-                        labels: { color: "#000", boxWidth: 12 },
-                      },
+                      legend: { position: "bottom", labels: { color: "#000", boxWidth: 12 } },
                     },
                     cutout: "70%",
                     responsive: true,
@@ -157,13 +155,13 @@ function StaffDash() {
               </h2>
 
               <div className="flex-1 flex items-center justify-center">
-                <Bar
+                <Bar 
                   data={{
-                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                    labels: months,
                     datasets: [
                       {
                         label: "Applicants",
-                        data: [120, 150, 100, 180, 130, 160],
+                        data: monthlyApplicants,
                         backgroundColor: "#278659",
                         borderRadius: 6,
                       },
@@ -172,12 +170,15 @@ function StaffDash() {
                   options={{
                     plugins: { legend: { display: false } },
                     scales: {
-                      x: {
-                        ticks: { color: "#000" },
-                        grid: { display: false },
+                      x: { 
+                        ticks: { color: "#000" }, 
+                        grid: { display: false } 
                       },
-                      y: {
-                        ticks: { color: "#000" },
+                      y: { 
+                        ticks: { 
+                          color: "#000",
+                          stepSize: 1,      
+                        },
                         grid: { color: "#E5E7EB" },
                       },
                     },
@@ -185,6 +186,7 @@ function StaffDash() {
                     maintainAspectRatio: false,
                   }}
                 />
+
               </div>
             </div>
           </div>

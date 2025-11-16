@@ -268,7 +268,7 @@ function StaffProfile() {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 flex flex-col bg-white pt-6 px-8 pb-8 h-screen overflow-auto">
+      <main className="flex-1 flex flex-col bg-white pt-6 px-8 pb-5 h-screen overflow-auto">
         <StaffPanelBar />
 
         {/* Page Container */}

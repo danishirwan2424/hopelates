@@ -71,7 +71,7 @@ function StaffDash() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* ===== Sidebar ===== */}
-      <div className="w-64 bg-white">
+      <div className="flex min-h-screen bg-gray-50">
         <StaffSideBar />
       </div>
 

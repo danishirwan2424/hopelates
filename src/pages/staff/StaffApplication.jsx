@@ -129,7 +129,7 @@ const handleSort = (field) => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="w-64 bg-white">
+      <aside className="flex min-h-screen bg-gray-50">
         <StaffSideBar />
       </aside>
 

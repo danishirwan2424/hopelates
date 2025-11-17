@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { LogOut, Menu, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -14,15 +14,26 @@ import ProfileIcon from "../../../images/Profile.png";
 import ReportsIcon from "../../../images/Reports.png";
 
 function StaffSideBar() {
-  const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // State for sidebar open/close
+  const [isOpen, setIsOpen] = useState(window.innerWidth >= 770);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 770) setIsOpen(true);
+      else setIsOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleLogout = () => {
     navigate("/"); // Redirect to homepage
   };
 
-  // ✅ Added icon property for each menu
   const menuItems = [
     { name: "DASHBOARD", path: "/staff-dashboard", icon: DashboardIcon },
     { name: "APPLICATION", path: "/staff-application", icon: ApplicationIcon },
@@ -37,7 +48,7 @@ function StaffSideBar() {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border rounded-md shadow-md"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white border rounded-md shadow-md"
       >
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -46,7 +57,7 @@ function StaffSideBar() {
       <aside
         className={`${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 transform fixed lg:static top-0 left-0 h-[calc(100vh-40px)] w-64 bg-white border border-gray-200 shadow-md transition-transform duration-300 ease-in-out z-40`}
+        } md:translate-x-0 transform fixed md:static top-0 left-0 h-[calc(100vh-40px)] w-64 bg-white border border-gray-200 shadow-md transition-transform duration-300 ease-in-out z-40`}
         style={{
           marginLeft: "20px",
           marginTop: "20px",
@@ -75,7 +86,6 @@ function StaffSideBar() {
                     : "text-gray-700 hover:text-[#019461] hover:bg-gray-50"
                 }`}
               >
-                {/* ✅ Use icon dynamically */}
                 <img src={item.icon} alt={`${item.name} Icon`} className="w-5 h-5" />
                 <span>{item.name}</span>
               </Link>

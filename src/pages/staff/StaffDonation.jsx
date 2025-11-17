@@ -23,7 +23,7 @@
               <header className="flex-shrink-0">
                 <h1 className="text-[20px] text-gray-800">Staff Donation Stock</h1>
                 <p className="text-[12px] text-black opacity-[50%] mb-2">
-                  Food Donation Distribution Processing and Management
+                  Track, manage, and monitor all food donation inventory
                 </p>
               </header>
     

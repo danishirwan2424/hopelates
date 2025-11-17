@@ -141,7 +141,7 @@ const handleSort = (field) => {
           <header className="flex-shrink-0">
             <h1 className="text-[20px] text-gray-800">Staff Application</h1>
             <p className="text-[12px] text-black opacity-[50%] mb-2">
-              Review and manage all food aid applications
+              Review, manage, and track all food aid applications efficiently
             </p>
           </header>
 
@@ -182,12 +182,13 @@ const handleSort = (field) => {
             <div className="relative flex-1 overflow-auto rounded-lg border border-gray-200">
               <table className="min-w-full text-sm text-left border-collapse">
                 <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
-                  <tr>
-                    <th className="py-3 px-4 w-[50px]"></th>
-                    <th className="py-3 px-4 w-[250px] cursor-pointer" 
-                      onClick={() => handleSort("name")}>
-                      Name {sortBy === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                  <tr>                    
+                    <th className="py-3 px-4 w-[250px] cursor-pointer" onClick={() =>   handleSort("name")}>
+                      <span className="ml-[30px]">
+                        Name {sortBy === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      </span>
                     </th>
+                    
                     <th
                       className="py-3 px-4 w-[150px] cursor-pointer"
                       onClick={() => handleSort("phone")}
@@ -198,7 +199,7 @@ const handleSort = (field) => {
                       className="py-3 px-4 w-[150px] cursor-pointer"
                       onClick={() => handleSort("date")}
                     >
-                      Application Date {sortBy === "date" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      Date Applied {sortBy === "date" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
                     <th
                       className="py-3 px-4 w-[120px] cursor-pointer"
@@ -212,10 +213,8 @@ const handleSort = (field) => {
                 <tbody className="border-none">
                   {filteredApps.map((app) => (
                     <tr key={app.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="py-3 px-4">
-                        <input type="checkbox" />
-                      </td>
-                      <td className="py-3 px-4 font-medium text-gray-800">{app.name}</td>
+                      
+                      <td className="py-3 font-medium text-gray-800 pl-[30px]">{app.name}</td>
                       <td className="py-3 px-4 text-gray-600">{app.phone}</td>
                       <td className="py-3 px-4 text-gray-600">{app.date}</td>
                       <td className="py-3 px-4">

@@ -4,6 +4,8 @@ import { FaFacebookF, FaInstagram, FaTwitter, FaBars, FaTimes } from "react-icon
 import donorIcon from "../images/donoricon.jpeg";
 import logo from "../images/Logo.png";
 
+import LocationPopup from "./LocationPopup";
+
 function Navigator() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,7 +69,7 @@ function Navigator() {
         </div>
 
         <div className="hidden sm:flex items-center gap-3 text-gray-800">
-          <span>📍 Malacca, Malaysia</span>
+          <LocationPopup />
           <span>|</span>
           <span>☎ +60 12-345 6789</span>
         </div>

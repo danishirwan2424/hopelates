@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 import { Edit, Trash2, Search } from "lucide-react";
 import "react-calendar/dist/Calendar.css";
 
+import axios from "axios";
+
 import { applications } from "../dataExample/UserExp";
 
 import Swal from "sweetalert2";
@@ -15,7 +17,7 @@ function StaffApplication() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // ===== Sorting State =====
-const [sortBy, setSortBy] = useState(""); // "phone" | "date" | "status"
+const [sortBy, setSortBy] = useState("");
 const [sortOrder, setSortOrder] = useState("asc");
 
 const handleSort = (field) => {
@@ -86,6 +88,99 @@ const handleDelete = (id) => {
     };
     return colors[status] || "text-gray-600 bg-gray-100";
   };
+
+
+// ===== Edit modal approve =====
+  const handleApprove = (id) => {
+  Swal.fire({
+    title: "Approve Application?",
+    text: "This applicant will be marked as approved.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#278659",
+    cancelButtonColor: "#B91C1C",
+    confirmButtonText: "Approve",
+  }).then((result) => {
+    if (result.isConfirmed) {
+
+        // Update status locally
+      setAppList((prev) =>
+        prev.map((app) =>
+          app.id === id ? { ...app, status: "Completed" } : app
+        )
+      );
+      Swal.fire("Approved!", "The application is now approved.", "success");
+      closeModal();
+    }
+  }); 
+  // === Uncomment this to active the database connection ===
+  // ======================= APPROVE API CALL (Axios) =======================
+// This sends a PUT request to your backend to approve the application.
+// Replace the URL with your real backend endpoint.
+axios
+  .put(`http://localhost:5000/api/application/${id}/approve`)
+  
+  .then((res) => {
+    // ===== UPDATE UI AFTER BACKEND SUCCESS =====
+    // Update only the selected user's status to "Completed"
+    setAppList((prev) =>
+      prev.map((app) =>
+        app.id === id ? { ...app, status: "Completed" } : app
+      )
+    );
+
+    // Show success popup
+    Swal.fire("Approved!", "The application is now approved.", "success");
+
+    // Close modal after updating UI
+    closeModal();
+  })
+
+  .catch((err) => {
+    // ===== HANDLE ANY ERRORS =====
+    console.error(err);
+
+    // Show error popup
+    Swal.fire(
+      "Error",
+      "Something went wrong approving this application.",
+      "error"
+    );
+  });
+// ========================================================================
+
+
+
+
+
+
+
+};
+const handleReject = (id) => {
+  Swal.fire({
+    title: "Reject Application?",
+    text: "This applicant will be marked as rejected.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#B91C1C",
+    cancelButtonColor: "#6B7280",
+    confirmButtonText: "Reject",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      setAppList((prev) =>
+        prev.map((app) =>
+          app.id === id ? { ...app, status: "Rejected" } : app
+        )
+      );
+
+      Swal.fire("Rejected!", "The application has been rejected.", "success");
+
+      closeModal();
+    }
+  });
+};
+
+
 
   // ===== Stats Animation =====
   const [pendingCount, setPendingCount] = useState(0);
@@ -295,8 +390,20 @@ const totalRejected = appList.filter((a) => a.status === "Rejected").length;
                 </div>
 
                 <div className="mt-6 flex gap-3">
-                  <button className="w-1/2 bg-[#278659] text-white py-2 rounded-lg hover:bg-[#11452E]">Approve</button>
-                  <button className="w-1/2 bg-[#EF4444] text-white py-2 rounded-lg hover:bg-[#B91C1C]">Reject</button>
+                  <button
+  onClick={() => handleApprove(selectedUser.id)}
+  className="w-1/2 bg-[#278659] text-white py-2 rounded-lg hover:bg-[#11452E]"
+>
+  Approve
+</button>
+
+<button
+  onClick={() => handleReject(selectedUser.id)}
+  className="w-1/2 bg-[#EF4444] text-white py-2 rounded-lg hover:bg-[#B91C1C]"
+>
+  Reject
+</button>
+
                 </div>
               </div>
             </div>

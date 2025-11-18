@@ -184,7 +184,7 @@ const handleDelete = (id) => {
                     <th className="py-2 px-3 cursor-pointer" onClick={() => handleSort("status")}>
                       Status {sortBy === "status" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th className="py-2 px-3">Actions</th>
+                    <th className="py-2 pl-16">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -205,7 +205,7 @@ const handleDelete = (id) => {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <div className="flex justify-center gap-3">
+                        <div className="flex justify-center gap-3 ">
                           <button className="text-blue-600 hover:text-blue-800" onClick={() => handleEdit(item)}>
                             <Edit size={18} />
                           </button>

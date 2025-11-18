@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 
 import { applications, statusCounts, months, monthlyApplicants } from "../dataExample/UserExp";
+import { donationStock, donationStats } from "../dataExample/DonationExp";
 
 // Components
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
@@ -43,6 +44,17 @@ function StaffDash() {
   const totalCompleted = applications.filter(a => a.status === "Completed").length;
   const totalApproved = totalCompleted; // same as completed
   const totalPending = applications.filter(a => a.status === "Pending").length;
+
+  // Group by category and sum quantities
+  const categoryData = donationStock.reduce((acc, item) => {
+    if (!acc[item.category]) acc[item.category] = 0;
+    acc[item.category] += item.quantity;
+    return acc;
+  }, {});
+
+  // Find max quantity for scaling bars
+  const maxQuantity = Math.max(...Object.values(categoryData));
+
 
   // Animate numbers
   useEffect(() => {
@@ -199,21 +211,37 @@ function StaffDash() {
                 Donation Stock
               </h2>
 
-              <div className="flex flex-col gap-4 mt-2">
-                <div>
-                  <p className="text-[13px] text-gray-600 mb-1">Snack</p>
-                  <div className="h-4 w-full bg-gray-200 rounded">
-                    <div className="h-4 w-[70%] bg-green-600 rounded"></div>
-                  </div>
-                </div>
+<div className="flex flex-col gap-4 mt-2 overflow-scroll pb-7">
+  {Object.entries(categoryData).map(([category, qty]) => {
+    const widthPercent = Math.min((qty / maxQuantity) * 100, 100);
 
-                <div>
-                  <p className="text-[13px] text-gray-600 mb-1">Beverages</p>
-                  <div className="h-4 w-full bg-gray-200 rounded">
-                    <div className="h-4 w-[50%] bg-blue-600 rounded"></div>
-                  </div>
-                </div>
-              </div>
+    // If the bar is less than 20% of the max, use dark green for low stock
+    const color = widthPercent < 20 ? "#11452E" : "#278659";
+
+    return (
+      <div key={category}>
+        {/* Category title and quantity in same row */}
+        <div className="flex justify-between items-center mb-1">
+          <p className="text-[13px] text-gray-600">{category}</p>
+          <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
+        </div>
+
+        {/* Progress bar */}
+        <div className="h-4 w-full bg-gray-200 rounded">
+          <div
+            className="h-4 rounded"
+            style={{ width: `${widthPercent}%`, backgroundColor: color }}
+          ></div>
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+
+
+
+
             </div>
 
             {/* Upcoming Deliveries (Calendar) */}

@@ -124,25 +124,26 @@ function StaffDonation() {
             </div>
           </section>
 
-          {/* Search + Filter */}
-          <section className="flex items-center gap-3 mb-3 flex-shrink-0">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="Search item name, donor..."
-                className="w-full bg-gray-100 px-10 py-2 rounded-md focus:ring-2 focus:ring-green-600 outline-none"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
-            </div>
-          </section>
-
           {/* Donation Table */}
           <section className="flex-1 bg-white rounded-[15px] shadow-md p-4 flex flex-col overflow-hidden">
+                      <div className="flex items-center justify-between w-full bg-white rounded-lg px-3 py-2 mb-0">
+                        <h2 className="text-[16px] font-semibold text-gray-700 shrink-0">Stock List</h2>
+                        <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1 w-64">
+                          <Search className="text-gray-500 w-5 h-5 mr-2" />
+                          <input
+                            type="text"
+                            placeholder="Search item name, donor..."
+                            className="bg-transparent outline-none w-full text-gray-700 placeholder-gray-500 text-sm"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+                          
+                        </div>
+          
+                      </div>
             <div className="overflow-auto flex-1 rounded-lg border border-gray-200">
               <table className="w-full text-left border-collapse text-sm">
-                <thead>
+                <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
                   <tr className="bg-gray-100 text-gray-700">
                     <th className="py-2 px-11 cursor-pointer" onClick={() => handleSort("item")}>
                       Item {sortBy === "item" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
@@ -182,13 +183,15 @@ function StaffDonation() {
                           {item.status}
                         </span>
                       </td>
-                      <td className="py-2 px-3 flex gap-2">
-                        <button className="text-blue-600 hover:text-blue-800" onClick={() => handleEdit(item)}>
-                          <Edit size={18} />
-                        </button>
-                        <button className="text-red-600 hover:text-red-800">
-                          <Trash2 size={18} />
-                        </button>
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex justify-center gap-3">
+                          <button className="text-blue-600 hover:text-blue-800" onClick={() => handleEdit(item)}>
+                            <Edit size={18} />
+                          </button>
+                          <button className="text-red-600 hover:text-red-800">
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

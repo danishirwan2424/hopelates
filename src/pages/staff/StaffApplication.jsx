@@ -5,6 +5,8 @@ import "react-calendar/dist/Calendar.css";
 
 import { applications } from "../dataExample/UserExp";
 
+import Swal from "sweetalert2";
+
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
@@ -25,6 +27,23 @@ const handleSort = (field) => {
   }
 };
 
+const [appList, setAppList] = useState(applications); 
+const handleDelete = (id) => {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This application will be deleted permanently!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#278659",
+    cancelButtonColor: "#B91C1C",
+    confirmButtonText: "Yes, delete it!",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      setAppList((prev) => prev.filter((app) => app.id !== id));
+      Swal.fire("Deleted!", "The application has been deleted.", "success");
+    }
+  });
+};
 
   // ===== Modal State =====
   const [showModal, setShowModal] = useState(false);
@@ -73,9 +92,10 @@ const handleSort = (field) => {
   const [approvedCount, setApprovedCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
 
-  const totalPending = applications.filter((a) => a.status === "Pending").length;
-  const totalApproved = applications.filter((a) => a.status === "Completed").length;
-  const totalRejected = applications.filter((a) => a.status === "Rejected").length;
+const totalPending = appList.filter((a) => a.status === "Pending").length;
+const totalApproved = appList.filter((a) => a.status === "Completed").length;
+const totalRejected = appList.filter((a) => a.status === "Rejected").length;
+
 
   useEffect(() => {
     let p = 0,
@@ -95,37 +115,6 @@ const handleSort = (field) => {
     }, 30);
     return () => clearInterval(timer);
   }, [totalPending, totalApproved, totalRejected]);
-
-  // ===== Filtered and Sorted Applications =====
-  const filteredApps = applications
-    .filter(
-      (app) =>
-        app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.phone.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.status.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (!sortBy) return 0;
-      let valA, valB;
-
-      if (sortBy === "phone") {
-        valA = a.phone;
-        valB = b.phone;
-      } else if (sortBy === "date") {
-        valA = new Date(a.date);
-        valB = new Date(b.date);
-      } else if (sortBy === "status") {
-        valA = a.status.toLowerCase();
-        valB = b.status.toLowerCase();
-      } else if (sortBy === "name") {
-        valA = a.name.toLowerCase();
-        valB = b.name.toLowerCase();
-      }
-
-      if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-      if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    });
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -211,7 +200,37 @@ const handleSort = (field) => {
                   </tr>
                 </thead>
                 <tbody className="border-none">
-                  {filteredApps.map((app) => (
+                  {appList
+  .filter(
+    (app) =>
+      app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.phone.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.status.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  .sort((a, b) => {
+    if (!sortBy) return 0;
+    let valA, valB;
+
+    if (sortBy === "phone") {
+      valA = a.phone;
+      valB = b.phone;
+    } else if (sortBy === "date") {
+      valA = new Date(a.date);
+      valB = new Date(b.date);
+    } else if (sortBy === "status") {
+      valA = a.status.toLowerCase();
+      valB = b.status.toLowerCase();
+    } else if (sortBy === "name") {
+      valA = a.name.toLowerCase();
+      valB = b.name.toLowerCase();
+    }
+
+    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  })
+  .map((app) => (
+
                     <tr key={app.id} className="hover:bg-gray-50 transition-colors">
                       
                       <td className="py-3 font-medium text-gray-800 pl-[30px]">{app.name}</td>
@@ -227,7 +246,10 @@ const handleSort = (field) => {
                           <button className="text-blue-600 hover:text-blue-800" onClick={() => openEditModal(app)}>
                             <Edit size={18} />
                           </button>
-                          <button className="text-red-600 hover:text-red-800">
+                          <button
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleDelete(app.id)}
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -273,8 +295,8 @@ const handleSort = (field) => {
                 </div>
 
                 <div className="mt-6 flex gap-3">
-                  <button className="w-1/2 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">Approve</button>
-                  <button className="w-1/2 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700">Reject</button>
+                  <button className="w-1/2 bg-[#278659] text-white py-2 rounded-lg hover:bg-[#11452E]">Approve</button>
+                  <button className="w-1/2 bg-[#EF4444] text-white py-2 rounded-lg hover:bg-[#B91C1C]">Reject</button>
                 </div>
               </div>
             </div>

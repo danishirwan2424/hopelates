@@ -5,6 +5,8 @@ import "react-calendar/dist/Calendar.css";
 
 import { donationStock, donationStats } from "../dataExample/DonationExp";
 
+import Swal from "sweetalert2";
+
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
@@ -45,6 +47,25 @@ function StaffDonation() {
       setSortOrder("asc");
     }
   };
+
+  // delete row
+const handleDelete = (id) => {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#278659",
+    cancelButtonColor: "#EF4444",
+    confirmButtonText: "Yes, delete it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      setStock((prev) => prev.filter((item) => item.id !== id));
+      Swal.fire("Deleted!", "The item has been deleted.", "success");
+    }
+  });
+};
+
 
   // dynamically sorted + filtered stock
   const sortedStock = [...stock].sort((a, b) => {
@@ -188,7 +209,10 @@ function StaffDonation() {
                           <button className="text-blue-600 hover:text-blue-800" onClick={() => handleEdit(item)}>
                             <Edit size={18} />
                           </button>
-                          <button className="text-red-600 hover:text-red-800">
+                          <button
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleDelete(item.id)}
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -270,7 +294,7 @@ function StaffDonation() {
                 Cancel
               </button>
               <button
-                className="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-800"
+                className="px-4 py-2 bg-[#278659] text-white rounded hover:bg-[#11452E]"
                 onClick={handleSave}
               >
                 Save Changes

@@ -2,9 +2,17 @@ import React from "react";
 import Navigator from "../LandingPage_cmp/Navigator";
 import DonateImg from "../images/People3.jpg"; 
 import Footer from "../LandingPage_cmp/Footer";
+import { motion } from "framer-motion";
 
 function Donations() {
   return (
+    <motion.div
+      className="bg-[#EDEDED] min-h-screen min-w-screen font-sans"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
     <div className="bg-[#EDEDED] min-h-screen font-sans">
       <Navigator />
 
@@ -98,6 +106,7 @@ function Donations() {
         </div>
       </section>
     </div>
+    </motion.div>
   );
 }
 

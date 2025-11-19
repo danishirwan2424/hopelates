@@ -1,17 +1,25 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../images/Logo2.png"; // ✅ Adjust path if needed
+import logo from "../images/LogoBR.png";
+import { motion } from "framer-motion";
 
 function NotFound() {
   const navigate = useNavigate();
 
   return (
+    <motion.div
+      className="bg-[#EDEDED] min-h-screen min-w-screen font-sans"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
     <div className="h-screen w-screen flex flex-col justify-center items-center bg-gradient-to-br from-green-50 via-white to-green-100 font-sans">
       {/* 🟢 Logo */}
       <img
         src={logo}
         alt="HopeLates Logo"
-        className="h-12 w-auto mb-6 drop-shadow-md"
+        className="h-20 w-auto mb-6 drop-shadow-md"
       />
 
       {/* 🧱 Card Container */}
@@ -45,6 +53,7 @@ function NotFound() {
         © {new Date().getFullYear()} HopeLates. All rights reserved.
       </p>
     </div>
+    </motion.div>
   );
 }
 

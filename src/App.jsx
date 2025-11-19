@@ -38,26 +38,8 @@ import SignUp from "./pages/auth/SignUp";
 import Application_donate from "./pages/forms/ApplicationApply";
 
 // ✅ 404 Page
-const NotFound = () => {
-  const navigate = useNavigate();
-  const handleGoBack = () => {
-    if (window.history.length > 1) navigate(-1);
-    else navigate("/landing");
-  };
+import NotFound from "./pages/NotFound"; 
 
-  return (
-    <div className="flex flex-col items-center justify-center h-screen text-center">
-      <h1 className="text-4xl font-bold mb-2 text-gray-800">404</h1>
-      <p className="text-gray-600 mb-6">Oops! Page not found.</p>
-      <a
-        onClick={handleGoBack}
-        className="text-[#019461] font-medium hover:underline cursor-pointer"
-      >
-        Go Back
-      </a>
-    </div>
-  );
-};
 
 // ✅ Scroll to Top
 function ScrollToTop() {
@@ -94,9 +76,7 @@ function PublicLayout() {
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <Navbar />
       <main className="flex-grow">
-        <AnimatedPage>
           <Outlet />
-        </AnimatedPage>
       </main>
       <Footer />
     </div>

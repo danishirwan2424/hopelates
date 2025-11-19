@@ -21,6 +21,7 @@ import { donationStock, donationStats } from "../dataExample/DonationExp";
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
+
 ChartJS.register(
   ArcElement,
   CategoryScale,

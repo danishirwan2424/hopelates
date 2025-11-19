@@ -2,10 +2,17 @@ import React from "react";
 import Navigator from "../LandingPage_cmp/Navigator";
 import ContactImg from "../images/People3.jpg"; 
 import Footer from "../LandingPage_cmp/Footer";
+import { motion } from "framer-motion";
 
 function Contact() {
   return (
-    <div className="bg-[#EDEDED] min-h-screen font-sans overflow-x-hidden">
+    <motion.div
+      className="bg-[#EDEDED] min-h-screen min-w-screen font-sans overflow-x-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <Navigator />
 
       {/* 🟢 Hero Section */}
@@ -106,7 +113,7 @@ function Contact() {
           </form>
         </div>
       </section>
-    </div>
+    </motion.div>
   );
 }
 

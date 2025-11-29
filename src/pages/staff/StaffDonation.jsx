@@ -175,7 +175,7 @@ const handleDelete = (id) => {
                     <th className="py-2 px-11 cursor-pointer" onClick={() => handleSort("quantity")}>
                       Qty {sortBy === "quantity" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th className="py-2 px-10 cursor-pointer" onClick={() => handleSort("expiry")}>
+                    <th className="py-2 px-10 cursor-pointer" onClick={() => handleSort  ("expiry")}>
                       Expiry {sortBy === "expiry" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
                     <th className="py-2 px-8 cursor-pointer" onClick={() => handleSort("donor")}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { LogOut, Menu, X, MoreVertical } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 // Logo
@@ -18,7 +18,6 @@ function StaffSideBar() {
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 770);
-  const [submenuOpen, setSubmenuOpen] = useState({});
 
   useEffect(() => {
     const handleResize = () => {
@@ -33,27 +32,12 @@ function StaffSideBar() {
 
   const menuItems = [
     { name: "DASHBOARD", path: "/staff-dashboard", icon: DashboardIcon },
-    {
-      name: "APPLICATION",
-      path: "/staff-application",
-      icon: ApplicationIcon,
-      submenu: [
-        { name: "New Applications", path: "/staff-application/new" },
-        { name: "Approved", path: "/staff-application/approved" },
-      ],
-    },
+    { name: "APPLICATION", path: "/staff-application", icon: ApplicationIcon },
     { name: "DISTRIBUTION", path: "/staff-distribution", icon: DistributionIcon },
     { name: "DONATION STOCK", path: "/staff-donation", icon: DonationStockIcon },
     { name: "PROFILE", path: "/staff-profile", icon: ProfileIcon },
     { name: "REPORTS", path: "/staff-report", icon: ReportsIcon },
   ];
-
-  const toggleSubmenu = (name) => {
-    setSubmenuOpen((prev) => ({
-      ...prev,
-      [name]: !prev[name],
-    }));
-  };
 
   return (
     <>
@@ -89,48 +73,19 @@ function StaffSideBar() {
             <h1 className="text-black opacity-50 pl-3 pt-10">Menu</h1>
             {menuItems.map((item, index) => {
               const isActive = location.pathname === item.path;
-              const hasSubmenu = item.submenu && item.submenu.length > 0;
-
               return (
-                <div key={index} className="flex flex-col">
-                  {/* Main Menu Item */}
-                  <div
-                    className={`flex items-center justify-between px-4 py-3 rounded-lg font-semibold tracking-wide cursor-pointer transition-colors ${
-                      isActive
-                        ? "text-[#019461]"
-                        : "text-gray-700 hover:text-[#019461] hover:bg-gray-50"
-                    }`}
-                    onClick={() => hasSubmenu && toggleSubmenu(item.name)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <img src={item.icon} alt={`${item.name} Icon`} className="w-5 h-5" />
-                      <span>{item.name}</span>
-                    </div>
-                    {hasSubmenu && (
-                      <MoreVertical
-                        size={16}
-                        className={`transition-transform ${
-                          submenuOpen[item.name] ? "rotate-180" : ""
-                        }`}
-                      />
-                    )}
-                  </div>
-
-                  {/* Submenu */}
-                  {hasSubmenu && submenuOpen[item.name] && (
-                    <div className="flex flex-col ml-8 mt-1 space-y-1 transition-all duration-200 ease-in-out">
-                      {item.submenu.map((sub, subIndex) => (
-                        <Link
-                          key={subIndex}
-                          to={sub.path}
-                          className="px-4 py-2 rounded-lg text-gray-600 hover:text-[#019461] hover:bg-gray-100 transition-colors"
-                        >
-                          {sub.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <Link
+                  key={index}
+                  to={item.path}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold tracking-wide transition-colors ${
+                    isActive
+                      ? "text-[#019461]"
+                      : "text-gray-700 hover:text-[#019461] hover:bg-gray-50"
+                  }`}
+                >
+                  <img src={item.icon} alt={`${item.name} Icon`} className="w-5 h-5" />
+                  <span>{item.name}</span>
+                </Link>
               );
             })}
           </nav>

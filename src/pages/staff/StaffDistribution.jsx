@@ -76,7 +76,7 @@ const getPackageColor = (packageName) => {
     setSending(prev => ({ ...prev, [applicant.id]: true }));
 
     try {
-      const response = await fetch("http://localhost:5173/api/email/send", {
+      const response = await fetch("http://localhost:5000/api/email/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(applicant),

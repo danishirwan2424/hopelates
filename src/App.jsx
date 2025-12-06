@@ -37,6 +37,9 @@ import SignUp from "./pages/auth/SignUp";
 // ✅ Forms
 import Application_donate from "./pages/forms/ApplicationApply";
 
+// ✅ PDF Export Page
+import PdfExp from "./pages/staff/StaffPage_cmp/pdfExp";
+
 // ✅ 404 Page
 import NotFound from "./pages/NotFound"; 
 
@@ -118,6 +121,7 @@ function App() {
           <Route path="/staff-distribution" element={<StaffDistribution />} />
           <Route path="/staff-donation" element={<StaffDonation />} />
           <Route path="/staff-report" element={<StaffReport />} />
+          <Route path="/pdf-report" element={<PdfExp />} />
         </Route>
 
         {/* ✅ Auth Pages (animated) */}

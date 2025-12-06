@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
+// StaffReport.jsx
+import React, { useState, useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
   Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from "recharts";
+  Legend,
+  Filler,
+  Title,
+} from "chart.js";
+import { Line, Bar, Doughnut } from "react-chartjs-2";
 
 import { donationStock, donationStats } from "../dataExample/DonationExp";
 import { applications, statusCounts, months, monthlyApplicants } from "../dataExample/UserExp";
@@ -21,8 +23,47 @@ import { applications, statusCounts, months, monthlyApplicants } from "../dataEx
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
-// Colors for Pie/Doughnut Charts
-const COLORS = ["#278659", "#11452E", "#9BC6B3"];
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
+  Filler,
+  Title
+);
+
+// Small plugin to add shadow to dataset drawing
+const shadowPlugin = {
+  id: "shadowPlugin",
+  beforeDatasetsDraw: (chart, args, options) => {
+    const { ctx } = chart;
+    ctx.save();
+    // set shadow only if dataset option requests it
+    chart.data.datasets.forEach((ds, i) => {
+      if (ds._shadow) {
+        ctx.shadowColor = ds._shadow.color || "rgba(0,0,0,0.15)";
+        ctx.shadowBlur = ds._shadow.blur || 10;
+        ctx.shadowOffsetX = ds._shadow.offsetX || 0;
+        ctx.shadowOffsetY = ds._shadow.offsetY || 4;
+      }
+    });
+  },
+  afterDatasetsDraw: (chart) => {
+    chart.ctx.restore();
+  },
+};
+
+ChartJS.register(shadowPlugin);
+
+// theme colors / gradient stops
+const GRADIENT_TOP = "#278659";
+const GRADIENT_BOTTOM = "#11452E";
+const GRADIENT_LIGHT = "#9BC6B3";
 
 function StaffReport() {
   // Animated Stats
@@ -53,18 +94,20 @@ function StaffReport() {
   }, []);
 
   // Charts Data
-  const lineData = months.map((month, i) => ({
+  const applicantTrendData = months.map((month, i) => ({
     month,
-    donations: monthlyApplicants[i], // dummy mapping
+    applicants: monthlyApplicants[i] || 0,
   }));
 
   const pieData = [
-    { name: "Completed", value: statusCounts.Completed },
-    { name: "Pending", value: statusCounts.Pending },
-    { name: "Rejected", value: statusCounts.Rejected },
+    { name: "Completed", value: statusCounts.Completed || 0 },
+    { name: "Pending", value: statusCounts.Pending || 0 },
+    { name: "Rejected", value: statusCounts.Rejected || 0 },
   ];
 
-  const topDonors = donationStock.map(d => ({ donor: d.donor, quantity: d.quantity }));
+  const topDonors = donationStock.map((d) => ({ donor: d.donor, quantity: d.quantity || 0 }));
+
+  const recentApplications = applications.slice(0, 5);
 
   // Category Breakdown for progress bars
   const categoryData = donationStock.reduce((acc, item) => {
@@ -72,7 +115,210 @@ function StaffReport() {
     acc[item.category] += item.quantity;
     return acc;
   }, {});
-  const maxCategoryQty = Math.max(...Object.values(categoryData));
+  const maxCategoryQty = Math.max(...Object.values(categoryData), 1);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Completed":
+        return "text-green-600";
+      case "Pending":
+        return "text-yellow-600";
+      case "Rejected":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  // Chart refs (react-chartjs-2 uses refs if we need canvas context)
+  const lineRef = useRef(null);
+  const barRef = useRef(null);
+  const doughnutRef = useRef(null);
+
+  /* ---------- Chart Configs ---------- */
+
+  // Utility scriptable gradient used by datasets (scriptable option)
+  const gradientScriptable = (ctx, colorA = GRADIENT_TOP, colorB = GRADIENT_BOTTOM) => {
+    const chart = ctx.chart;
+    const { ctx: c } = chart;
+    const height = chart.height || 200;
+    const gradient = c.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, colorA);
+    gradient.addColorStop(1, colorB);
+    return gradient;
+  };
+
+  // Line Chart (Monthly Applicants)
+  const lineData = {
+    labels: applicantTrendData.map((d) => d.month),
+    datasets: [
+      {
+        label: "Applicants",
+        data: applicantTrendData.map((d) => d.applicants),
+        borderColor: (ctx) => gradientScriptable(ctx, GRADIENT_TOP, GRADIENT_BOTTOM),
+        backgroundColor: (ctx) =>
+          ctx.chart
+            .ctx.createLinearGradient(0, 0, 0, ctx.chart.height)
+            .addColorStop
+            ? // use a light translucent gradient stop
+              (function () {
+                const grad = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
+                grad.addColorStop(0, "rgba(39,134,89,0.28)");
+                grad.addColorStop(1, "rgba(17,69,46,0.05)");
+                return grad;
+              })()
+            : "rgba(39,134,89,0.2)",
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 3,
+        _shadow: { color: "rgba(39,134,89,0.18)", blur: 10, offsetY: 6 },
+      },
+    ],
+  };
+
+  const lineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: {
+        display: true,
+        position: "top",
+        labels: { boxWidth: 12, padding: 12 },
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const value = context.parsed.y ?? context.parsed;
+            // percent relative to max of dataset
+            const data = context.dataset.data || [];
+            const max = Math.max(...data, 1);
+            const pct = ((value / max) * 100).toFixed(1);
+            return `${context.dataset.label || ""}: ${value} — ${pct}% of peak`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { maxRotation: 0, autoSkip: true },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: "rgba(0,0,0,0.06)" },
+      },
+    },
+    animation: {
+      duration: 900,
+      easing: "easeOutCubic",
+    },
+  };
+
+  // Doughnut (Applicants Status)
+  const doughnutTotal = pieData.reduce((s, p) => s + p.value, 0) || 1;
+  const doughnutData = {
+    labels: pieData.map((p) => p.name),
+    datasets: [
+      {
+        data: pieData.map((p) => p.value),
+        backgroundColor: [GRADIENT_TOP, GRADIENT_BOTTOM, GRADIENT_LIGHT],
+        hoverBackgroundColor: [
+          "#33a06b",
+          "#1b593d",
+          "#cfe9dd",
+        ],
+        borderWidth: 0,
+        _shadow: { color: "rgba(0,0,0,0.12)", blur: 12, offsetY: 6 },
+      },
+    ],
+  };
+
+  const handleDownloadPDF = () => {
+    window.open("http://localhost:5000/api/export-report", "_blank");
+  };
+
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: "55%",
+    plugins: {
+      legend: {
+        display: true,
+        position: "bottom",
+        labels: { boxWidth: 12, padding: 12 },
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const label = context.label || "";
+            const value = context.parsed || 0;
+            const pct = ((value / doughnutTotal) * 100).toFixed(1);
+            return `${label}: ${value} — ${pct}%`;
+          },
+        },
+      },
+    },
+    animation: {
+      animateRotate: true,
+      duration: 900,
+      easing: "easeOutQuart",
+    },
+  };
+
+  // Bar Chart (Top Donors)
+  const barTotal = topDonors.reduce((s, d) => s + (d.quantity || 0), 0) || 1;
+  const barData = {
+    labels: topDonors.map((d) => d.donor),
+    datasets: [
+      {
+        label: "Quantity",
+        data: topDonors.map((d) => d.quantity),
+        backgroundColor: (ctx) => gradientScriptable(ctx, GRADIENT_TOP, GRADIENT_BOTTOM),
+        borderRadius: 8,
+        barPercentage: 0.6,
+        categoryPercentage: 0.7,
+        _shadow: { color: "rgba(17,69,46,0.14)", blur: 10, offsetY: 6 },
+      },
+    ],
+  };
+
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: "top",
+        labels: { boxWidth: 12, padding: 12 },
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const value = context.parsed.y ?? context.parsed;
+            const pct = ((value / barTotal) * 100).toFixed(1);
+            return `${context.dataset.label || ""}: ${value} — ${pct}% of donors' total`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: "rgba(0,0,0,0.06)" },
+      },
+    },
+    animation: {
+      duration: 900,
+      easing: "easeOutCubic",
+    },
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -87,14 +333,24 @@ function StaffReport() {
 
         {/* Scrollable Section */}
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-y-auto overflow-x-hidden">
-
           {/* Header */}
-          <header className="flex-shrink-0 mb-4">
-            <h1 className="text-[20px] text-gray-800">Donation Report</h1>
-            <p className="text-[12px] text-black opacity-[50%]">
-              Track, monitor, and analyze donation activities
-            </p>
+          <header className="flex-shrink-0 mb-4 flex items-center justify-between">
+            <div>
+              <h1 className="text-[20px] text-gray-800">Donation & Applicant Report</h1>
+              <p className="text-[12px] text-black opacity-[50%]">
+                Track, monitor, and analyze donation and application activities
+              </p>
+            </div>
+
+            {/* Export PDF Button */}
+            <button
+              className="bg-[#11452E] hover:bg-[#0d3a26] text-white px-4 py-2 rounded-lg shadow-md          transition"
+              onClick={handleDownloadPDF}
+            >
+              Export as PDF
+            </button>
           </header>
+
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 flex-shrink-0">
@@ -115,53 +371,59 @@ function StaffReport() {
           {/* Charts Section */}
           <div className="flex flex-wrap gap-2 mb-4">
             {/* Line Chart */}
-            <div className="bg-white rounded-[15px] shadow-md flex-1 min-w-[300px] h-[283px] p-4 flex flex-col">
-              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Monthly Donation Trend</h2>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={lineData}>
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="donations" stroke="#278659" strokeWidth={3} />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="bg-white rounded-[15px] shadow-lg flex-1 min-w-[300px] h-[320px] p-4 flex flex-col">
+              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Monthly Applicant Trend</h2>
+              <div className="flex-1">
+                <Line ref={lineRef} data={lineData} options={lineOptions} />
+              </div>
             </div>
 
-            {/* Pie Chart */}
-            <div className="bg-white rounded-[15px] shadow-md h-[283px] w-[283px] p-4 flex flex-col">
-              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Applicants Category</h2>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    label
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+            {/* Doughnut Chart */}
+            <div className="bg-white rounded-[15px] shadow-lg h-[320px] w-[320px] p-4 flex flex-col">
+              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Applicants Status Breakdown</h2>
+              <div className="flex-1">
+                <Doughnut ref={doughnutRef} data={doughnutData} options={doughnutOptions} />
+              </div>
             </div>
 
             {/* Bar Chart */}
-            <div className="bg-white rounded-[15px] shadow-md flex-1 min-w-[300px] h-[283px] p-4 flex flex-col">
+            <div className="bg-white rounded-[15px] shadow-lg flex-1 min-w-[300px] h-[320px] p-4 flex flex-col">
               <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Top Donors</h2>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topDonors}>
-                  <XAxis dataKey="donor" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="quantity" fill="#278659" barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="flex-1">
+                <Bar ref={barRef} data={barData} options={barOptions} />
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Applications Table */}
+          <div className="bg-white rounded-[15px] shadow-md mb-4 p-4">
+            <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Recent Applications</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {recentApplications.map((app) => (
+                    <tr key={app.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{app.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.applicantName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.date}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                        <span className={getStatusColor(app.status)}>{app.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {recentApplications.length === 0 && (
+                <p className="text-center py-4 text-gray-500 text-sm">No recent applications found.</p>
+              )}
             </div>
           </div>
 
@@ -169,12 +431,11 @@ function StaffReport() {
           <div className="flex flex-wrap gap-2 mb-4">
             {/* Donation Stock */}
             <div className="bg-white rounded-[15px] shadow-md flex-1 min-w-[400px] p-4 flex flex-col">
-              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Donation Stock</h2>
+              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Donation Stock (Category Breakdown)</h2>
               <div className="flex flex-col gap-4 mt-2 overflow-y-auto max-h-[300px] pb-7">
                 {Object.entries(categoryData).map(([category, qty]) => {
                   const widthPercent = Math.min((qty / maxCategoryQty) * 100, 100);
                   const color = widthPercent < 20 ? "#11452E" : "#278659";
-
                   return (
                     <div key={category}>
                       <div className="flex justify-between items-center mb-1">
@@ -182,10 +443,7 @@ function StaffReport() {
                         <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
                       </div>
                       <div className="h-4 w-full bg-gray-200 rounded">
-                        <div
-                          className="h-4 rounded"
-                          style={{ width: `${widthPercent}%`, backgroundColor: color }}
-                        />
+                        <div className="h-4 rounded" style={{ width: `${widthPercent}%`, background: `linear-gradient(90deg, ${color}, ${GRADIENT_BOTTOM})` }} />
                       </div>
                     </div>
                   );

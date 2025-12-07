@@ -396,36 +396,52 @@ function StaffReport() {
           </div>
 
           {/* Recent Applications Table */}
-          <div className="bg-white rounded-[15px] shadow-md mb-4 p-4">
-            <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Recent Applications</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {recentApplications.map((app) => (
-                    <tr key={app.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{app.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.applicantName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.date}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
-                        <span className={getStatusColor(app.status)}>{app.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {recentApplications.length === 0 && (
-                <p className="text-center py-4 text-gray-500 text-sm">No recent applications found.</p>
-              )}
-            </div>
-          </div>
+<div className="bg-white rounded-[15px] shadow-md mb-4 p-4">
+  {/* Title (not scrollable) */}
+  <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
+    Recent Applications
+  </h2>
+
+  {/* Scroll container ONLY for rows */}
+  <div className="overflow-y-auto max-h-[310px]">
+    <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-gray-50 sticky top-0 z-10">
+        <tr>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            ID
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Applicant Name
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Date
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Status
+          </th>
+        </tr>
+      </thead>
+
+      <tbody className="bg-white divide-y divide-gray-200">
+        {recentApplications.map((app) => (
+          <tr key={app.id}>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{app.id}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.name}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.date}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+              <span className={getStatusColor(app.status)}>{app.status}</span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    {recentApplications.length === 0 && (
+      <p className="text-center py-4 text-gray-500 text-sm">No recent applications found.</p>
+    )}
+  </div>
+</div>
+
 
           {/* Stock & Category Progress Bars */}
           <div className="flex flex-wrap gap-2 mb-4">

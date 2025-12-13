@@ -11,7 +11,11 @@ function Landing() {
   const navigate = useNavigate();
 
   const handleDonateClick = () => {
-    navigate("/donate"); // 👈 Redirect to login page
+    navigate("/donations"); // 👈 Redirect to login page
+  };
+
+  const handleApplyClick = () => {
+    navigate("/application"); // 👈 Redirect to login page
   };
 
   return (
@@ -27,13 +31,11 @@ function Landing() {
           </p>
 
           <h1 className="text-[54px] font-bold leading-tight text-gray-900">
-            Lend a Helping Hand<br />to Those in Need
+            Lend a Helping Hand to Those in Need
           </h1>
 
           <p className="text-black/50 text-[15px] leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde 
-            omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam 
-            rem aperiam.
+            Every RM200 provides 1 to 3 meals to someone in need
           </p>
 
           <button
@@ -88,27 +90,23 @@ function Landing() {
 
           {/* ✅ Right — Text */}
           <div className="md:w-1/2 space-y-6 text-left">
+          <p className="text-black/50 text-[15px] leading-relaxed">
+              AN INITIATIVE TO HELP THOSE IN NEEDS
+            </p>
+            
             <h2 className="text-[54px] font-bold leading-tight text-gray-900">
-              Helping Each Other <br />Can Make World Better
+              APPLY FOR FOOD AND FILL IN THE INFORMATION
             </h2>
 
             <p className="text-black/50 text-[15px] leading-relaxed">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde 
-              omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam 
-              rem aperiam.
+              FILL THE INFORMATION AND SENT TO US AND WE WILL CHECK AND PROVIDES FOOD WITH 7 DAYS
             </p>
 
-            <ul className="list-disc list-inside text-black/50 text-[15px] leading-relaxed space-y-1">
-              <li>Lorem ipsum dolor sit amet</li>
-              <li>Consectetur adipiscing elit. Sed ut</li>
-              <li>Perspiciatis unde</li>
-            </ul>
-
             <button
-              onClick={handleDonateClick} // 👈 Redirect to login
+              onClick={handleApplyClick} // 👈 Redirect to login
               className="bg-[#019461] text-white font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-md hover:bg-[#017a54] transition-all duration-200"
             >
-              Donate Now
+              Apply Now
             </button>
           </div>
         </div>

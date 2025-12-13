@@ -55,13 +55,31 @@ export default function Footer() {
               Stay connected and be part of our journey.
             </p>
             <div className="flex gap-3">
-              <a href="#" className="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 transition">
+              <a 
+                href="https://www.facebook.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 transition"
+                aria-label="Visit our Facebook page"
+              >
                 <Facebook className="w-4 h-4" />
               </a>
-              <a href="#" className="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 transition">
+              <a 
+                href="https://www.instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 transition"
+                aria-label="Visit our Instagram page"
+              >
                 <Instagram className="w-4 h-4" />
               </a>
-              <a href="#" className="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 transition">
+              <a 
+                href="https://www.twitter.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 transition"
+                aria-label="Visit our Twitter page"
+              >
                 <Twitter className="w-4 h-4" />
               </a>
             </div>

@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navigator from "../../LandingPage_cmp/Navigator";
+import { Users } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 function Application() {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
+    // Step 1 - Personal Info
     fullName: "",
     icNumber: "",
     dateOfBirth: "",
@@ -14,14 +19,66 @@ function Application() {
     postalCode: "",
     occupation: "",
     monthlySalary: "",
-    email: ""
+    email: "",
+    // Step 2 - Household Info
+    householdSize: "",
+    // Step 3 - Financial Info
+    financialOccupation: "",
+    monthlyIncome: "",
+    // Step 4 - Confirmation
+    confirmInfo: false,
+    agreePrivacy: false,
+    agreeTerms: false
   });
 
+  // Function to convert IC number to date of birth
+  const convertICToDateOfBirth = (icNumber) => {
+    // Remove any non-digit characters
+    const digits = icNumber.replace(/\D/g, '');
+    
+    // Check if we have at least 6 digits
+    if (digits.length < 6) return "";
+    
+    // Extract first 6 digits: YYMMDD
+    const year = digits.substring(0, 2);
+    const month = digits.substring(2, 4);
+    const day = digits.substring(4, 6);
+    
+    // Validate month and day
+    const monthNum = parseInt(month);
+    const dayNum = parseInt(day);
+    
+    if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) {
+      return "";
+    }
+    
+    // Determine century (assume current year cutoff at 25)
+    const yearNum = parseInt(year);
+    const currentYear = new Date().getFullYear() % 100; // Get last 2 digits of current year
+    const fullYear = yearNum <= currentYear + 10 ? `20${year}` : `19${year}`;
+    
+    // Return in YYYY-MM-DD format for input[type="date"]
+    return `${fullYear}-${month}-${day}`;
+  };
+
+  // Update date of birth when IC number changes
+  useEffect(() => {
+    if (formData.icNumber) {
+      const dob = convertICToDateOfBirth(formData.icNumber);
+      if (dob && dob !== formData.dateOfBirth) {
+        setFormData(prev => ({
+          ...prev,
+          dateOfBirth: dob
+        }));
+      }
+    }
+  }, [formData.icNumber]);
+
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === "checkbox" ? checked : value
     }));
   };
 
@@ -29,6 +86,21 @@ function Application() {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!formData.confirmInfo || !formData.agreePrivacy || !formData.agreeTerms) {
+      alert("Please agree to all terms before submitting");
+      return;
+    }
+    alert("Application submitted successfully!");
+    navigate("/landing");
   };
 
   const steps = [
@@ -65,7 +137,6 @@ function Application() {
                       {step.label}
                     </span>
                   </div>
-                  {/* Connector Line */}
                   {index < steps.length - 1 && (
                     <div 
                       className={`absolute left-4 top-8 w-[2px] h-8 -translate-x-1/2 ${
@@ -90,8 +161,16 @@ function Application() {
                 </p>
               </div>
 
-              {currentStep === 1 && (
-                <div>
+              {/* Step 1 - Personal Information */}
+              <AnimatePresence mode="wait">
+                {currentStep === 1 && (
+                  <motion.div
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
                   <div className="border-l-4 border-[#019461] pl-4 mb-8">
                     <h2 className="text-[18px] font-semibold text-gray-900">
                       Personal Information
@@ -99,7 +178,6 @@ function Application() {
                   </div>
 
                   <div className="space-y-5">
-                    {/* Full Name and IC Number */}
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <label className="block text-gray-700 text-[13px] font-medium mb-2">
@@ -123,13 +201,13 @@ function Application() {
                           name="icNumber"
                           value={formData.icNumber}
                           onChange={handleInputChange}
-                          placeholder="e.g., 020304040505"
+                          placeholder="e.g., 040605040505"
                           className="w-full px-4 py-2.5 border border-gray-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#019461]/20 focus:border-[#019461] text-[14px]"
                         />
+                        <p className="text-[11px] text-gray-500 mt-1">Date of birth will be auto-filled</p>
                       </div>
                     </div>
 
-                    {/* Date of Birth and Phone Number */}
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <label className="block text-gray-700 text-[13px] font-medium mb-2">
@@ -140,8 +218,10 @@ function Application() {
                           name="dateOfBirth"
                           value={formData.dateOfBirth}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#019461]/20 focus:border-[#019461] text-[14px]"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#019461]/20 focus:border-[#019461] text-[14px] bg-gray-50"
+                          readOnly
                         />
+                        <p className="text-[11px] text-gray-500 mt-1">Auto-filled from IC number</p>
                       </div>
                       <div>
                         <label className="block text-gray-700 text-[13px] font-medium mb-2">
@@ -158,7 +238,6 @@ function Application() {
                       </div>
                     </div>
 
-                    {/* Home Address */}
                     <div>
                       <label className="block text-gray-700 text-[13px] font-medium mb-2">
                         Home Address
@@ -173,7 +252,6 @@ function Application() {
                       />
                     </div>
 
-                    {/* City and State */}
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <label className="block text-gray-700 text-[13px] font-medium mb-2">
@@ -203,7 +281,6 @@ function Application() {
                       </div>
                     </div>
 
-                    {/* Postal Code and Occupation */}
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <label className="block text-gray-700 text-[13px] font-medium mb-2">
@@ -233,7 +310,6 @@ function Application() {
                       </div>
                     </div>
 
-                    {/* Monthly Salary and Email */}
                     <div className="grid grid-cols-2 gap-6">
                       <div>
                         <label className="block text-gray-700 text-[13px] font-medium mb-2">
@@ -264,7 +340,6 @@ function Application() {
                     </div>
                   </div>
 
-                  {/* Next Button */}
                   <div className="flex justify-end mt-10">
                     <button
                       onClick={handleNext}
@@ -273,16 +348,211 @@ function Application() {
                       Next
                     </button>
                   </div>
-                </div>
+                </motion.div>
               )}
 
-              {currentStep > 1 && (
-                <div className="text-center py-20">
-                  <p className="text-gray-500 text-[15px]">
-                    Step {currentStep} content will be added here
-                  </p>
-                </div>
+              {/* Step 2 - Household Information */}
+              {currentStep === 2 && (
+                <motion.div
+                  key="step2"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="border-l-4 border-[#019461] pl-4 mb-8">
+                    <h2 className="text-[18px] font-semibold text-gray-900">
+                      Household Information
+                    </h2>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-6 mb-10">
+                    {[
+                      { value: "1-3", label: "1-3 Members", icon: "👤" },
+                      { value: "4-7", label: "4-7 Members", icon: "👥" },
+                      { value: "8+", label: "8+ Members", icon: "👨‍👩‍👧‍👦" }
+                    ].map((option) => (
+                      <div
+                        key={option.value}
+                        onClick={() => setFormData({ ...formData, householdSize: option.value })}
+                        className={`border-2 rounded-[8px] p-6 cursor-pointer text-center transition-all ${
+                          formData.householdSize === option.value
+                            ? "border-[#019461] bg-[#E8F5F1]"
+                            : "border-gray-300 hover:border-[#019461]"
+                        }`}
+                      >
+                        <div className="text-[48px] mb-3">{option.icon}</div>
+                        <p className="text-[14px] font-medium text-gray-700">{option.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between mt-10">
+                    <button
+                      onClick={handleBack}
+                      className="bg-white border-2 border-gray-300 text-gray-700 font-semibold text-[14px] px-8 py-2.5 rounded-[6px] hover:bg-gray-50 transition-all duration-200"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      className="bg-[#019461] text-white font-semibold text-[14px] px-8 py-2.5 rounded-[6px] hover:bg-[#017a54] transition-all duration-200"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </motion.div>
               )}
+
+              {/* Step 3 - Financial Information */}
+              {currentStep === 3 && (
+                <motion.div
+                  key="step3"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="border-l-4 border-[#019461] pl-4 mb-8">
+                    <h2 className="text-[18px] font-semibold text-gray-900">
+                      Financial Information
+                    </h2>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-gray-700 text-[13px] font-medium mb-2">
+                          Occupation
+                        </label>
+                        <input
+                          type="text"
+                          name="financialOccupation"
+                          value={formData.financialOccupation}
+                          onChange={handleInputChange}
+                          placeholder="Enter occupation"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#019461]/20 focus:border-[#019461] text-[14px]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 text-[13px] font-medium mb-2">
+                          Monthly Income (RM)
+                        </label>
+                        <input
+                          type="text"
+                          name="monthlyIncome"
+                          value={formData.monthlyIncome}
+                          onChange={handleInputChange}
+                          placeholder="Enter monthly income"
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#019461]/20 focus:border-[#019461] text-[14px]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between mt-10">
+                    <button
+                      onClick={handleBack}
+                      className="bg-white border-2 border-gray-300 text-gray-700 font-semibold text-[14px] px-8 py-2.5 rounded-[6px] hover:bg-gray-50 transition-all duration-200"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      className="bg-[#019461] text-white font-semibold text-[14px] px-8 py-2.5 rounded-[6px] hover:bg-[#017a54] transition-all duration-200"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Step 4 - Confirmation */}
+              {currentStep === 4 && (
+                <motion.div
+                  key="step4"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="border-l-4 border-[#019461] pl-4 mb-8">
+                    <h2 className="text-[18px] font-semibold text-gray-900">
+                      Confirmation
+                    </h2>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Checkbox 1 */}
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        name="confirmInfo"
+                        checked={formData.confirmInfo}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                      />
+                      <div>
+                        <p className="text-[14px] text-gray-700 font-medium mb-2">
+                          I confirm all information provided is accurate and complete.
+                        </p>
+                        <p className="text-[12px] text-gray-500 leading-relaxed">
+                          We respect your privacy and will only use your personal information to process your application. Your data will not be shared with third parties without your consent and will be stored securely.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Checkbox 2 */}
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        name="agreePrivacy"
+                        checked={formData.agreePrivacy}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                      />
+                      <p className="text-[14px] text-gray-700">
+                        I have read and agree to the Privacy Policy.
+                      </p>
+                    </div>
+
+                    {/* Checkbox 3 */}
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        name="agreeTerms"
+                        checked={formData.agreeTerms}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                      />
+                      <div>
+                        <p className="text-[14px] text-gray-700 font-medium mb-2">
+                          I have read and agree to the Terms & Conditions.
+                        </p>
+                        <p className="text-[12px] text-gray-500 leading-relaxed">
+                          By submitting this form, you agree to follow all guidelines for receiving aid. Misrepresentation of information may result in disqualification. We reserve the right to modify or cancel the program at any time.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between mt-10">
+                    <button
+                      onClick={handleBack}
+                      className="bg-white border-2 border-gray-300 text-gray-700 font-semibold text-[14px] px-8 py-2.5 rounded-[6px] hover:bg-gray-50 transition-all duration-200"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      className="bg-[#019461] text-white font-semibold text-[14px] px-8 py-2.5 rounded-[6px] hover:bg-[#017a54] transition-all duration-200"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

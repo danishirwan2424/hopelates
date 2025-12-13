@@ -14,7 +14,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 
 // ✅ Layout Components
-import Navbar from "./LandingPage_cmp/Navigator"; // Assuming Navigator is your Navbar
+import Navbar from "./LandingPage_cmp/Navigator";
 import Footer from "./LandingPage_cmp/Footer";
 
 // ✅ Main Pages
@@ -22,6 +22,7 @@ import Landing from "./pages/LandingPage";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
+import Donations from "./pages/forms/Donations";
 
 // ✅ Staff Pages
 import StaffDash from "./pages/staff/StaffDash";
@@ -118,7 +119,7 @@ const DonationConfirmation = () => {
             Back to Home
           </button>
           <button
-            onClick={() => navigate('/donate')}
+            onClick={() => navigate('/donations')}
             style={{
               backgroundColor: 'transparent',
               color: '#11ab72',
@@ -193,7 +194,11 @@ function AnimatedPage({ children }) {
     "/check-details",
     "/payment",
     "/donation-confirmation",
-    "/application"
+    "/application",
+    "/donations",
+    "/staff-dashboard",
+    "/staff-application",
+    "/staff-profile"
   ];
 
   const shouldAnimate = animatedPaths.includes(location.pathname);
@@ -215,9 +220,9 @@ function AnimatedPage({ children }) {
 }
 
 // --------------------------------------------------------
-// ✅ Public Layout (Navbar + Footer)
+// ✅ Main Layout (Navbar + Footer for ALL pages)
 // --------------------------------------------------------
-function PublicLayout() {
+function MainLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <Navbar />
@@ -227,35 +232,6 @@ function PublicLayout() {
         </AnimatedPage>
       </main>
       <Footer />
-    </div>
-  );
-}
-
-// --------------------------------------------------------
-// ✅ Donation Layout (Special layout for donation flow/forms)
-// --------------------------------------------------------
-function DonationLayout() {
-  // Note: This layout omits the Navbar, suggesting a cleaner form experience,
-  // but keeps the Footer.
-  return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-800">
-      <main className="flex-grow">
-        <AnimatedPage>
-          <Outlet />
-        </AnimatedPage>
-      </main>
-      <Footer />
-    </div>
-  );
-}
-
-// --------------------------------------------------------
-// ✅ Staff Layout (No Navbar/Footer - typically for dashboard)
-// --------------------------------------------------------
-function StaffLayout() {
-  return (
-    <div className="bg-gray-50 min-h-screen">
-      <Outlet />
     </div>
   );
 }
@@ -272,59 +248,35 @@ function App() {
         <Route path="/" element={<Navigate to="/landing" />} />
 
         {/* ===================================== */}
-        {/* ✅ Public Routes (Uses PublicLayout) */}
+        {/* ✅ ALL Routes (Use MainLayout with Navbar + Footer) */}
         {/* ===================================== */}
-        <Route element={<PublicLayout />}>
+        <Route element={<MainLayout />}>
+          {/* Public Pages */}
           <Route path="/landing" element={<Landing />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
-        </Route>
-
-        {/* ===================================== */}
-        {/* ✅ Donation/Forms Routes (Uses DonationLayout) */}
-        {/* ===================================== */}
-        <Route element={<DonationLayout />}>
+          <Route path="/donations" element={<Donations />} />
+          
+          {/* Donation/Forms Pages */}
           <Route path="/donate" element={<Donation />} />
           <Route path="/check-details" element={<CheckDetails />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/donation-confirmation" element={<DonationConfirmation />} />
-          <Route path="/application" element={<Application />} /> {/* The new Application route */}
-        </Route>
-
-        {/* ===================================== */}
-        {/* ✅ Staff Routes (Uses StaffLayout) */}
-        {/* ===================================== */}
-        <Route element={<StaffLayout />}>
+          <Route path="/application" element={<Application />} />
+          
+          {/* Staff Pages */}
           <Route path="/staff-dashboard" element={<StaffDash />} />
           <Route path="/staff-application" element={<StaffApplication />} />
           <Route path="/staff-profile" element={<StaffProfile />} />
+          
+          {/* Auth Pages */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          
+          {/* 404 Fallback */}
+          <Route path="*" element={<NotFound />} />
         </Route>
-
-        {/* ===================================== */}
-        {/* ✅ Auth Pages (Individual Animation) */}
-        {/* ===================================== */}
-        <Route
-          path="/login"
-          element={
-            <AnimatedPage>
-              <Login />
-            </AnimatedPage>
-          }
-        />
-        <Route
-          path="/signUp"
-          element={
-            <AnimatedPage>
-              <SignUp />
-            </AnimatedPage>
-          }
-        />
-
-        {/* ===================================== */}
-        {/* ✅ 404 Fallback */}
-        {/* ===================================== */}
-        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

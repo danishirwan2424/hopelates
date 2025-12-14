@@ -35,7 +35,7 @@ function Landing() {
           </h1>
 
           <p className="text-black/50 text-[15px] leading-relaxed">
-            Every RM200 provides 1 to 3 meals to someone in need
+            A donation of RM20 allows us to distribute complete food care packages, ensuring that nutritious meals reach the most vulnerable members of our community
           </p>
 
           <button
@@ -56,18 +56,39 @@ function Landing() {
         </div>
       </div>
 
-      {/* 🔹 Info Section */}
+{/* 🔹 Info Section */}
       <div className="h-[254px] bg-white flex items-center justify-center px-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl w-full">
-          {[humanityImg1, humanityImg2, humanityImg3].map((img, index) => (
+          {/* Define the data for each card here */}
+          {[
+            {
+              img: humanityImg1,
+              title: "EMPOWER COMMUNITIES",
+              desc: "We build stronger bonds by ensuring no one in our community goes to bed hungry.",
+            },
+            {
+              img: humanityImg2,
+              title: "DELIVER NOURISHMENT",
+              desc: "We organize and distribute essential food supplies directly to families in need.",
+            },
+            {
+              img: humanityImg3,
+              title: "SHARE COMPASSION",
+              desc: "Your generosity provides more than just food; it provides hope and dignity.",
+            },
+          ].map((item, index) => (
             <div key={index} className="flex items-center gap-2">
-              <img src={img} alt="Humanity icon" className="w-40 h-40 object-contain" />
+              <img
+                src={item.img}
+                alt="Humanity icon"
+                className="w-40 h-40 object-contain"
+              />
               <div>
-                <h3 className="text-[18px] font-semibold text-gray-900">
-                  ALWAYS DONATE FOR HUMANITY
+                <h3 className="text-[18px] font-semibold text-gray-900 uppercase">
+                  {item.title}
                 </h3>
                 <p className="text-black/50 text-[14px] leading-snug">
-                  Lorem ipsum dolor sit amet, consectetur omnis iste natus
+                  {item.desc}
                 </p>
               </div>
             </div>

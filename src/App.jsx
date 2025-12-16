@@ -37,6 +37,8 @@ import SignUp from "./pages/auth/SignUp";
 
 // ✅ Forms
 import Application_donate from "./pages/forms/ApplicationApply";
+import DonationApply from "./pages/forms/DonationApply";
+
 
 // ✅ PDF Export Page
 import PdfExp from "./pages/staff/StaffPage_cmp/pdfExp";
@@ -151,7 +153,14 @@ function App() {
             </AnimatedPage>
           }
         />
-
+        <Route
+          path="/donation"
+          element={
+            <AnimatedPage>
+              <DonationApply />
+            </AnimatedPage>
+          }
+        />
         {/* ✅ 404 Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>

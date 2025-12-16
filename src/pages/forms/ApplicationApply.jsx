@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { UserIcon, UsersIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Application_donate() {
   const primaryColor = "#278659";  // lighter green
@@ -10,6 +12,8 @@ export default function Application_donate() {
 const [agreePrivacy, setAgreePrivacy] = useState(false);
 const [agreeTerms, setAgreeTerms] = useState(false);
 const [householdSize, setHouseholdSize] = useState('');
+
+const navigate = useNavigate();
 
 
 
@@ -194,6 +198,14 @@ const [householdSize, setHouseholdSize] = useState('');
     </div>
 
     <div className="flex justify-end mt-6">
+                    <button
+                  type="button"
+                  onClick={() => navigate("/landing")}
+                  className="px-6 py-2 mr-4 rounded-xl text-white"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  Back
+                </button>
       <button 
         type="button" 
         onClick={() => setCurrentStep(2)} 

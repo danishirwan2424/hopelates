@@ -22,7 +22,7 @@ function Login() {
       } else if (email === "applicants@email.com" && password === "password") {
         navigate("/application");
       } else if (email === "donor@email.com" && password === "password") {
-        navigate("/application");
+        navigate("/donation");
       } else {
         alert("Invalid email or password");
         setLoading(false);

@@ -29,6 +29,7 @@ import StaffProfile from "./pages/staff/StaffProfile";
 import StaffDistribution from "./pages/staff/StaffDistribution";
 import StaffDonation from "./pages/staff/StaffDonation";
 import StaffReport from "./pages/staff/StaffReport";
+import StaffReceipt from "./pages/staff/StaffReceipt";
 
 // ✅ Auth Pages
 import Login from "./pages/auth/Login";
@@ -121,6 +122,7 @@ function App() {
           <Route path="/staff-distribution" element={<StaffDistribution />} />
           <Route path="/staff-donation" element={<StaffDonation />} />
           <Route path="/staff-report" element={<StaffReport />} />
+          <Route path="/staff-receipt" element={<StaffReceipt />} />
           <Route path="/pdf-report" element={<PdfExp />} />
         </Route>
 

@@ -12,6 +12,8 @@ import DistributionIcon from "../../../images/Distribution.png";
 import DonationStockIcon from "../../../images/DonationStock.png";
 import ProfileIcon from "../../../images/Profile.png";
 import ReportsIcon from "../../../images/Reports.png";
+import ReceiptIcon from "../../../images/Receipt.png";
+
 
 function StaffSideBar() {
   const location = useLocation();
@@ -35,8 +37,9 @@ function StaffSideBar() {
     { name: "APPLICATION", path: "/staff-application", icon: ApplicationIcon },
     { name: "DISTRIBUTION", path: "/staff-distribution", icon: DistributionIcon },
     { name: "DONATION STOCK", path: "/staff-donation", icon: DonationStockIcon },
-    { name: "PROFILE", path: "/staff-profile", icon: ProfileIcon },
+    { name: "PAYMENT RECEIPT", path: "/staff-receipt", icon: ReceiptIcon },
     { name: "REPORTS", path: "/staff-report", icon: ReportsIcon },
+    { name: "PROFILE", path: "/staff-profile", icon: ProfileIcon },
   ];
 
   return (

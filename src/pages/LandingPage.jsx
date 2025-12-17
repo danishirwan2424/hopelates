@@ -120,7 +120,7 @@ function Landing() {
             </h2>
 
             <p className="text-black/50 text-[15px] leading-relaxed">
-              FILL THE INFORMATION AND SENT TO US AND WE WILL CHECK AND PROVIDES FOOD WITH 7 DAYS
+              FILL THE INFORMATION AND SENT TO US AND WE WILL CHECK AND PROVIDES FOOD WITHIN 7 DAYS
             </p>
 
             <button

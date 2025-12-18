@@ -3,11 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaFacebookF, FaInstagram, FaTwitter, FaBars, FaTimes } from "react-icons/fa";
 import donorIcon from "../images/donoricon.jpeg";
 import logo from "../images/Logo.png";
-<<<<<<< HEAD
-=======
-
-import LocationPopup from "./LocationPopup";
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
 
 function Navigator() {
   const navigate = useNavigate();
@@ -19,11 +14,7 @@ function Navigator() {
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
-<<<<<<< HEAD
     return () => window.removeEventListener("scroll", handleScroll);
-=======
-    return () => window.removeEventListener("scroll",  handleScroll);
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
   }, []);
 
   const menuItems = [
@@ -76,11 +67,7 @@ function Navigator() {
         </div>
 
         <div className="hidden sm:flex items-center gap-3 text-gray-800">
-<<<<<<< HEAD
           <span>📍 Malacca, Malaysia</span>
-=======
-          <LocationPopup />
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
           <span>|</span>
           <span>☎ +60 12-345 6789</span>
         </div>

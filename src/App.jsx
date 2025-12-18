@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // App.jsx
 
 import React, { useEffect } from "react";
@@ -14,21 +13,6 @@ import {
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
-=======
-import React, { useEffect } from "react";
-import "@fontsource/inter";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  Outlet,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
 // ✅ Layout Components
 import Navbar from "./LandingPage_cmp/Navigator";
 import Footer from "./LandingPage_cmp/Footer";
@@ -37,31 +21,18 @@ import Footer from "./LandingPage_cmp/Footer";
 import Landing from "./pages/LandingPage";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
-<<<<<<< HEAD
 import Contact from "./pages/Contact";
 import Donations from "./pages/forms/Donations";
-=======
-import Donations from "./pages/Donations";
-import Contact from "./pages/Contact";
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
 
 // ✅ Staff Pages
 import StaffDash from "./pages/staff/StaffDash";
 import StaffApplication from "./pages/staff/StaffApplication";
 import StaffProfile from "./pages/staff/StaffProfile";
-<<<<<<< HEAD
-=======
-import StaffDistribution from "./pages/staff/StaffDistribution";
-import StaffDonation from "./pages/staff/StaffDonation";
-import StaffReport from "./pages/staff/StaffReport";
-import StaffReceipt from "./pages/staff/StaffReceipt";
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
 
 // ✅ Auth Pages
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 
-<<<<<<< HEAD
 // ✅ Forms & Donation Flow
 import Application from "./pages/forms/Application";
 import Donation from "./pages/forms/Donations";
@@ -199,21 +170,6 @@ const NotFound = () => {
 // --------------------------------------------------------
 // ✅ Scroll to Top Hook
 // --------------------------------------------------------
-=======
-// ✅ Forms
-import Application_donate from "./pages/forms/ApplicationApply";
-import DonationApply from "./pages/forms/DonationApply";
-
-
-// ✅ PDF Export Page
-import PdfExp from "./pages/staff/StaffPage_cmp/pdfExp";
-
-// ✅ 404 Page
-import NotFound from "./pages/NotFound"; 
-
-
-// ✅ Scroll to Top
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -222,7 +178,6 @@ function ScrollToTop() {
   return null;
 }
 
-<<<<<<< HEAD
 // --------------------------------------------------------
 // ✅ Animation Wrapper Component
 // --------------------------------------------------------
@@ -247,25 +202,14 @@ function AnimatedPage({ children }) {
   ];
 
   const shouldAnimate = animatedPaths.includes(location.pathname);
-=======
-// ✅ Animation Wrapper (for public & auth pages only)
-function AnimatedPage({ children }) {
-  const location = useLocation();
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.key}
-<<<<<<< HEAD
         initial={shouldAnimate ? { opacity: 0 } : false}
         animate={{ opacity: 1 }}
         exit={shouldAnimate ? { opacity: 0 } : false}
-=======
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="min-h-screen"
       >
@@ -275,48 +219,26 @@ function AnimatedPage({ children }) {
   );
 }
 
-<<<<<<< HEAD
 // --------------------------------------------------------
 // ✅ Main Layout (Navbar + Footer for ALL pages)
 // --------------------------------------------------------
 function MainLayout() {
-=======
-// ✅ Public Layout (Navbar + Footer + animation)
-function PublicLayout() {
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <Navbar />
       <main className="flex-grow">
-<<<<<<< HEAD
         <AnimatedPage>
           <Outlet />
         </AnimatedPage>
-=======
-          <Outlet />
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
       </main>
       <Footer />
     </div>
   );
 }
 
-<<<<<<< HEAD
 // --------------------------------------------------------
 // ✅ Main App Router
 // --------------------------------------------------------
-=======
-// ✅ Staff Layout (No Navbar/Footer, instant render)
-function StaffLayout() {
-  return (
-    <div className="bg-gray-50 min-h-screen">
-      <Outlet /> {/* instantly render staff pages */}
-    </div>
-  );
-}
-
-// ✅ Main App Router
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
 function App() {
   return (
     <Router>
@@ -325,7 +247,6 @@ function App() {
         {/* Redirect root → landing */}
         <Route path="/" element={<Navigate to="/landing" />} />
 
-<<<<<<< HEAD
         {/* ===================================== */}
         {/* ✅ ALL Routes (Use MainLayout with Navbar + Footer) */}
         {/* ===================================== */}
@@ -356,64 +277,6 @@ function App() {
           {/* 404 Fallback */}
           <Route path="*" element={<NotFound />} />
         </Route>
-=======
-        {/* ✅ Public Routes */}
-        <Route element={<PublicLayout />}>
-          <Route path="/landing" element={<Landing />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/donations" element={<Donations />} />
-          <Route path="/contact" element={<Contact />} />
-        </Route>
-
-        {/* ✅ Staff Routes */}
-        <Route element={<StaffLayout />}>
-          <Route path="/staff-dashboard" element={<StaffDash />} />
-          <Route path="/staff-application" element={<StaffApplication />} /> 
-          <Route path="/staff-profile" element={<StaffProfile />} /> 
-          <Route path="/staff-distribution" element={<StaffDistribution />} />
-          <Route path="/staff-donation" element={<StaffDonation />} />
-          <Route path="/staff-report" element={<StaffReport />} />
-          <Route path="/staff-receipt" element={<StaffReceipt />} />
-          <Route path="/pdf-report" element={<PdfExp />} />
-        </Route>
-
-        {/* ✅ Auth Pages (animated) */}
-        <Route
-          path="/login"
-          element={
-            <AnimatedPage>
-              <Login />
-            </AnimatedPage>
-          }
-        />
-        <Route
-          path="/signUp"
-          element={
-            <AnimatedPage>
-              <SignUp />
-            </AnimatedPage>
-          }
-        />
-        <Route
-          path="/application"
-          element={
-            <AnimatedPage>
-              <Application_donate />
-            </AnimatedPage>
-          }
-        />
-        <Route
-          path="/donation"
-          element={
-            <AnimatedPage>
-              <DonationApply />
-            </AnimatedPage>
-          }
-        />
-        {/* ✅ 404 Fallback */}
-        <Route path="*" element={<NotFound />} />
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
       </Routes>
     </Router>
   );

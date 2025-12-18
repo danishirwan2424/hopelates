@@ -1,67 +1,3 @@
-<<<<<<< HEAD
-import React from "react";
-import { useNavigate } from "react-router-dom";
-
-function StaffDash() {
-  const navigate = useNavigate();
-
-  const stats = [
-    { label: "Total Applications", value: "124", color: "bg-blue-500" },
-    { label: "Pending Review", value: "45", color: "bg-yellow-500" },
-    { label: "Approved", value: "67", color: "bg-green-500" },
-    { label: "Rejected", value: "12", color: "bg-red-500" }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-md px-8 py-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Staff Dashboard</h1>
-          <button
-            onClick={() => navigate("/staff-profile")}
-            className="bg-[#019461] text-white px-4 py-2 rounded-lg hover:bg-[#017a54]"
-          >
-            My Profile
-          </button>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-8 py-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Welcome Back, Staff</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-md p-6">
-              <div className={`w-12 h-12 ${stat.color} rounded-lg mb-4 flex items-center justify-center text-white font-bold text-xl`}>
-                {stat.value}
-              </div>
-              <p className="text-gray-600 font-medium">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">Recent Applications</h3>
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
-                <div>
-                  <p className="font-semibold text-gray-900">Application #{1000 + item}</p>
-                  <p className="text-sm text-gray-600">Submitted on 2025-01-{10 + item}</p>
-                </div>
-                <span className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                  Pending
-                </span>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={() => navigate("/staff-application")}
-            className="mt-6 w-full bg-[#019461] text-white font-semibold py-3 rounded-lg hover:bg-[#017a54]"
-          >
-            View All Applications
-          </button>
-=======
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Calendar from "react-calendar";
@@ -79,12 +15,10 @@ import {
 } from "chart.js";
 
 import { applications, statusCounts, months, monthlyApplicants } from "../dataExample/UserExp";
-import { donationStock, donationStats } from "../dataExample/DonationExp";
 
 // Components
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
-
 
 ChartJS.register(
   ArcElement,
@@ -109,17 +43,6 @@ function StaffDash() {
   const totalCompleted = applications.filter(a => a.status === "Completed").length;
   const totalApproved = totalCompleted; // same as completed
   const totalPending = applications.filter(a => a.status === "Pending").length;
-
-  // Group by category and sum quantities
-  const categoryData = donationStock.reduce((acc, item) => {
-    if (!acc[item.category]) acc[item.category] = 0;
-    acc[item.category] += item.quantity;
-    return acc;
-  }, {});
-
-  // Find max quantity for scaling bars
-  const maxQuantity = Math.max(...Object.values(categoryData));
-
 
   // Animate numbers
   useEffect(() => {
@@ -148,7 +71,7 @@ function StaffDash() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* ===== Sidebar ===== */}
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="w-64 bg-white">
         <StaffSideBar />
       </div>
 
@@ -276,37 +199,21 @@ function StaffDash() {
                 Donation Stock
               </h2>
 
-<div className="flex flex-col gap-4 mt-2 overflow-scroll pb-7">
-  {Object.entries(categoryData).map(([category, qty]) => {
-    const widthPercent = Math.min((qty / maxQuantity) * 100, 100);
+              <div className="flex flex-col gap-4 mt-2">
+                <div>
+                  <p className="text-[13px] text-gray-600 mb-1">Snack</p>
+                  <div className="h-4 w-full bg-gray-200 rounded">
+                    <div className="h-4 w-[70%] bg-green-600 rounded"></div>
+                  </div>
+                </div>
 
-    // If the bar is less than 20% of the max, use dark green for low stock
-    const color = widthPercent < 20 ? "#11452E" : "#278659";
-
-    return (
-      <div key={category}>
-        {/* Category title and quantity in same row */}
-        <div className="flex justify-between items-center mb-1">
-          <p className="text-[13px] text-gray-600">{category}</p>
-          <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
-        </div>
-
-        {/* Progress bar */}
-        <div className="h-4 w-full bg-gray-200 rounded">
-          <div
-            className="h-4 rounded"
-            style={{ width: `${widthPercent}%`, backgroundColor: color }}
-          ></div>
-        </div>
-      </div>
-    );
-  })}
-</div>
-
-
-
-
-
+                <div>
+                  <p className="text-[13px] text-gray-600 mb-1">Beverages</p>
+                  <div className="h-4 w-full bg-gray-200 rounded">
+                    <div className="h-4 w-[50%] bg-blue-600 rounded"></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Upcoming Deliveries (Calendar) */}
@@ -404,7 +311,6 @@ function StaffDash() {
 
             <Outlet />
           </div>
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
         </div>
       </div>
     </div>

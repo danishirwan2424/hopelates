@@ -1,148 +1,9 @@
-<<<<<<< HEAD
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-function StaffApplication() {
-  const navigate = useNavigate();
-  const [filter, setFilter] = useState("all");
-
-  const applications = [
-    { id: 1001, name: "Ahmad bin Abdullah", status: "pending", date: "2025-01-15" },
-    { id: 1002, name: "Siti Nurhaliza", status: "approved", date: "2025-01-14" },
-    { id: 1003, name: "Lee Wei Ming", status: "pending", date: "2025-01-13" },
-    { id: 1004, name: "Kumar Raj", status: "rejected", date: "2025-01-12" },
-    { id: 1005, name: "Fatimah Zahra", status: "pending", date: "2025-01-11" },
-    { id: 1006, name: "Wong Mei Ling", status: "approved", date: "2025-01-10" }
-  ];
-
-  const filteredApplications = filter === "all"
-    ? applications
-    : applications.filter(app => app.status === filter);
-
-  const getStatusColor = (status) => {
-    switch(status) {
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      case "approved": return "bg-green-100 text-green-800";
-      case "rejected": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-md px-8 py-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Applications Management</h1>
-          <button
-            onClick={() => navigate("/staff-dashboard")}
-            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-8 py-12">
-        <div className="bg-white rounded-xl shadow-md p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">All Applications</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilter("all")}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  filter === "all" ? "bg-[#019461] text-white" : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilter("pending")}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  filter === "pending" ? "bg-[#019461] text-white" : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Pending
-              </button>
-              <button
-                onClick={() => setFilter("approved")}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  filter === "approved" ? "bg-[#019461] text-white" : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Approved
-              </button>
-              <button
-                onClick={() => setFilter("rejected")}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  filter === "rejected" ? "bg-[#019461] text-white" : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Rejected
-              </button>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Application ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Applicant Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date Submitted
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredApplications.map((app) => (
-                  <tr key={app.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{app.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {app.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {app.date}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(app.status)}`}>
-                        {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button className="text-[#019461] hover:text-[#017a54] font-medium">
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-=======
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { Edit, Trash2, Search } from "lucide-react";
 import "react-calendar/dist/Calendar.css";
 
-import axios from "axios";
-
 import { applications } from "../dataExample/UserExp";
-
-import Swal from "sweetalert2";
 
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
@@ -152,7 +13,7 @@ function StaffApplication() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // ===== Sorting State =====
-const [sortBy, setSortBy] = useState("");
+const [sortBy, setSortBy] = useState(""); // "phone" | "date" | "status"
 const [sortOrder, setSortOrder] = useState("asc");
 
 const handleSort = (field) => {
@@ -164,23 +25,6 @@ const handleSort = (field) => {
   }
 };
 
-const [appList, setAppList] = useState(applications); 
-const handleDelete = (id) => {
-  Swal.fire({
-    title: "Are you sure?",
-    text: "This application will be deleted permanently!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#278659",
-    cancelButtonColor: "#B91C1C",
-    confirmButtonText: "Yes, delete it!",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      setAppList((prev) => prev.filter((app) => app.id !== id));
-      Swal.fire("Deleted!", "The application has been deleted.", "success");
-    }
-  });
-};
 
   // ===== Modal State =====
   const [showModal, setShowModal] = useState(false);
@@ -224,108 +68,14 @@ const handleDelete = (id) => {
     return colors[status] || "text-gray-600 bg-gray-100";
   };
 
-
-// ===== Edit modal approve =====
-  const handleApprove = (id) => {
-  Swal.fire({
-    title: "Approve Application?",
-    text: "This applicant will be marked as approved.",
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#278659",
-    cancelButtonColor: "#B91C1C",
-    confirmButtonText: "Approve",
-  }).then((result) => {
-    if (result.isConfirmed) {
-
-        // Update status locally
-      setAppList((prev) =>
-        prev.map((app) =>
-          app.id === id ? { ...app, status: "Completed" } : app
-        )
-      );
-      Swal.fire("Approved!", "The application is now approved.", "success");
-      closeModal();
-    }
-  }); 
-  // === Uncomment this to active the database connection ===
-  // ======================= APPROVE API CALL (Axios) =======================
-// This sends a PUT request to your backend to approve the application.
-// Replace the URL with your real backend endpoint.
-axios
-  .put(`http://localhost:5000/api/application/${id}/approve`)
-  
-  .then((res) => {
-    // ===== UPDATE UI AFTER BACKEND SUCCESS =====
-    // Update only the selected user's status to "Completed"
-    setAppList((prev) =>
-      prev.map((app) =>
-        app.id === id ? { ...app, status: "Completed" } : app
-      )
-    );
-
-    // Show success popup
-    Swal.fire("Approved!", "The application is now approved.", "success");
-
-    // Close modal after updating UI
-    closeModal();
-  })
-
-  .catch((err) => {
-    // ===== HANDLE ANY ERRORS =====
-    console.error(err);
-
-    // Show error popup
-    Swal.fire(
-      "Error",
-      "Something went wrong approving this application.",
-      "error"
-    );
-  });
-// ========================================================================
-
-
-
-
-
-
-
-};
-const handleReject = (id) => {
-  Swal.fire({
-    title: "Reject Application?",
-    text: "This applicant will be marked as rejected.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#B91C1C",
-    cancelButtonColor: "#6B7280",
-    confirmButtonText: "Reject",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      setAppList((prev) =>
-        prev.map((app) =>
-          app.id === id ? { ...app, status: "Rejected" } : app
-        )
-      );
-
-      Swal.fire("Rejected!", "The application has been rejected.", "success");
-
-      closeModal();
-    }
-  });
-};
-
-
-
   // ===== Stats Animation =====
   const [pendingCount, setPendingCount] = useState(0);
   const [approvedCount, setApprovedCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
 
-const totalPending = appList.filter((a) => a.status === "Pending").length;
-const totalApproved = appList.filter((a) => a.status === "Completed").length;
-const totalRejected = appList.filter((a) => a.status === "Rejected").length;
-
+  const totalPending = applications.filter((a) => a.status === "Pending").length;
+  const totalApproved = applications.filter((a) => a.status === "Completed").length;
+  const totalRejected = applications.filter((a) => a.status === "Rejected").length;
 
   useEffect(() => {
     let p = 0,
@@ -346,9 +96,40 @@ const totalRejected = appList.filter((a) => a.status === "Rejected").length;
     return () => clearInterval(timer);
   }, [totalPending, totalApproved, totalRejected]);
 
+  // ===== Filtered and Sorted Applications =====
+  const filteredApps = applications
+    .filter(
+      (app) =>
+        app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.phone.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.status.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (!sortBy) return 0;
+      let valA, valB;
+
+      if (sortBy === "phone") {
+        valA = a.phone;
+        valB = b.phone;
+      } else if (sortBy === "date") {
+        valA = new Date(a.date);
+        valB = new Date(b.date);
+      } else if (sortBy === "status") {
+        valA = a.status.toLowerCase();
+        valB = b.status.toLowerCase();
+      } else if (sortBy === "name") {
+        valA = a.name.toLowerCase();
+        valB = b.name.toLowerCase();
+      }
+
+      if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="flex min-h-screen bg-gray-50">
+      <aside className="w-64 bg-white">
         <StaffSideBar />
       </aside>
 
@@ -360,7 +141,7 @@ const totalRejected = appList.filter((a) => a.status === "Rejected").length;
           <header className="flex-shrink-0">
             <h1 className="text-[20px] text-gray-800">Staff Application</h1>
             <p className="text-[12px] text-black opacity-[50%] mb-2">
-              Review, manage, and track all food aid applications efficiently
+              Review and manage all food aid applications
             </p>
           </header>
 
@@ -401,13 +182,12 @@ const totalRejected = appList.filter((a) => a.status === "Rejected").length;
             <div className="relative flex-1 overflow-auto rounded-lg border border-gray-200">
               <table className="min-w-full text-sm text-left border-collapse">
                 <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
-                  <tr>                    
-                    <th className="py-3 px-4 w-[250px] cursor-pointer" onClick={() =>   handleSort("name")}>
-                      <span className="ml-[30px]">
-                        Name {sortBy === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
-                      </span>
+                  <tr>
+                    <th className="py-3 px-4 w-[50px]"></th>
+                    <th className="py-3 px-4 w-[250px] cursor-pointer" 
+                      onClick={() => handleSort("name")}>
+                      Name {sortBy === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    
                     <th
                       className="py-3 px-4 w-[150px] cursor-pointer"
                       onClick={() => handleSort("phone")}
@@ -418,7 +198,7 @@ const totalRejected = appList.filter((a) => a.status === "Rejected").length;
                       className="py-3 px-4 w-[150px] cursor-pointer"
                       onClick={() => handleSort("date")}
                     >
-                      Date Applied {sortBy === "date" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      Application Date {sortBy === "date" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
                     <th
                       className="py-3 px-4 w-[120px] cursor-pointer"
@@ -430,40 +210,12 @@ const totalRejected = appList.filter((a) => a.status === "Rejected").length;
                   </tr>
                 </thead>
                 <tbody className="border-none">
-                  {appList
-  .filter(
-    (app) =>
-      app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.phone.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.status.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-  .sort((a, b) => {
-    if (!sortBy) return 0;
-    let valA, valB;
-
-    if (sortBy === "phone") {
-      valA = a.phone;
-      valB = b.phone;
-    } else if (sortBy === "date") {
-      valA = new Date(a.date);
-      valB = new Date(b.date);
-    } else if (sortBy === "status") {
-      valA = a.status.toLowerCase();
-      valB = b.status.toLowerCase();
-    } else if (sortBy === "name") {
-      valA = a.name.toLowerCase();
-      valB = b.name.toLowerCase();
-    }
-
-    if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-    if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  })
-  .map((app) => (
-
+                  {filteredApps.map((app) => (
                     <tr key={app.id} className="hover:bg-gray-50 transition-colors">
-                      
-                      <td className="py-3 font-medium text-gray-800 pl-[30px]">{app.name}</td>
+                      <td className="py-3 px-4">
+                        <input type="checkbox" />
+                      </td>
+                      <td className="py-3 px-4 font-medium text-gray-800">{app.name}</td>
                       <td className="py-3 px-4 text-gray-600">{app.phone}</td>
                       <td className="py-3 px-4 text-gray-600">{app.date}</td>
                       <td className="py-3 px-4">
@@ -476,10 +228,7 @@ const totalRejected = appList.filter((a) => a.status === "Rejected").length;
                           <button className="text-blue-600 hover:text-blue-800" onClick={() => openEditModal(app)}>
                             <Edit size={18} />
                           </button>
-                          <button
-                            className="text-red-600 hover:text-red-800"
-                            onClick={() => handleDelete(app.id)}
-                          >
+                          <button className="text-red-600 hover:text-red-800">
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -525,20 +274,8 @@ const totalRejected = appList.filter((a) => a.status === "Rejected").length;
                 </div>
 
                 <div className="mt-6 flex gap-3">
-                  <button
-  onClick={() => handleApprove(selectedUser.id)}
-  className="w-1/2 bg-[#278659] text-white py-2 rounded-lg hover:bg-[#11452E]"
->
-  Approve
-</button>
-
-<button
-  onClick={() => handleReject(selectedUser.id)}
-  className="w-1/2 bg-[#EF4444] text-white py-2 rounded-lg hover:bg-[#B91C1C]"
->
-  Reject
-</button>
-
+                  <button className="w-1/2 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">Approve</button>
+                  <button className="w-1/2 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700">Reject</button>
                 </div>
               </div>
             </div>
@@ -547,7 +284,6 @@ const totalRejected = appList.filter((a) => a.status === "Rejected").length;
           <Outlet />
         </section>
       </main>
->>>>>>> b014efa4548877040a1c34ae1895bec6c9b3ff3c
     </div>
   );
 }

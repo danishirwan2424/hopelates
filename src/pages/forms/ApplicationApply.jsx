@@ -60,10 +60,10 @@ export default function Application_donate() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
         <Confetti recycle={false} />
-        <div className="bg-white p-10 rounded-2xl shadow-xl text-center">
-          <h1 className="text-3xl font-bold mb-3" style={{ color: darkColor }}>
+        <div className="bg-white p-6 sm:p-10 rounded-2xl shadow-xl text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3" style={{ color: darkColor }}>
             🎉 Application Submitted!
           </h1>
           <p className="text-gray-600">Thank you for applying for food aid.</p>
@@ -72,16 +72,13 @@ export default function Application_donate() {
     );
   }
 
-  // Reusable button style for hover effect
-  const HoverButton = ({ children, onClick, disabled }) => (
+  const HoverButton = ({ children, onClick, disabled, type = "button" }) => (
     <button
-      type="button"
+      type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`px-6 py-2 rounded-xl text-white transition-colors duration-200 ${
-        disabled
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-green-600 hover:bg-green-700"
+      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl text-white transition-colors duration-200 ${
+        disabled ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
       }`}
     >
       {children}
@@ -92,7 +89,7 @@ export default function Application_donate() {
     <button
       type="button"
       onClick={onClick}
-      className={`px-6 py-2 rounded-xl border transition-colors duration-200 hover:bg-gray-100 hover:text-gray-800`}
+      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl border transition-colors duration-200 hover:bg-gray-100 hover:text-gray-800 w-full sm:w-auto mb-2 sm:mb-0`}
       style={{ borderColor: darkColor, color: darkColor }}
     >
       {children}
@@ -100,45 +97,51 @@ export default function Application_donate() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* LEFT STEPS */}
-      <div className="w-1/6 bg-white p-8 shadow-inner">
-        <div className="relative">
-          {steps.map((step, index) => {
-            const Icon = stepIcons[index];
-            const active = index + 1 === currentStep;
-            const completed = index + 1 < currentStep;
+    <div className="min-h-screen bg-gray-100 flex flex-col sm:flex-row p-4 sm:p-0">
+      {/* LEFT STEPS - hidden on mobile */}
+      <div className="hidden sm:flex w-1/6 bg-white p-8 shadow-inner flex-col">
+        {steps.map((step, index) => {
+          const Icon = stepIcons[index];
+          const active = index + 1 === currentStep;
+          const completed = index + 1 < currentStep;
 
-            return (
-              <div key={index} className="flex items-start mb-8 relative">
-                {index !== steps.length - 1 && (
-                  <div
-                    className={`absolute left-4 top-10 w-0.5 h-full ${completed ? "bg-green-600" : "bg-gray-300"}`}
-                  />
-                )}
+          return (
+            <div key={index} className="flex items-start mb-8 relative">
+              {index !== steps.length - 1 && (
                 <div
-                  className={`p-2 rounded-full z-10 ${
-                    completed ? "bg-green-600 text-white" : active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className={`ml-4 mt-2 text-sm ${completed || active ? "text-green-700 font-medium" : "text-gray-400"}`}>
-                  {step}
-                </span>
+                  className={`absolute left-4 top-10 w-0.5 h-full ${completed ? "bg-green-600" : "bg-gray-300"}`}
+                />
+              )}
+              <div
+                className={`p-2 rounded-full z-10 ${
+                  completed
+                    ? "bg-green-600 text-white"
+                    : active
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                <Icon className="w-5 h-5" />
               </div>
-            );
-          })}
-        </div>
+              <span
+                className={`ml-4 mt-2 text-sm ${
+                  completed || active ? "text-green-700 font-medium" : "text-gray-400"
+                }`}
+              >
+                {step}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* RIGHT FORM */}
-      <div className="w-5/6 bg-white p-10 rounded-l-2xl shadow-xl">
-        <h1 className="text-3xl font-bold mb-6" style={{ color: darkColor }}>
+      <div className="flex-grow bg-white p-4 sm:p-10 rounded-xl sm:rounded-l-2xl shadow-xl">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: darkColor }}>
           Food Aid Application
         </h1>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* STEP 1 */}
           {currentStep === 1 && (
             <section className="space-y-4">
@@ -147,7 +150,7 @@ export default function Application_donate() {
               <input placeholder="Password" type="password" className="w-full border p-3 rounded" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <input placeholder="IC Number" className="w-full border p-3 rounded" value={icNumber} onChange={(e) => setIcNumber(e.target.value)} required />
 
-              <div className="flex justify-between mt-6">
+              <div className="flex flex-col sm:flex-row justify-between mt-6">
                 <BackButton onClick={() => navigate("/landing")}>Back</BackButton>
                 <HoverButton onClick={() => setCurrentStep(2)}>Next</HoverButton>
               </div>
@@ -156,31 +159,30 @@ export default function Application_donate() {
 
           {/* STEP 2 */}
           {currentStep === 2 && (
-            <section>
-              <h2 className="font-semibold mb-4">Family Household</h2>
-              <div className="grid grid-cols-3 gap-4 mb-6">
+            <section className="space-y-4">
+              <h2 className="font-semibold mb-2">Family Household</h2>
+              <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 {householdOptions.map((opt) => (
                   <motion.div
                     key={opt.label}
                     onClick={() => setHouseholdSize(opt.label)}
                     whileHover={{ scale: 1.05 }}
-                    className={`cursor-pointer border rounded-xl p-6 text-center ${householdSize === opt.label ? "border-green-600 bg-green-100" : "border-gray-300"}`}
+                    className={`cursor-pointer border rounded-xl p-4 sm:p-6 text-center ${householdSize === opt.label ? "border-green-600 bg-green-100" : "border-gray-300"}`}
                   >
-                    <UsersIcon className="h-10 w-10 mx-auto mb-2 text-gray-500" />
+                    <UsersIcon className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 text-gray-500" />
                     <div className="font-semibold">{opt.label}</div>
-                    <div className="text-sm text-gray-500">People</div>
+                    <div className="text-xs sm:text-sm text-gray-500">People</div>
                   </motion.div>
                 ))}
               </div>
 
               <textarea placeholder="Home Address" className="w-full border p-3 rounded mb-4" value={homeAddress} onChange={(e) => setHomeAddress(e.target.value)} required />
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <input placeholder="Postcode" className="border p-3 rounded" value={postcode} onChange={(e) => setPostcode(e.target.value)} required />
-                <input placeholder="City" className="border p-3 rounded" value={city} onChange={(e) => setCity(e.target.value)} required />
-                <input placeholder="State" className="border p-3 rounded" value={state} onChange={(e) => setState(e.target.value)} required />
-              </div>
 
-              <div className="flex justify-between">
+              <input placeholder="Postcode" className="w-full border p-3 rounded" value={postcode} onChange={(e) => setPostcode(e.target.value)} required />
+              <input placeholder="City" className="w-full border p-3 rounded" value={city} onChange={(e) => setCity(e.target.value)} required />
+              <input placeholder="State" className="w-full border p-3 rounded" value={state} onChange={(e) => setState(e.target.value)} required />
+
+              <div className="flex flex-col sm:flex-row justify-between mt-6">
                 <BackButton onClick={() => setCurrentStep(1)}>Back</BackButton>
                 <HoverButton onClick={() => setCurrentStep(3)} disabled={!householdSize}>Next</HoverButton>
               </div>
@@ -189,35 +191,15 @@ export default function Application_donate() {
 
           {/* STEP 3 */}
           {currentStep === 3 && (
-            <section className="space-y-6">
-              <input
-                placeholder="Occupation"
-                className="w-full border p-3 rounded"
-                value={occupation}
-                onChange={(e) => setOccupation(e.target.value)}
-                required
-              />
+            <section className="space-y-4">
+              <input placeholder="Occupation" className="w-full border p-3 rounded" value={occupation} onChange={(e) => setOccupation(e.target.value)} required />
 
               <div className="space-y-2">
                 <label className="font-medium text-gray-700">Salary (RM): {salary || 0}</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="10000"
-                  step="100"
-                  value={salary}
-                  onChange={(e) => setSalary(e.target.value)}
-                  className="w-full h-2 bg-gray-200 rounded-lg accent-green-600 cursor-pointer"
-                />
+                <input type="range" min="0" max="10000" step="100" value={salary} onChange={(e) => setSalary(e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg accent-green-600 cursor-pointer" />
               </div>
 
-              <input
-                placeholder="Employment Status"
-                className="w-full border p-3 rounded"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                required
-              />
+              <input placeholder="Employment Status" className="w-full border p-3 rounded" value={status} onChange={(e) => setStatus(e.target.value)} required />
 
               <div
                 {...getRootProps()}
@@ -232,7 +214,7 @@ export default function Application_donate() {
                 {payslip ? <p className="text-gray-700">{payslip.name}</p> : <p className="text-gray-500">Drop Image</p>}
               </div>
 
-              <div className="flex justify-between mt-6">
+              <div className="flex flex-col sm:flex-row justify-between mt-6">
                 <BackButton onClick={() => setCurrentStep(2)}>Back</BackButton>
                 <HoverButton onClick={() => setCurrentStep(4)}>Next</HoverButton>
               </div>
@@ -241,7 +223,7 @@ export default function Application_donate() {
 
           {/* STEP 4 */}
           {currentStep === 4 && (
-            <section>
+            <section className="space-y-4">
               <label className="flex items-center mb-3">
                 <input type="checkbox" className="mr-2" onChange={(e) => setConfirmInfo(e.target.checked)} /> I confirm the information is correct
               </label>
@@ -252,7 +234,7 @@ export default function Application_donate() {
                 <input type="checkbox" className="mr-2" onChange={(e) => setAgreeTerms(e.target.checked)} /> I agree to the Terms & Conditions
               </label>
 
-              <div className="flex justify-between">
+              <div className="flex flex-col sm:flex-row justify-between">
                 <BackButton onClick={() => setCurrentStep(3)}>Back</BackButton>
                 <HoverButton type="submit" disabled={!(confirmInfo && agreePrivacy && agreeTerms)}>Submit</HoverButton>
               </div>

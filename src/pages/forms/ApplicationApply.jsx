@@ -161,20 +161,21 @@ export default function Application_donate() {
           {currentStep === 2 && (
             <section className="space-y-4">
               <h2 className="font-semibold mb-2">Family Household</h2>
-              <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                {householdOptions.map((opt) => (
-                  <motion.div
-                    key={opt.label}
-                    onClick={() => setHouseholdSize(opt.label)}
-                    whileHover={{ scale: 1.05 }}
-                    className={`cursor-pointer border rounded-xl p-4 sm:p-6 text-center ${householdSize === opt.label ? "border-green-600 bg-green-100" : "border-gray-300"}`}
-                  >
-                    <UsersIcon className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 text-gray-500" />
-                    <div className="font-semibold">{opt.label}</div>
-                    <div className="text-xs sm:text-sm text-gray-500">People</div>
-                  </motion.div>
-                ))}
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                  {householdOptions.map((opt) => (
+                    <motion.div
+                      key={opt.label}
+                      onClick={() => setHouseholdSize(opt.label)}
+                      whileHover={{ scale: 1.05 }}
+                      className={`cursor-pointer border rounded-xl p-4 sm:p-6 text-center w-full $                {householdSize === opt.label ? "border-green-600 bg-green-100" : "border-gray-300"}`}
+                    >
+                      <UsersIcon className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 text-gray-500" />
+                      <div className="font-semibold">{opt.label}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">People</div>
+                    </motion.div>
+                  ))}
+                </div>
+
 
               <textarea placeholder="Home Address" className="w-full border p-3 rounded mb-4" value={homeAddress} onChange={(e) => setHomeAddress(e.target.value)} required />
 

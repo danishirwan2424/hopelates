@@ -502,20 +502,6 @@ function Application() {
                       </div>
                     </div>
 
-                    {/* Checkbox 2 */}
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        name="agreePrivacy"
-                        checked={formData.agreePrivacy}
-                        onChange={handleInputChange}
-                        className="mt-1"
-                      />
-                      <p className="text-[14px] text-gray-700">
-                        I have read and agree to the Privacy Policy.
-                      </p>
-                    </div>
-
                     {/* Checkbox 3 */}
                     <div className="flex items-start gap-3">
                       <input

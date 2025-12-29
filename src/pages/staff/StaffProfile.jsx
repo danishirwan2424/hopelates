@@ -263,7 +263,7 @@ function StaffProfile() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="flex min-h-screen bg-gray-50">
+      <aside className="w-64">
         <StaffSideBar />
       </aside>
 

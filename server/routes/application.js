@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO application 
+      `INSERT INTO application
         (beneficiary_id, staff_id, ic_no, address, postcode, city, state, occupation, salary, status, family_no)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
       [beneficiary_id, staff_id, ic_no, address, postcode, city, state, occupation, salary, status, family_no]

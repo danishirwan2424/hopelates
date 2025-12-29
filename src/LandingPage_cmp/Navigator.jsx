@@ -4,8 +4,6 @@ import { FaFacebookF, FaInstagram, FaTwitter, FaBars, FaTimes } from "react-icon
 import donorIcon from "../images/donoricon.jpeg";
 import logo from "../images/Logo.png";
 
-import LocationPopup from "./LocationPopup";
-
 function Navigator() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,16 +14,16 @@ function Navigator() {
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll",  handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const menuItems = [
     { label: "Home", path: "/landing" },
     { label: "About", path: "/about" },
     { label: "Services", path: "/services" },
-    { label: "Donations", path: "/donations" },
     { label: "Contact", path: "/contact" },
   ];
+  
   const handleDonateClick = () => {
     navigate("/login"); // 👈 Redirect to login page
   };
@@ -69,7 +67,7 @@ function Navigator() {
         </div>
 
         <div className="hidden sm:flex items-center gap-3 text-gray-800">
-          <LocationPopup />
+          <span>📍 Malacca, Malaysia</span>
           <span>|</span>
           <span>☎ +60 12-345 6789</span>
         </div>

@@ -202,7 +202,7 @@ function StaffApplication() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="flex min-h-screen bg-gray-50">
+      <aside className="w-64 bg-white">
         <StaffSideBar />
       </aside>
 
@@ -214,7 +214,7 @@ function StaffApplication() {
           <header className="flex-shrink-0">
             <h1 className="text-[20px] text-gray-800">Staff Application</h1>
             <p className="text-[12px] text-black opacity-[50%] mb-2">
-              Review, manage, and track all food aid applications efficiently
+              Review and manage all food aid applications
             </p>
           </header>
 

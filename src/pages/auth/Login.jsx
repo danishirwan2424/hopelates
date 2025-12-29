@@ -3,50 +3,31 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import leaves from "../../images/leaves.jpg";
 import logo from "../../images/Logo2.png";
-import "../../index.css";
+import '../../index.css';
 
 function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
-    setLoading(true);
 
-    setTimeout(() => {
-      if (email === "staff@email.com" && password === "password") {
-        navigate("/staff-dashboard");
-      } else if (email === "applicants@email.com" && password === "password") {
-        navigate("/application");
-      } else if (email === "donor@email.com" && password === "password") {
-        navigate("/donation");
-      } else {
-        alert("Invalid email or password");
-        setLoading(false);
-      }
-    }, 2000);
+    // Dummy authentication
+    if (email === "staff@email.com" && password === "password") {
+      navigate("/staff-dashboard");
+    } else {
+      alert("Invalid email or password");
+    }
   };
-
-  if (loading) {
-    return (
-      <div className="fixed inset-0 flex flex-col justify-center items-center bg-white z-50">
-        {/* Minimal spinner */}
-        <div className="border-4 border-gray-200 border-t-[#019461] rounded-full w-16 h-16 animate-spin mb-4"></div>
-        <p className="text-gray-700 text-lg font-medium animate-fade-in">
-          Logging in...
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row font-sans overflow-hidden bg-white">
-      {/* Left Side - Form */}
+      {/* 🟢 Left Side - Form Section */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-8 md:px-16">
         <div className="w-full max-w-sm text-center">
+          {/* Logo and Title */}
           <img
             src={logo}
             alt="HopeLates Logo"
@@ -59,6 +40,7 @@ function Login() {
             Welcome back! Please log in to continue making an impact.
           </p>
 
+          {/* Form */}
           <form className="space-y-4 text-left" onSubmit={handleLogin}>
             {/* Email */}
             <div>
@@ -74,7 +56,7 @@ function Login() {
               />
             </div>
 
-            {/* Password */}
+            {/* Password with eye icon */}
             <div>
               <label className="block text-gray-600 text-sm font-medium mb-1">
                 Password
@@ -90,7 +72,7 @@ function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -116,6 +98,7 @@ function Login() {
             </div>
           </form>
 
+          {/* Signup Redirect */}
           <div className="text-center mt-5 text-[14px] text-gray-600">
             Don’t have an account?{" "}
             <button
@@ -128,7 +111,7 @@ function Login() {
         </div>
       </div>
 
-      {/* Right Side - Image */}
+      {/* 🟢 Right Side - Image Section */}
       <div className="hidden md:flex w-full md:w-1/2 h-full">
         <img
           src={leaves}

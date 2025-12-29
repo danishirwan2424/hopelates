@@ -21,7 +21,7 @@ function DonationTrendLine() {
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip />
-            <Line type="monotone" dataKey="items" strokeWidth={3} />
+            <Line type="monotone" dataKey="items" stroke="#8B5CF6" strokeWidth={3} />
           </LineChart>
         </ResponsiveContainer>
       </div>

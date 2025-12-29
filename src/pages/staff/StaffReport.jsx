@@ -1,6 +1,5 @@
 // StaffReport.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { Outlet } from "react-router-dom";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -21,7 +20,6 @@ import { applications, statusCounts, months, monthlyApplicants } from "../dataEx
 
 // Components
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
 // Register Chart.js components
 ChartJS.register(
@@ -61,9 +59,9 @@ const shadowPlugin = {
 ChartJS.register(shadowPlugin);
 
 // theme colors / gradient stops
-const GRADIENT_TOP = "#278659";
-const GRADIENT_BOTTOM = "#11452E";
-const GRADIENT_LIGHT = "#9BC6B3";
+const GRADIENT_TOP = "#8B5CF6";
+const GRADIENT_BOTTOM = "#6366F1";
+const GRADIENT_LIGHT = "#A78BFA";
 
 function StaffReport() {
   // Animated Stats
@@ -224,11 +222,11 @@ function StaffReport() {
     datasets: [
       {
         data: pieData.map((p) => p.value),
-        backgroundColor: [GRADIENT_TOP, GRADIENT_BOTTOM, GRADIENT_LIGHT],
+        backgroundColor: ["#10B981", "#3B82F6", "#EF4444"],
         hoverBackgroundColor: [
-          "#33a06b",
-          "#1b593d",
-          "#cfe9dd",
+          "#34D399",
+          "#60A5FA",
+          "#F87171",
         ],
         borderWidth: 0,
         _shadow: { color: "rgba(0,0,0,0.12)", blur: 12, offsetY: 6 },
@@ -329,8 +327,6 @@ function StaffReport() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-0 h-screen">
-        <StaffPanelBar />
-
         {/* Scrollable Section */}
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-y-auto overflow-x-hidden">
           {/* Header */}
@@ -449,9 +445,17 @@ cl
             <div className="bg-white rounded-[15px] shadow-md flex-1 min-w-[400px] p-4 flex flex-col">
               <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Donation Stock (Category Breakdown)</h2>
               <div className="flex flex-col gap-4 mt-2 overflow-y-auto max-h-[300px] pb-7">
-                {Object.entries(categoryData).map(([category, qty]) => {
+                {Object.entries(categoryData).map(([category, qty], index) => {
                   const widthPercent = Math.min((qty / maxCategoryQty) * 100, 100);
-                  const color = widthPercent < 20 ? "#11452E" : "#278659";
+                  const colors = [
+                    { start: "#3B82F6", end: "#6366F1" },
+                    { start: "#10B981", end: "#14B8A6" },
+                    { start: "#F59E0B", end: "#F97316" },
+                    { start: "#8B5CF6", end: "#A78BFA" },
+                    { start: "#EC4899", end: "#F472B6" },
+                    { start: "#EF4444", end: "#F87171" },
+                  ];
+                  const colorPair = colors[index % colors.length];
                   return (
                     <div key={category}>
                       <div className="flex justify-between items-center mb-1">
@@ -459,7 +463,7 @@ cl
                         <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
                       </div>
                       <div className="h-4 w-full bg-gray-200 rounded">
-                        <div className="h-4 rounded" style={{ width: `${widthPercent}%`, background: `linear-gradient(90deg, ${color}, ${GRADIENT_BOTTOM})` }} />
+                        <div className="h-4 rounded" style={{ width: `${widthPercent}%`, background: `linear-gradient(90deg, ${colorPair.start}, ${colorPair.end})` }} />
                       </div>
                     </div>
                   );
@@ -484,8 +488,6 @@ cl
               </div>
             </div>
           </div>
-
-          <Outlet />
         </section>
       </main>
     </div>

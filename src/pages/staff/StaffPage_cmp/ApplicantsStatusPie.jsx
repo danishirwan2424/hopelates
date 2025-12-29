@@ -8,7 +8,7 @@ function ApplicantsStatusPie() {
     value: statusCounts[key],
   }));
 
-  const COLORS = ["#4ade80", "#60a5fa", "#f87171"]; // green, blue, red
+  const COLORS = ["#10B981", "#3B82F6", "#EF4444"]; // green, blue, red
 
   return (
     <div className="bg-white p-5 rounded-2xl shadow">

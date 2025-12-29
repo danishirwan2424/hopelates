@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
 import { Edit, Trash2, Search } from "lucide-react";
 import "react-calendar/dist/Calendar.css";
 
@@ -8,7 +7,6 @@ import { donationStock, donationStats } from "../dataExample/DonationExp";
 import Swal from "sweetalert2";
 
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
 function StaffDonation() {
   const [stock, setStock] = useState(donationStock);
@@ -115,8 +113,6 @@ const handleDelete = (id) => {
       </aside>
 
       <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] h-screen overflow-hidden">
-        <StaffPanelBar />
-
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
           {/* Header */}
           <header className="flex-shrink-0">
@@ -223,8 +219,6 @@ const handleDelete = (id) => {
               </table>
             </div>
           </section>
-
-          <Outlet />
         </section>
       </main>
 

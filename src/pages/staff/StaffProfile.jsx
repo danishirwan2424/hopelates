@@ -1,11 +1,9 @@
 // StaffProfile.jsx
 import React, { useEffect, useState, useRef } from "react";
-import { Outlet } from "react-router-dom";
 import { Edit } from "lucide-react";
 import axios from "axios";
 
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
 /*
   Full Staff Profile page with:
@@ -269,8 +267,6 @@ function StaffProfile() {
 
       {/* Main */}
       <main className="flex-1 flex flex-col bg-white pt-6 px-8 pb-5 h-screen overflow-auto">
-        <StaffPanelBar />
-
         {/* Page Container */}
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
 
@@ -400,8 +396,6 @@ function StaffProfile() {
               )}
             </div>
           </div>
-
-          <Outlet />
         </section>
       </main>
 

@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
 import { Mail, Search } from "lucide-react";
 
 import { applications as initialApplications } from "../dataExample/UserExp";
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
 function StaffDistribution() {
   // ===== Local state: Completed -> Pending by default =====
@@ -106,8 +104,6 @@ const getPackageColor = (packageName) => {
       </aside>
 
       <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] h-screen overflow-hidden">
-        <StaffPanelBar />
-
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
           {/* Header */}
           <header className="flex-shrink-0 mb-4">
@@ -204,8 +200,6 @@ const getPackageColor = (packageName) => {
               </table>
             </div>
           </section>
-
-          <Outlet />
         </section>
       </main>
     </div>

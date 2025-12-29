@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
 import { Edit, Trash2, Search } from "lucide-react";
 import { Doughnut, Bar } from "react-chartjs-2";
 import {
@@ -15,7 +14,6 @@ import {
 
 import { donationStock } from "../dataExample/DonationExp";
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 import Swal from "sweetalert2";
 
 ChartJS.register(
@@ -86,8 +84,6 @@ function StaffReceipt() {
 
       {/* Main */}
       <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-screen overflow-hidden">
-        <StaffPanelBar />
-
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
           {/* Header */}
           <header className="flex-shrink-0">
@@ -257,7 +253,7 @@ function StaffReceipt() {
                     {
                       label: "Quantity",
                       data: quantities,
-                      backgroundColor: "#278659",
+                      backgroundColor: ["#3B82F6", "#8B5CF6", "#10B981", "#F59E0B", "#EF4444", "#14B8A6", "#EC4899", "#6366F1"],
                       borderRadius: 6,
                     },
                   ],
@@ -274,8 +270,6 @@ function StaffReceipt() {
               />
             </div>
           </div>
-
-          <Outlet />
         </section>
       </main>
     </div>

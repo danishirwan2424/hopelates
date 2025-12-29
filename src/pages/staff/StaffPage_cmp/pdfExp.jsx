@@ -17,12 +17,12 @@ const PdfExp = () => {
           {
             label: "Applicants",
             data: monthlyApplicants,
-            borderColor: "#278659",
-            backgroundColor: "rgba(39,134,89,0.2)",
+            borderColor: "#8B5CF6",
+            backgroundColor: "rgba(139,92,246,0.2)",
             fill: true,
             tension: 0.4,
             pointRadius: 4,
-            pointBackgroundColor: "#11452E",
+            pointBackgroundColor: "#6366F1",
           },
         ],
       },
@@ -37,7 +37,7 @@ const PdfExp = () => {
         datasets: [
           {
             data: Object.values(statusCounts),
-            backgroundColor: ["#22c55e", "#facc15", "#ef4444"],
+            backgroundColor: ["#10B981", "#3B82F6", "#EF4444"],
             hoverOffset: 10,
           },
         ],
@@ -55,7 +55,7 @@ const PdfExp = () => {
           {
             label: "Quantity",
             data: topDonors.map((d) => d.quantity),
-            backgroundColor: "#278659",
+            backgroundColor: ["#3B82F6", "#8B5CF6", "#10B981", "#F59E0B", "#EF4444"],
             borderRadius: 6,
           },
         ],

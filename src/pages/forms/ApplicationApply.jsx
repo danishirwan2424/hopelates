@@ -1,149 +1,243 @@
-import React, { useState, useEffect } from "react";
-import { UserIcon, UsersIcon, UserGroupIcon } from '@heroicons/react/24/solid';
+import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDropzone } from "react-dropzone";
+import { UsersIcon, UserIcon, HomeIcon, BanknotesIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 
 export default function Application_donate() {
-  const primaryColor = "#278659";  
-  const darkColor = "#11452E";     
+  const primaryColor = "#278659";
+  const darkColor = "#11452E";
+  const navigate = useNavigate();
+
   const [currentStep, setCurrentStep] = useState(1);
+  const [submitted, setSubmitted] = useState(false);
+
+  // STEP 1
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [icNumber, setIcNumber] = useState("");
+
+  // STEP 2
+  const [householdSize, setHouseholdSize] = useState(null);
+  const [homeAddress, setHomeAddress] = useState("");
+  const [postcode, setPostcode] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+
+  // STEP 3
+  const [occupation, setOccupation] = useState("");
+  const [salary, setSalary] = useState("");
+  const [status, setStatus] = useState("");
+  const [payslip, setPayslip] = useState(null);
+
+  // STEP 4
   const [confirmInfo, setConfirmInfo] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
-  const [householdSize, setHouseholdSize] = useState('');
-  const [submitted, setSubmitted] = useState(false);
 
-  const navigate = useNavigate();
-
-  const steps = [
-    { name: "Personal Info" },
-    { name: "Household Info" },
-    { name: "Financial Info" },
-    { name: "Confirmation" }
-  ];
+  const steps = ["Personal Info", "Household Info", "Financial Info", "Confirmation"];
+  const householdOptions = [{ label: "1–3" }, { label: "4–6" }, { label: "7–9" }];
+  const stepIcons = [UserIcon, HomeIcon, BanknotesIcon, CheckCircleIcon];
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
-
-    // Automatically navigate after 1.5 seconds
-    setTimeout(() => {
-      navigate("/landing");
-    }, 1500);
+    setTimeout(() => navigate("/landing"), 1500);
   };
 
-  // If submitted, show success screen with confetti
+  // Dropzone
+  const onDrop = useCallback((acceptedFiles) => {
+    setPayslip(acceptedFiles[0]);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "image/*": [] },
+    multiple: false,
+  });
+
   if (submitted) {
     return (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 relative">
-        <Confetti 
-          width={window.innerWidth} 
-          height={window.innerHeight} 
-          numberOfPieces={150} 
-          recycle={false} 
-        />
-        <motion.div 
-          initial={{ scale: 0 }} 
-          animate={{ scale: 1 }} 
-          transition={{ type: "spring", stiffness: 200 }}
-          className="bg-white p-10 rounded-2xl shadow-xl text-center z-10"
-        >
-          <h1 className="text-4xl font-bold mb-4" style={{ color: darkColor }}>
-            🎉 Donation Completed!
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <Confetti recycle={false} />
+        <div className="bg-white p-6 sm:p-10 rounded-2xl shadow-xl text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3" style={{ color: darkColor }}>
+            🎉 Application Submitted!
           </h1>
-          <p className="text-gray-700 mb-6">
-            Thank you for your contribution. You are helping those in need!
-          </p>
-          <motion.div 
-            className="w-20 h-20 mx-auto bg-green-500 rounded-full flex items-center justify-center text-white text-2xl font-bold"
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
-          >
-            ✅
-          </motion.div>
-        </motion.div>
+          <p className="text-gray-600">Thank you for applying for food aid.</p>
+        </div>
       </div>
     );
   }
 
+  const HoverButton = ({ children, onClick, disabled, type = "button" }) => (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl text-white transition-colors duration-200 ${
+        disabled ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+      }`}
+    >
+      {children}
+    </button>
+  );
+
+  const BackButton = ({ children, onClick }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-4 sm:px-6 py-2 sm:py-3 rounded-xl border transition-colors duration-200 hover:bg-gray-100 hover:text-gray-800 w-full sm:w-auto mb-2 sm:mb-0`}
+      style={{ borderColor: darkColor, color: darkColor }}
+    >
+      {children}
+    </button>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Left Tracker */}
-      <div
-        className="w-1/6 bg-white shadow-inner flex flex-col items-start py-10 px-8 overflow-y-auto"
-        style={{ maxHeight: "100vh", position: "sticky", top: 0 }}
-      >
-        {steps.map((step, index) => (
-          <div key={index} className="flex items-start relative mb-8">
-            <div className="flex flex-col items-center mr-4 relative">
-              <div className={`w-4 h-4 rounded-full z-10 ${index + 1 <= currentStep ? "bg-[#278659]" : "bg-gray-300"}`} />
-              {index < steps.length - 1 && (
+    <div className="min-h-screen bg-gray-100 flex flex-col sm:flex-row p-4 sm:p-0">
+      {/* LEFT STEPS - hidden on mobile */}
+      <div className="hidden sm:flex w-1/6 bg-white p-8 shadow-inner flex-col">
+        {steps.map((step, index) => {
+          const Icon = stepIcons[index];
+          const active = index + 1 === currentStep;
+          const completed = index + 1 < currentStep;
+
+          return (
+            <div key={index} className="flex items-start mb-8 relative">
+              {index !== steps.length - 1 && (
                 <div
-                  className="absolute top-5 left-1/2 transform -translate-x-1/2 w-1"
-                  style={{ height: "calc(100% + 20px)", backgroundColor: index + 1 < currentStep ? "#278659" : "#d1d5db" }}
+                  className={`absolute left-4 top-10 w-0.5 h-full ${completed ? "bg-green-600" : "bg-gray-300"}`}
                 />
               )}
+              <div
+                className={`p-2 rounded-full z-10 ${
+                  completed
+                    ? "bg-green-600 text-white"
+                    : active
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+              </div>
+              <span
+                className={`ml-4 mt-2 text-sm ${
+                  completed || active ? "text-green-700 font-medium" : "text-gray-400"
+                }`}
+              >
+                {step}
+              </span>
             </div>
-            <span className={`mt-1 font-medium ${index + 1 <= currentStep ? "text-[#11452E]" : "text-gray-400"}`}>
-              {step.name}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Right Form */}
-      <div className="w-5/6 p-10 bg-white rounded-l-2xl shadow-xl">
-        <h1 className="text-4xl font-extrabold tracking-tight" style={{ color: darkColor }}>
+      {/* RIGHT FORM */}
+      <div className="flex-grow bg-white p-4 sm:p-10 rounded-xl sm:rounded-l-2xl shadow-xl">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6" style={{ color: darkColor }}>
           Food Aid Application
         </h1>
-        <p className="italic mt-1 mb-6 text-gray-600">
-          Fill out the form for food assistance.
-        </p>
 
-        <form className="space-y-12" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* STEP 1 */}
           {currentStep === 1 && (
-            <section>
-              {/* ... STEP 1 fields ... */}
-              <div className="flex justify-end mt-6">
-                <button type="button" onClick={() => navigate("/landing")} className="px-6 py-2 mr-4 rounded-xl text-white" style={{ backgroundColor: primaryColor }}>Back</button>
-                <button type="button" onClick={() => setCurrentStep(2)} className="px-6 py-2 rounded-xl text-white" style={{ backgroundColor: primaryColor }}>Next</button>
+            <section className="space-y-4">
+              <input placeholder="Full Name" className="w-full border p-3 rounded" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              <input placeholder="Email" type="email" className="w-full border p-3 rounded" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input placeholder="Password" type="password" className="w-full border p-3 rounded" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <input placeholder="IC Number" className="w-full border p-3 rounded" value={icNumber} onChange={(e) => setIcNumber(e.target.value)} required />
+
+              <div className="flex flex-col sm:flex-row justify-between mt-6">
+                <BackButton onClick={() => navigate("/landing")}>Back</BackButton>
+                <HoverButton onClick={() => setCurrentStep(2)}>Next</HoverButton>
               </div>
             </section>
           )}
 
           {/* STEP 2 */}
           {currentStep === 2 && (
-            <section>
-              {/* ... Household selection ... */}
-              <div className="flex justify-between mt-6">
-                <button type="button" onClick={() => setCurrentStep(1)} className="px-6 py-2 rounded-xl border" style={{ borderColor: primaryColor, color: darkColor }}>Back</button>
-                <button type="button" onClick={() => setCurrentStep(3)} className="px-6 py-2 rounded-xl text-white" style={{ backgroundColor: primaryColor }} disabled={!householdSize}>Next</button>
+            <section className="space-y-4">
+              <h2 className="font-semibold mb-2">Family Household</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                  {householdOptions.map((opt) => (
+                    <motion.div
+                      key={opt.label}
+                      onClick={() => setHouseholdSize(opt.label)}
+                      whileHover={{ scale: 1.05 }}
+                      className={`cursor-pointer border rounded-xl p-4 sm:p-6 text-center w-full $                {householdSize === opt.label ? "border-green-600 bg-green-100" : "border-gray-300"}`}
+                    >
+                      <UsersIcon className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 text-gray-500" />
+                      <div className="font-semibold">{opt.label}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">People</div>
+                    </motion.div>
+                  ))}
+                </div>
+
+
+              <textarea placeholder="Home Address" className="w-full border p-3 rounded mb-4" value={homeAddress} onChange={(e) => setHomeAddress(e.target.value)} required />
+
+              <input placeholder="Postcode" className="w-full border p-3 rounded" value={postcode} onChange={(e) => setPostcode(e.target.value)} required />
+              <input placeholder="City" className="w-full border p-3 rounded" value={city} onChange={(e) => setCity(e.target.value)} required />
+              <input placeholder="State" className="w-full border p-3 rounded" value={state} onChange={(e) => setState(e.target.value)} required />
+
+              <div className="flex flex-col sm:flex-row justify-between mt-6">
+                <BackButton onClick={() => setCurrentStep(1)}>Back</BackButton>
+                <HoverButton onClick={() => setCurrentStep(3)} disabled={!householdSize}>Next</HoverButton>
               </div>
             </section>
           )}
 
           {/* STEP 3 */}
           {currentStep === 3 && (
-            <section>
-              {/* ... Financial info ... */}
-              <div className="flex justify-between mt-6">
-                <button type="button" onClick={() => setCurrentStep(2)} className="px-6 py-2 rounded-xl border" style={{ borderColor: primaryColor, color: darkColor }}>Back</button>
-                <button type="button" onClick={() => setCurrentStep(4)} className="px-6 py-2 rounded-xl text-white" style={{ backgroundColor: primaryColor }}>Next</button>
+            <section className="space-y-4">
+              <input placeholder="Occupation" className="w-full border p-3 rounded" value={occupation} onChange={(e) => setOccupation(e.target.value)} required />
+
+              <div className="space-y-2">
+                <label className="font-medium text-gray-700">Salary (RM): {salary || 0}</label>
+                <input type="range" min="0" max="10000" step="100" value={salary} onChange={(e) => setSalary(e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg accent-green-600 cursor-pointer" />
+              </div>
+
+              <input placeholder="Employment Status" className="w-full border p-3 rounded" value={status} onChange={(e) => setStatus(e.target.value)} required />
+
+              <div
+                {...getRootProps()}
+                className={`w-full h-32 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer ${
+                  isDragActive ? "border-green-600 bg-green-50" : "border-gray-300 bg-gray-50"
+                }`}
+              >
+                <input {...getInputProps()} />
+                <svg className="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M4 12l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+                {payslip ? <p className="text-gray-700">{payslip.name}</p> : <p className="text-gray-500">Drop Image</p>}
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-between mt-6">
+                <BackButton onClick={() => setCurrentStep(2)}>Back</BackButton>
+                <HoverButton onClick={() => setCurrentStep(4)}>Next</HoverButton>
               </div>
             </section>
           )}
 
           {/* STEP 4 */}
           {currentStep === 4 && (
-            <section>
-              {/* ... Confirmation checkboxes ... */}
-              <div className="flex justify-between mt-6">
-                <button type="button" onClick={() => setCurrentStep(3)} className="px-6 py-2 rounded-xl border" style={{ borderColor: primaryColor, color: darkColor }}>Back</button>
-                <button type="submit" className="px-6 py-2 rounded-xl text-white" style={{ backgroundColor: primaryColor }} disabled={!(confirmInfo && agreePrivacy && agreeTerms)}>
-                  Complete Donation
-                </button>
+            <section className="space-y-4">
+              <label className="flex items-center mb-3">
+                <input type="checkbox" className="mr-2" onChange={(e) => setConfirmInfo(e.target.checked)} /> I confirm the information is correct
+              </label>
+              <label className="flex items-center mb-3">
+                <input type="checkbox" className="mr-2" onChange={(e) => setAgreePrivacy(e.target.checked)} /> I agree to the Privacy Policy
+              </label>
+              <label className="flex items-center mb-6">
+                <input type="checkbox" className="mr-2" onChange={(e) => setAgreeTerms(e.target.checked)} /> I agree to the Terms & Conditions
+              </label>
+
+              <div className="flex flex-col sm:flex-row justify-between">
+                <BackButton onClick={() => setCurrentStep(3)}>Back</BackButton>
+                <HoverButton type="submit" disabled={!(confirmInfo && agreePrivacy && agreeTerms)}>Submit</HoverButton>
               </div>
             </section>
           )}

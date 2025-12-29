@@ -28,6 +28,10 @@ import Donations from "./pages/forms/Donations";
 import StaffDash from "./pages/staff/StaffDash";
 import StaffApplication from "./pages/staff/StaffApplication";
 import StaffProfile from "./pages/staff/StaffProfile";
+import StaffDonation from "./pages/staff/StaffDonation";
+import StaffDistribution from "./pages/staff/StaffDistribution";
+import StaffReceipt from "./pages/staff/StaffReceipt";
+import StaffReport from "./pages/staff/StaffReport";
 
 // ✅ Auth Pages
 import Login from "./pages/auth/Login";
@@ -198,7 +202,11 @@ function AnimatedPage({ children }) {
     "/donations",
     "/staff-dashboard",
     "/staff-application",
-    "/staff-profile"
+    "/staff-profile",
+    "/staff-donation",
+    "/staff-distribution",
+    "/staff-receipt",
+    "/staff-report"
   ];
 
   const shouldAnimate = animatedPaths.includes(location.pathname);
@@ -237,6 +245,21 @@ function MainLayout() {
 }
 
 // --------------------------------------------------------
+// ✅ Clean Layout (No Navbar/Footer for Login & Staff Dashboard)
+// --------------------------------------------------------
+function CleanLayout() {
+  return (
+    <div className="flex flex-col min-h-screen bg-white text-gray-800">
+      <main className="flex-grow">
+        <AnimatedPage>
+          <Outlet />
+        </AnimatedPage>
+      </main>
+    </div>
+  );
+}
+
+// --------------------------------------------------------
 // ✅ Main App Router
 // --------------------------------------------------------
 function App() {
@@ -248,7 +271,15 @@ function App() {
         <Route path="/" element={<Navigate to="/landing" />} />
 
         {/* ===================================== */}
-        {/* ✅ ALL Routes (Use MainLayout with Navbar + Footer) */}
+        {/* ✅ Clean Layout (No Navbar/Footer) */}
+        {/* ===================================== */}
+        <Route element={<CleanLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/staff-dashboard" element={<StaffDash />} />
+        </Route>
+
+        {/* ===================================== */}
+        {/* ✅ Main Layout (With Navbar + Footer) */}
         {/* ===================================== */}
         <Route element={<MainLayout />}>
           {/* Public Pages */}
@@ -257,23 +288,25 @@ function App() {
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/donations" element={<Donations />} />
-          
+
           {/* Donation/Forms Pages */}
           <Route path="/donate" element={<Donation />} />
           <Route path="/check-details" element={<CheckDetails />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/donation-confirmation" element={<DonationConfirmation />} />
           <Route path="/application" element={<Application />} />
-          
+
           {/* Staff Pages */}
-          <Route path="/staff-dashboard" element={<StaffDash />} />
           <Route path="/staff-application" element={<StaffApplication />} />
           <Route path="/staff-profile" element={<StaffProfile />} />
-          
+          <Route path="/staff-donation" element={<StaffDonation />} />
+          <Route path="/staff-distribution" element={<StaffDistribution />} />
+          <Route path="/staff-receipt" element={<StaffReceipt />} />
+          <Route path="/staff-report" element={<StaffReport />} />
+
           {/* Auth Pages */}
-          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
-          
+
           {/* 404 Fallback */}
           <Route path="*" element={<NotFound />} />
         </Route>

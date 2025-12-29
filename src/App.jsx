@@ -27,6 +27,10 @@ import Donations from "./pages/forms/Donations";
 // ✅ Staff Pages
 import StaffDash from "./pages/staff/StaffDash";
 import StaffApplication from "./pages/staff/StaffApplication";
+import StaffDistribution from "./pages/staff/StaffDistribution";
+import StaffDonation from "./pages/staff/StaffDonation";
+import StaffReceipt from "./pages/staff/StaffReceipt";
+import StaffReport from "./pages/staff/StaffReport";
 import StaffProfile from "./pages/staff/StaffProfile";
 
 // ✅ Auth Pages
@@ -198,6 +202,10 @@ function AnimatedPage({ children }) {
     "/donations",
     "/staff-dashboard",
     "/staff-application",
+    "/staff-distribution",
+    "/staff-donation",
+    "/staff-receipt",
+    "/staff-report",
     "/staff-profile"
   ];
 
@@ -220,12 +228,29 @@ function AnimatedPage({ children }) {
 }
 
 // --------------------------------------------------------
-// ✅ Main Layout (Navbar + Footer for ALL pages)
+// ✅ Main Layout (WITH Navbar + Footer for PUBLIC pages)
 // --------------------------------------------------------
 function MainLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <Navbar />
+      <main className="flex-grow">
+        <AnimatedPage>
+          <Outlet />
+        </AnimatedPage>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+// --------------------------------------------------------
+// ✅ Staff Layout (WITHOUT Navbar, ONLY Footer for STAFF pages)
+// --------------------------------------------------------
+function StaffLayout() {
+  return (
+    <div className="flex flex-col min-h-screen bg-white text-gray-800">
+      {/* NO NAVBAR HERE - Staff pages have their own sidebar */}
       <main className="flex-grow">
         <AnimatedPage>
           <Outlet />
@@ -248,7 +273,7 @@ function App() {
         <Route path="/" element={<Navigate to="/landing" />} />
 
         {/* ===================================== */}
-        {/* ✅ ALL Routes (Use MainLayout with Navbar + Footer) */}
+        {/* ✅ PUBLIC PAGES (WITH Navbar + Footer) */}
         {/* ===================================== */}
         <Route element={<MainLayout />}>
           {/* Public Pages */}
@@ -265,17 +290,25 @@ function App() {
           <Route path="/donation-confirmation" element={<DonationConfirmation />} />
           <Route path="/application" element={<Application />} />
           
-          {/* Staff Pages */}
-          <Route path="/staff-dashboard" element={<StaffDash />} />
-          <Route path="/staff-application" element={<StaffApplication />} />
-          <Route path="/staff-profile" element={<StaffProfile />} />
-          
           {/* Auth Pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           
           {/* 404 Fallback */}
           <Route path="*" element={<NotFound />} />
+        </Route>
+
+        {/* ===================================== */}
+        {/* ✅ STAFF PAGES (WITHOUT Navbar, ONLY Footer) */}
+        {/* ===================================== */}
+        <Route element={<StaffLayout />}>
+          <Route path="/staff-dashboard" element={<StaffDash />} />
+          <Route path="/staff-application" element={<StaffApplication />} />
+          <Route path="/staff-distribution" element={<StaffDistribution />} />
+          <Route path="/staff-donation" element={<StaffDonation />} />
+          <Route path="/staff-receipt" element={<StaffReceipt />} />
+          <Route path="/staff-report" element={<StaffReport />} />
+          <Route path="/staff-profile" element={<StaffProfile />} />
         </Route>
       </Routes>
     </Router>

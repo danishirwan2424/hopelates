@@ -21,9 +21,9 @@ function Navigator() {
     { label: "Home", path: "/landing" },
     { label: "About", path: "/about" },
     { label: "Services", path: "/services" },
-    { label: "Donations", path: "/donations" },
     { label: "Contact", path: "/contact" },
   ];
+  
   const handleDonateClick = () => {
     navigate("/login"); // 👈 Redirect to login page
   };

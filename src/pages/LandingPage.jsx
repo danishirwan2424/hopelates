@@ -1,21 +1,21 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // 👈 Import navigation hook
+import { useNavigate } from "react-router-dom";
 import Navigator from "../LandingPage_cmp/Navigator";
-import peopleImg from "../images/People.png";
+import peopleImg from "../images/People.jpg";
 import humanityImg1 from "../images/Humanity1.png"; 
 import humanityImg2 from "../images/Humanity2.png"; 
 import humanityImg3 from "../images/Humanity3.png"; 
-import peopleImg2 from "../images/People2.png"; 
+import peopleImg2 from "../images/People2.jpg"; 
 
 function Landing() {
   const navigate = useNavigate();
 
   const handleDonateClick = () => {
-    navigate("/donations"); // 👈 Redirect to login page
+    navigate("/donations");
   };
 
   const handleApplyClick = () => {
-    navigate("/application"); // 👈 Redirect to login page
+    navigate("/application");
   };
 
   return (
@@ -23,43 +23,44 @@ function Landing() {
       <Navigator />
 
       {/* ✅ Hero Section */}
-      <div className="pt-[150px] flex flex-col md:flex-row items-center justify-between px-12 py-16 max-w-7xl mx-auto">
-        {/* Left — Text Section */}
-        <div className="md:w-1/2 text-left space-y-6">
-          <p className="text-black/50 text-[15px] font-semibold tracking-wide">
-            ALWAYS DONATE FOR HUMANITY
-          </p>
+      <div 
+        className="relative pt-[99px] min-h-[700px] flex items-center justify-center"
+        style={{
+          backgroundImage: `url(${peopleImg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50"></div>
 
-          <h1 className="text-[54px] font-bold leading-tight text-gray-900">
-            Lend a Helping Hand to Those in Need
-          </h1>
+        <div className="relative z-10 max-w-7xl mx-auto px-12 py-16 text-center">
+          <div className="max-w-3xl mx-auto space-y-6">
+            <p className="text-white/80 text-[15px] font-semibold tracking-wide">
+              ALWAYS DONATE FOR HUMANITY
+            </p>
 
-          <p className="text-black/50 text-[15px] leading-relaxed">
-            A donation of RM20 allows us to distribute complete food care packages, ensuring that nutritious meals reach the most vulnerable members of our community
-          </p>
+            <h1 className="text-[54px] font-bold leading-tight text-white">
+              Lend a Helping Hand to Those in Need
+            </h1>
 
-          <button
-            onClick={handleDonateClick} // 👈 Redirect to login
-            className="bg-[#019461] text-white font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-md hover:bg-[#017a54] transition-all duration-200"
-          >
-            Donate Now
-          </button>
-        </div>
+            <p className="text-white/90 text-[16px] leading-relaxed">
+              A donation of RM20 allows us to distribute complete food care packages, ensuring that nutritious meals reach the most vulnerable members of our community
+            </p>
 
-        {/* Right — Image Section */}
-        <div className="md:w-1/2 mt-10 md:mt-0 flex justify-center">
-          <img
-            src={peopleImg}
-            alt="Helping people"
-            className="w-[600px] h-auto object-cover"
-          />
+            <button
+              onClick={handleDonateClick}
+              className="bg-[#019461] text-white font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-lg hover:bg-[#017a54] hover:scale-105 transition-all duration-200"
+            >
+              Donate Now
+            </button>
+          </div>
         </div>
       </div>
 
-{/* 🔹 Info Section */}
+      {/* 🔹 Info Section */}
       <div className="h-[254px] bg-white flex items-center justify-center px-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl w-full">
-          {/* Define the data for each card here */}
           {[
             {
               img: humanityImg1,
@@ -96,36 +97,35 @@ function Landing() {
         </div>
       </div>
 
-      {/* 🔹 Helping Section */}
-      <div className="h-[700px] bg-[#EDEDED] flex justify-center px-12 pt-[28px]">
-        <div className="max-w-7xl w-full flex flex-col md:flex-row items-center justify-between gap-12">
+      {/* 🔹 Apply Section */}
+      <div 
+        className="relative min-h-[700px] flex items-center justify-center"
+        style={{
+          backgroundImage: `url(${peopleImg2})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50"></div>
 
-          {/* ✅ Left — Image */}
-          <div className="md:w-1/2 flex justify-center">
-            <img
-              src={peopleImg2}
-              alt="Helping Each Other"
-              className="w-[600px] h-auto object-cover"
-            />
-          </div>
-
-          {/* ✅ Right — Text */}
-          <div className="md:w-1/2 space-y-6 text-left">
-          <p className="text-black/50 text-[15px] leading-relaxed">
+        <div className="relative z-10 max-w-7xl mx-auto px-12 py-16 text-center">
+          <div className="max-w-3xl mx-auto space-y-6">
+            <p className="text-white/80 text-[15px] font-semibold tracking-wide">
               AN INITIATIVE TO HELP THOSE IN NEEDS
             </p>
-            
-            <h2 className="text-[54px] font-bold leading-tight text-gray-900">
+
+            <h2 className="text-[54px] font-bold leading-tight text-white">
               APPLY FOR FOOD AND FILL IN THE INFORMATION
             </h2>
 
-            <p className="text-black/50 text-[15px] leading-relaxed">
+            <p className="text-white/90 text-[16px] leading-relaxed">
               FILL THE INFORMATION AND SENT TO US AND WE WILL CHECK AND PROVIDES FOOD WITHIN 7 DAYS
             </p>
 
             <button
-              onClick={handleApplyClick} // 👈 Redirect to login
-              className="bg-[#019461] text-white font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-md hover:bg-[#017a54] transition-all duration-200"
+              onClick={handleApplyClick}
+              className="bg-[#019461] text-white font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-lg hover:bg-[#017a54] hover:scale-105 transition-all duration-200"
             >
               Apply Now
             </button>

@@ -130,7 +130,7 @@ function Navigator() {
             onClick={handleDonateClick}
             className="px-5 py-2 rounded-md text-white bg-[#019461] hover:bg-[#017a54] transition-colors duration-200 font-medium"
           >
-            Donate Now
+            Login
           </button>
         </div>
 

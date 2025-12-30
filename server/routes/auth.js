@@ -70,5 +70,81 @@ router.post("/register", async (req, res) => {
   }
 });
 
+/* ======================
+    LOGIN
+====================== */
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+
+    // =====================
+    // CHECK DONOR
+    // =====================
+    const donorResult = await pool.query(
+      "SELECT * FROM donor WHERE email = $1",
+      [email]
+    );
+
+    if (donorResult.rowCount > 0) {
+      const donor = donorResult.rows[0];
+
+      const match = await bcrypt.compare(password, donor.password);
+      if (!match) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      return res.json({
+        message: "Login successful",
+        role: "donor",
+        user: {
+          donor_id: donor.donor_id,
+          full_name: donor.full_name,
+          email: donor.email,
+        },
+      });
+    }
+
+    // =====================
+    // CHECK BENEFICIARY
+    // =====================
+    const beneficiaryResult = await pool.query(
+      "SELECT * FROM beneficiary WHERE email = $1",
+      [email]
+    );
+
+    if (beneficiaryResult.rowCount > 0) {
+      const beneficiary = beneficiaryResult.rows[0];
+
+      const match = await bcrypt.compare(password, beneficiary.password);
+      if (!match) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      return res.json({
+        message: "Login successful",
+        role: "applicant",
+        user: {
+          beneficiary_id: beneficiary.beneficiary_id,
+          full_name: beneficiary.full_name,
+          email: beneficiary.email,
+        },
+      });
+    }
+
+    // =====================
+    // USER NOT FOUND
+    // =====================
+    return res.status(401).json({ message: "Invalid credentials" });
+
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 module.exports = router;   // 🔴 THIS LINE IS CRITICAL

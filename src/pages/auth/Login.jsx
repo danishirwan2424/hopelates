@@ -11,16 +11,52 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+ const handleLogin = async (e) => {
+  e.preventDefault();
 
-    // Dummy authentication
-    if (email === "staff@email.com" && password === "password") {
-      navigate("/staff-dashboard");
-    } else {
-      alert("Invalid email or password");
+  // ✅ STAFF DUMMY LOGIN (KEEP THIS)
+  if (email === "staff@email.com" && password === "password") {
+    navigate("/staff-dashboard");
+    return;
+  }
+
+  if (!email || !password) {
+    alert("Please enter email and password");
+    return;
+  }
+
+  try {
+    // DATABASE LOGIN (DONOR / APPLICANT)
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Invalid email or password");
+      return;
     }
-  };
+
+    // OPTIONAL: store login info
+    localStorage.setItem("user", JSON.stringify(data));
+
+    // ✅ REDIRECT BASED ON ROLE
+    if (data.role === "donor") {
+      navigate("/Donations");        // direct to donation page
+    } else if (data.role === "applicant") {
+      navigate("/Application");    // direct to application page
+    } else {
+      alert("Unknown user role");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+};
 
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row font-sans overflow-hidden bg-white">

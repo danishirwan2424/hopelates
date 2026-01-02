@@ -12,23 +12,27 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleLogin = (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    setTimeout(() => {
-      if (email === "staff@email.com" && password === "password") {
-        navigate("/staff-dashboard");
-      } else if (email === "applicants@email.com" && password === "password") {
-        navigate("/application");
-      } else if (email === "donor@email.com" && password === "password") {
-        navigate("/donation");
-      } else {
-        alert("Invalid email or password");
-        setLoading(false);
-      }
-    }, 2000);
-  };
+  setTimeout(() => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password.trim();
+
+    if (normalizedEmail === "staff@email.com" && normalizedPassword === "password") {
+      navigate("/staff-dashboard");
+    } else if (normalizedEmail === "applicants@email.com" && normalizedPassword === "password") {
+      navigate("/application");
+    } else if (normalizedEmail === "donor@email.com" && normalizedPassword === "password") {
+      navigate("/donation");
+    } else {
+      alert("Invalid email or password");
+      setLoading(false);
+    }
+  }, 2000);
+};
+
 
   if (loading) {
     return (

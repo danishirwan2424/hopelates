@@ -152,7 +152,7 @@ function StaffSideBar() {
                       }`}
                     >
                       <img src={item.icon} alt={`${item.name} Icon`} className="w-5 h-5" />
-                      <span>{item.name}</span>
+                       <span>{item.name}</span>
                     </Link>
                   );
                 })}

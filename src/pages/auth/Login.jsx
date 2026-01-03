@@ -15,10 +15,19 @@ function Login() {
   e.preventDefault();
 
   // ✅ STAFF DUMMY LOGIN (KEEP THIS)
-  if (email === "staff@email.com" && password === "password") {
-    navigate("/staff-dashboard");
-    return;
-  }
+    // Superadmin
+    if (email === "superadmin@email.com" && password === "password") {
+      localStorage.setItem("role", "superadmin");
+      navigate("/staff-dashboard");
+      return;
+    }
+
+    // Staff (non-admin)
+    if (email === "staff@email.com" && password === "password") {
+      localStorage.setItem("role", "staff");
+      navigate("/staff-dashboard");
+      return;
+    }
 
   if (!email || !password) {
     alert("Please enter email and password");

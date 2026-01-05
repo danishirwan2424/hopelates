@@ -22,7 +22,6 @@ import Landing from "./pages/LandingPage";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
-import Donations from "./pages/forms/Donations";
 
 // ✅ Staff Pages
 import StaffDash from "./pages/staff/StaffDash";
@@ -39,7 +38,7 @@ import SignUp from "./pages/auth/SignUp";
 
 // ✅ Forms & Donation Flow
 import Application from "./pages/forms/Application";
-import Donation from "./pages/forms/Donations";
+import Donations from "./pages/forms/Donations";
 import CheckDetails from "./pages/forms/CheckDetails";
 import Payment from "./pages/forms/Payment";
 
@@ -161,12 +160,12 @@ const NotFound = () => {
     <div className="flex flex-col items-center justify-center h-screen text-center">
       <h1 className="text-4xl font-bold mb-2 text-gray-800">404</h1>
       <p className="text-gray-600 mb-6">Oops! Page not found.</p>
-      <a
+      <button
         onClick={handleGoBack}
-        className="text-[#019461] font-medium hover:underline cursor-pointer"
+        className="text-[#019461] font-medium hover:underline cursor-pointer bg-transparent border-none"
       >
         Go Back
-      </a>
+      </button>
     </div>
   );
 };
@@ -194,12 +193,12 @@ function AnimatedPage({ children }) {
     "/contact",
     "/login",
     "/signup",
+    "/donations",
     "/donate",
     "/check-details",
     "/payment",
     "/donation-confirmation",
     "/application",
-    "/donations",
     "/staff-dashboard",
     "/staff-application",
     "/staff-distribution",
@@ -250,7 +249,6 @@ function MainLayout() {
 function AuthLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
-      {/* NO NAVBAR, NO FOOTER - Just the auth page content */}
       <main className="flex-grow">
         <AnimatedPage>
           <Outlet />
@@ -266,7 +264,6 @@ function AuthLayout() {
 function StaffLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
-      {/* NO NAVBAR HERE - Staff pages have their own sidebar */}
       <main className="flex-grow">
         <AnimatedPage>
           <Outlet />
@@ -286,7 +283,7 @@ function App() {
       <ScrollToTop />
       <Routes>
         {/* Redirect root → landing */}
-        <Route path="/" element={<Navigate to="/landing" />} />
+        <Route path="/" element={<Navigate to="/landing" replace />} />
 
         {/* ===================================== */}
         {/* ✅ PUBLIC PAGES (WITH Navbar + Footer) */}
@@ -297,17 +294,15 @@ function App() {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/donations" element={<Donations />} />
           
           {/* Donation/Forms Pages */}
-          <Route path="/donate" element={<Donation />} />
+          <Route path="/donations" element={<Donations />} />
+          <Route path="/donate" element={<Donations />} />
           <Route path="/check-details" element={<CheckDetails />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/donation-confirmation" element={<DonationConfirmation />} />
           <Route path="/application" element={<Application />} />
-          
-          {/* 404 Fallback */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="/donation-apply" element={<Application />} />
         </Route>
 
         {/* ===================================== */}
@@ -329,6 +324,13 @@ function App() {
           <Route path="/staff-receipt" element={<StaffReceipt />} />
           <Route path="/staff-report" element={<StaffReport />} />
           <Route path="/staff-profile" element={<StaffProfile />} />
+        </Route>
+
+        {/* ===================================== */}
+        {/* ✅ 404 FALLBACK - Must be last */}
+        {/* ===================================== */}
+        <Route path="*" element={<MainLayout />}>
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </Router>

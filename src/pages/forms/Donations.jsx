@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
 
+// Import images
+import PackageAImg from "../../images/PACKAGEA.png";
+import PackageBImg from "../../images/PACKAGEB.png";
+import PackageCImg from "../../images/PACKAGEC.png";
+
 function Donation() {
   const navigate = useNavigate();
   const [packageQuantities, setPackageQuantities] = useState({
@@ -16,21 +21,24 @@ function Donation() {
       name: "PACKAGE A",
       price: 20,
       pax: "FOR 1-3 PAX",
-      items: ["RICE", "BREAD", "BISCUITS"]
+      items: ["RICE", "CANNED SARDINES", "COOKING OIL", "INSTANT NOODLES", "CHOCOLATE DRINK"],
+      image: PackageAImg
     },
     {
       id: "B",
       name: "PACKAGE B",
       price: 50,
       pax: "FOR 4-6 PAX",
-      items: ["RICE", "BREAD", "BISCUITS"]
+      items: ["RICE", "CANNED SARDINES", "COOKING OIL", "INSTANT NOODLES", "CHOCOLATE DRINK"],
+      image: PackageBImg
     },
     {
       id: "C",
       name: "PACKAGE C",
       price: 70,
       pax: "FOR 7-10 PAX",
-      items: ["RICE", "BREAD", "BISCUITS"]
+      items: ["RICE", "CANNED SARDINES", "COOKING OIL", "INSTANT NOODLES", "CHOCOLATE DRINK"],
+      image: PackageCImg
     }
   ];
 
@@ -58,19 +66,12 @@ function Donation() {
       return;
     }
 
-    // Create selected packages array with quantities
-    const selectedPackages = packages
-      .filter(pkg => packageQuantities[pkg.id] > 0)
-      .map(pkg => ({
-        ...pkg,
-        quantity: packageQuantities[pkg.id],
-        subtotal: pkg.price * packageQuantities[pkg.id]
-      }));
-
+    // Navigate to check details page with selected packages
     navigate("/check-details", { 
       state: { 
-        packages: selectedPackages,
-        totalAmount: calculateTotal(),
+        packageQuantities: packageQuantities,
+        packages: packages,
+        total: calculateTotal(),
         totalItems: totalItems
       } 
     });
@@ -79,85 +80,83 @@ function Donation() {
   return (
     <div className="min-h-screen bg-[#EDEDED] py-16 px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Title */}
-        <div className="text-center mb-20 mt-12">
-          <h1 className="text-[36px] font-bold text-gray-900">
-            FOOD DONATION PACKAGE
+        {/* Header */}
+        <header className="text-center mb-16">
+          <h1 className="text-[36px] font-bold text-gray-900 tracking-tight">
+            FOOD DONATION PACKAGES
           </h1>
-        </div>
+          <p className="text-gray-600 mt-2">Select a package to help those in need</p>
+        </header>
 
-        {/* Package Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 max-w-6xl mx-auto">
+        {/* Package Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {packages.map((pkg) => (
-            <div key={pkg.id} className="flex flex-col">
-              {/* Package Name - Outside Card */}
+            <div key={pkg.id} className="group flex flex-col">
+              {/* Package Title */}
               <div className="text-center mb-4">
-                <h3 className="text-[20px] font-bold text-gray-900 underline decoration-2 underline-offset-4 inline-block">
+                <h3 className="text-[18px] font-bold text-gray-800 uppercase tracking-widest border-b-2 border-[#019461] inline-block pb-1">
                   {pkg.name}
                 </h3>
               </div>
 
-              {/* Card */}
-              <div
-                className={`bg-white rounded-[16px] shadow-md transition-all overflow-hidden ${
-                  packageQuantities[pkg.id] > 0
-                    ? "ring-4 ring-[#019461]"
-                    : "hover:shadow-lg"
-                }`}
-              >
-                {/* Image Placeholder */}
-                <div className="bg-gradient-to-br from-[#1a5c8a] to-[#004B7F] h-[180px] flex items-center justify-center relative">
-                  <div className="text-[64px]">📦</div>
+              {/* Package Card */}
+              <div className={`bg-white rounded-2xl shadow-sm transition-all duration-300 flex flex-col h-full border-2 ${
+                  packageQuantities[pkg.id] > 0 ? "border-[#019461] shadow-md" : "border-transparent"
+                }`}>
+                
+                {/* Image Container */}
+                <div className="relative h-56 w-full overflow-hidden rounded-t-2xl bg-gray-200">
+                  <img 
+                    src={pkg.image} 
+                    alt={pkg.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => { 
+                      e.target.src = "https://via.placeholder.com/400x300?text=No+Image"; 
+                    }}
+                  />
+                  {/* Quantity Badge */}
                   {packageQuantities[pkg.id] > 0 && (
-                    <div className="absolute top-3 right-3 bg-[#019461] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-[14px]">
+                    <div className="absolute top-4 right-4 bg-[#019461] text-white w-10 h-10 rounded-full flex items-center justify-center font-bold shadow-lg">
                       {packageQuantities[pkg.id]}
                     </div>
                   )}
                 </div>
 
                 {/* Package Details */}
-                <div className="p-6 text-center">
-                  <p className="text-[28px] font-bold text-gray-900 mb-2">
-                    RM {pkg.price}
-                  </p>
-                  <p className="text-[14px] font-semibold text-gray-600 mb-6">
-                    {pkg.pax}
-                  </p>
+                <div className="p-8 flex flex-col flex-grow text-center">
+                  {/* Price */}
+                  <div className="mb-4">
+                    <span className="text-3xl font-black text-gray-900">RM {pkg.price}</span>
+                    <p className="text-xs font-bold text-[#019461] mt-1 tracking-widest">{pkg.pax}</p>
+                  </div>
 
                   {/* Items List */}
-                  <ul className="space-y-2 text-left mb-6">
+                  <ul className="text-left space-y-3 mb-8 flex-grow border-t border-gray-100 pt-6">
                     {pkg.items.map((item, index) => (
-                      <li
-                        key={index}
-                        className="text-[14px] text-gray-800 font-medium flex items-center"
-                      >
-                        <span className="mr-2 text-gray-600">•</span>
+                      <li key={index} className="text-sm text-gray-600 flex items-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#019461] mr-3" />
                         {item}
                       </li>
                     ))}
                   </ul>
 
                   {/* Quantity Controls */}
-                  <div className="flex items-center justify-center gap-4 pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between bg-gray-50 p-2 rounded-xl">
                     <button
                       onClick={() => handleQuantityChange(pkg.id, -1)}
                       disabled={packageQuantities[pkg.id] === 0}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                        packageQuantities[pkg.id] === 0
-                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
+                      className="w-12 h-12 rounded-lg bg-white shadow-sm flex items-center justify-center hover:bg-red-50 hover:text-red-500 disabled:opacity-30 transition-colors"
                     >
-                      <Minus className="w-5 h-5" />
+                      <Minus size={20} />
                     </button>
-                    <span className="text-[20px] font-bold text-gray-900 w-12 text-center">
+                    <span className="text-xl font-bold text-gray-900">
                       {packageQuantities[pkg.id]}
                     </span>
                     <button
                       onClick={() => handleQuantityChange(pkg.id, 1)}
-                      className="w-10 h-10 rounded-full bg-[#019461] text-white hover:bg-[#017a54] flex items-center justify-center transition-all"
+                      className="w-12 h-12 rounded-lg bg-[#019461] text-white shadow-md flex items-center justify-center hover:bg-[#017a54] transition-colors"
                     >
-                      <Plus className="w-5 h-5" />
+                      <Plus size={20} />
                     </button>
                   </div>
                 </div>
@@ -166,47 +165,42 @@ function Donation() {
           ))}
         </div>
 
-        {/* Cart Summary Bar */}
-        {getTotalItems() > 0 && (
-          <div className="bg-white rounded-[12px] shadow-lg p-6 mb-8 max-w-3xl mx-auto">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <ShoppingCart className="w-6 h-6 text-[#019461]" />
+        {/* Footer Summary & Checkout Button */}
+        <div className="sticky bottom-8 max-w-2xl mx-auto">
+          {/* Summary Card - Only show when items selected */}
+          {getTotalItems() > 0 && (
+            <div className="bg-gray-900 text-white rounded-2xl p-6 shadow-2xl flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-[#019461] rounded-xl">
+                  <ShoppingCart className="text-white" size={24} />
+                </div>
                 <div>
-                  <p className="text-[16px] font-semibold text-gray-900">
-                    {getTotalItems()} Package{getTotalItems() > 1 ? 's' : ''} Selected
+                  <p className="text-sm text-gray-400 uppercase font-bold tracking-widest">
+                    Selected Packages
                   </p>
-                  <p className="text-[14px] text-gray-600">
-                    {packages.map(pkg => 
-                      packageQuantities[pkg.id] > 0 
-                        ? `${pkg.name}: ${packageQuantities[pkg.id]}` 
-                        : null
-                    ).filter(Boolean).join(', ')}
-                  </p>
+                  <p className="text-xl font-bold">{getTotalItems()} Items</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[14px] text-gray-600 mb-1">Total Amount</p>
-                <p className="text-[28px] font-bold text-[#019461]">
-                  RM {calculateTotal()}
+                <p className="text-sm text-gray-400 uppercase font-bold tracking-widest">
+                  Total Amount
                 </p>
+                <p className="text-2xl font-black text-[#019461]">RM {calculateTotal()}</p>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Continue Button */}
-        <div className="text-center">
+          {/* Checkout Button */}
           <button
             onClick={handleContinue}
             disabled={getTotalItems() === 0}
-            className={`font-semibold text-[15px] px-12 py-3 rounded-[8px] transition-all duration-200 ${
-              getTotalItems() > 0
-                ? "bg-[#019461] text-white hover:bg-[#017a54] cursor-pointer"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            className={`w-full py-5 rounded-2xl font-bold text-lg tracking-widest transition-all ${
+              getTotalItems() > 0 
+              ? "bg-[#019461] text-white hover:bg-[#017a54] shadow-xl" 
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            Continue to Checkout
+            PROCEED TO CHECKOUT
           </button>
         </div>
       </div>

@@ -17,15 +17,21 @@ function Navigator() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
   const menuItems = [
     { label: "Home", path: "/landing" },
     { label: "About", path: "/about" },
     { label: "Services", path: "/services" },
+    { label: "Donations", path: "/donations" },
     { label: "Contact", path: "/contact" },
   ];
-  
+
   const handleDonateClick = () => {
-    navigate("/login"); // 👈 Redirect to login page
+    navigate("/donations");
   };
 
   return (
@@ -82,7 +88,7 @@ function Navigator() {
         >
           <img
             src={logo}
-            alt="Website Logo"
+            alt="HOPEPLATES Logo"
             className="h-15 w-auto object-contain hover:scale-105 transition-transform duration-200"
           />
         </div>
@@ -92,10 +98,10 @@ function Navigator() {
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
-              <span
+              <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`cursor-pointer font-medium relative group transition-all duration-200 ${
+                className={`cursor-pointer font-medium relative group transition-all duration-200 bg-transparent border-none ${
                   isActive ? "text-[#019461]" : "text-black hover:text-[#019461]"
                 }`}
               >
@@ -105,7 +111,7 @@ function Navigator() {
                     isActive ? "w-full" : "w-0 group-hover:w-full"
                   }`}
                 ></span>
-              </span>
+              </button>
             );
           })}
         </div>
@@ -119,12 +125,12 @@ function Navigator() {
           />
           <div className="flex flex-col leading-tight">
             <span className="text-sm text-gray-500">Join us now</span>
-            <span
+            <button
               onClick={() => navigate("/login")}
-              className="text-black font-medium cursor-pointer hover:text-[#019461] transition-colors duration-200"
+              className="text-black font-medium cursor-pointer hover:text-[#019461] transition-colors duration-200 text-left bg-transparent border-none p-0"
             >
               Become A Donor
-            </span>
+            </button>
           </div>
           <button
             onClick={handleDonateClick}
@@ -155,7 +161,7 @@ function Navigator() {
                     navigate(item.path);
                     setMenuOpen(false);
                   }}
-                  className={`text-[16px] w-full text-left font-medium transition-colors duration-200 ${
+                  className={`text-[16px] w-full text-left font-medium transition-colors duration-200 bg-transparent border-none p-2 ${
                     isActive ? "text-[#019461]" : "text-black hover:text-[#019461]"
                   }`}
                 >
@@ -165,7 +171,7 @@ function Navigator() {
             })}
             <button
               onClick={() => {
-                navigate("/donate");
+                handleDonateClick();
                 setMenuOpen(false);
               }}
               className="mt-3 w-full px-5 py-2 rounded-md text-white bg-[#019461] hover:bg-[#017a54] font-medium"

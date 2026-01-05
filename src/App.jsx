@@ -245,6 +245,22 @@ function MainLayout() {
 }
 
 // --------------------------------------------------------
+// ✅ Auth Layout (NO Navbar, NO Footer - Clean auth pages)
+// --------------------------------------------------------
+function AuthLayout() {
+  return (
+    <div className="flex flex-col min-h-screen bg-white text-gray-800">
+      {/* NO NAVBAR, NO FOOTER - Just the auth page content */}
+      <main className="flex-grow">
+        <AnimatedPage>
+          <Outlet />
+        </AnimatedPage>
+      </main>
+    </div>
+  );
+}
+
+// --------------------------------------------------------
 // ✅ Staff Layout (WITHOUT Navbar, ONLY Footer for STAFF pages)
 // --------------------------------------------------------
 function StaffLayout() {
@@ -290,12 +306,16 @@ function App() {
           <Route path="/donation-confirmation" element={<DonationConfirmation />} />
           <Route path="/application" element={<Application />} />
           
-          {/* Auth Pages */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          
           {/* 404 Fallback */}
           <Route path="*" element={<NotFound />} />
+        </Route>
+
+        {/* ===================================== */}
+        {/* ✅ AUTH PAGES (NO Navbar, NO Footer) */}
+        {/* ===================================== */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
         </Route>
 
         {/* ===================================== */}

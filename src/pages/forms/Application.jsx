@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 function Application() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1 - Personal Info
     fullName: "",
@@ -17,8 +18,6 @@ function Application() {
     city: "",
     state: "",
     postalCode: "",
-    occupation: "",
-    monthlySalary: "",
     email: "",
     // Step 2 - Household Info
     householdSize: "",
@@ -95,12 +94,11 @@ function Application() {
   };
 
   const handleSubmit = () => {
-    if (!formData.confirmInfo || !formData.agreePrivacy || !formData.agreeTerms) {
+    if (!formData.confirmInfo || !formData.agreeTerms) {
       alert("Please agree to all terms before submitting");
       return;
     }
-    alert("Application submitted successfully!");
-    navigate("/landing");
+    setShowSuccessModal(true);
   };
 
   const steps = [
@@ -113,6 +111,88 @@ function Application() {
   return (
     <div className="bg-[#F5F5F5] min-h-screen font-sans">
       <Navigator />
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-[20px] p-8 max-w-md w-full border-2 border-[#019461] shadow-2xl"
+          >
+            <div className="text-center">
+              {/* Success Icon */}
+              <div className="w-20 h-20 bg-[#019461] rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-[28px] font-bold text-gray-900 mb-3">
+                Application Successful!
+              </h2>
+              
+              {/* Description */}
+              <p className="text-gray-600 text-[14px] mb-6">
+                Thank you for applying for food assistance with HOPEPLATES.
+              </p>
+
+              {/* Application Details */}
+              <div className="bg-[#F9F9F9] rounded-[12px] p-5 mb-6 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-[13px]">Application ID:</span>
+                  <span className="text-gray-900 font-semibold text-[14px]">AP{Math.floor(Math.random() * 10000)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-[13px]">Applicant:</span>
+                  <span className="text-gray-900 font-semibold text-[14px]">{formData.fullName || "N/A"}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-[13px]">Date:</span>
+                  <span className="text-gray-900 font-semibold text-[14px]">{new Date().toLocaleDateString()}</span>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => navigate("/landing")}
+                  className="flex-1 bg-[#019461] text-white py-3 rounded-[25px] text-[14px] font-semibold hover:bg-[#017a54] transition-all duration-200"
+                >
+                  Back to Home
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    setCurrentStep(1);
+                    setFormData({
+                      fullName: "",
+                      icNumber: "",
+                      dateOfBirth: "",
+                      phoneNumber: "",
+                      homeAddress: "",
+                      city: "",
+                      state: "",
+                      postalCode: "",
+                      email: "",
+                      householdSize: "",
+                      financialOccupation: "",
+                      monthlyIncome: "",
+                      confirmInfo: false,
+                      agreePrivacy: false,
+                      agreeTerms: false
+                    });
+                  }}
+                  className="flex-1 bg-white border-2 border-[#019461] text-[#019461] py-3 rounded-[25px] text-[14px] font-semibold hover:bg-[#019461] hover:text-white transition-all duration-200"
+                >
+                  Apply Again
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       <div className="pt-[120px] px-8 pb-16">
         <div className="max-w-[1400px] mx-auto flex gap-8">
@@ -292,35 +372,6 @@ function Application() {
                           value={formData.postalCode}
                           onChange={handleInputChange}
                           placeholder="Postal Code"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#019461]/20 focus:border-[#019461] text-[14px]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-gray-700 text-[13px] font-medium mb-2">
-                          Occupation
-                        </label>
-                        <input
-                          type="text"
-                          name="occupation"
-                          value={formData.occupation}
-                          onChange={handleInputChange}
-                          placeholder="e.g., Teacher, Driver"
-                          className="w-full px-4 py-2.5 border border-gray-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#019461]/20 focus:border-[#019461] text-[14px]"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-gray-700 text-[13px] font-medium mb-2">
-                          Monthly Salary (RM)
-                        </label>
-                        <input
-                          type="text"
-                          name="monthlySalary"
-                          value={formData.monthlySalary}
-                          onChange={handleInputChange}
-                          placeholder="e.g., 2000"
                           className="w-full px-4 py-2.5 border border-gray-300 rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#019461]/20 focus:border-[#019461] text-[14px]"
                         />
                       </div>

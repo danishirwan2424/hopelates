@@ -45,7 +45,7 @@ function FormNav() {
         {/* Desktop Menu */}
         <div className="hidden lg:flex gap-8 text-black items-center">
           <Link
-            to="/application"
+            to="/donation"
             className="text-gray-700 hover:text-[#019461] font-medium transition-colors"
           >
             Form

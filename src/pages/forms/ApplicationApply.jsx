@@ -4,6 +4,8 @@ import { useDropzone } from "react-dropzone";
 import { UsersIcon, UserIcon, HomeIcon, BanknotesIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
+import FormNav from "./Forms_cmp/FormNav";
+
 
 export default function Application_donate() {
   const primaryColor = "#278659";
@@ -98,6 +100,7 @@ export default function Application_donate() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col sm:flex-row p-4 sm:p-0">
+    <FormNav />
       {/* LEFT STEPS - hidden on mobile */}
       <div className="hidden sm:flex w-1/6 bg-white p-8 shadow-inner flex-col">
         {steps.map((step, index) => {

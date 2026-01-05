@@ -1,6 +1,6 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const pool = require("../db");
+const authPool = require("../db/authDb");
 
 const router = express.Router();
 
@@ -21,16 +21,18 @@ router.post("/register", async (req, res) => {
     // DONOR SIGNUP
     // =====================
     if (role === "donor") {
-      const existing = await pool.query(
+      const existing = await authPool.query(
         "SELECT 1 FROM donor WHERE email = $1",
         [email]
       );
 
       if (existing.rowCount > 0) {
-        return res.status(409).json({ message: "Email already registered as donor" });
+        return res
+          .status(409)
+          .json({ message: "Email already registered as donor" });
       }
 
-      await pool.query(
+      await authPool.query(
         "INSERT INTO donor (full_name, email, password) VALUES ($1, $2, $3)",
         [full_name, email, hashedPassword]
       );
@@ -42,26 +44,27 @@ router.post("/register", async (req, res) => {
     // APPLICANT SIGNUP
     // =====================
     if (role === "applicant") {
-      const existing = await pool.query(
+      const existing = await authPool.query(
         "SELECT 1 FROM beneficiary WHERE email = $1",
         [email]
       );
 
       if (existing.rowCount > 0) {
-        return res.status(409).json({ message: "Email already registered as applicant" });
+        return res
+          .status(409)
+          .json({ message: "Email already registered as applicant" });
       }
 
-      await pool.query(
+      await authPool.query(
         "INSERT INTO beneficiary (full_name, email, password) VALUES ($1, $2, $3)",
         [full_name, email, hashedPassword]
       );
 
-      return res.status(201).json({ message: "Applicant signup successful" });
+      return res
+        .status(201)
+        .json({ message: "Applicant signup successful" });
     }
 
-    // =====================
-    // INVALID ROLE
-    // =====================
     return res.status(400).json({ message: "Invalid role" });
 
   } catch (err) {
@@ -84,7 +87,7 @@ router.post("/login", async (req, res) => {
     // =====================
     // CHECK DONOR
     // =====================
-    const donorResult = await pool.query(
+    const donorResult = await authPool.query(
       "SELECT * FROM donor WHERE email = $1",
       [email]
     );
@@ -111,7 +114,7 @@ router.post("/login", async (req, res) => {
     // =====================
     // CHECK BENEFICIARY
     // =====================
-    const beneficiaryResult = await pool.query(
+    const beneficiaryResult = await authPool.query(
       "SELECT * FROM beneficiary WHERE email = $1",
       [email]
     );
@@ -135,9 +138,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // =====================
-    // USER NOT FOUND
-    // =====================
     return res.status(401).json({ message: "Invalid credentials" });
 
   } catch (err) {
@@ -146,5 +146,4 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
-module.exports = router;   // 🔴 THIS LINE IS CRITICAL
+module.exports = router;

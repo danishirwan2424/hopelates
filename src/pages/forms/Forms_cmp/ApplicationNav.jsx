@@ -2,11 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, User, X } from "lucide-react";
-import logo from "../../../images/Logo.png"; // keep your logo path
+import logo from "../../../images/Logo.png";
 
 function FormNav() {
   const navigate = useNavigate();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -28,7 +27,6 @@ function FormNav() {
         scrolled ? "shadow-md bg-white/95 backdrop-blur-sm" : "bg-white"
       }`}
     >
-
       {/* Main Nav */}
       <nav className="relative flex items-center justify-between px-6 md:px-10 h-[62px] text-[15px]">
         {/* Logo */}
@@ -45,40 +43,23 @@ function FormNav() {
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex gap-8 text-black items-center">
-          {/* Keep Form link */}
+          {/* Form Link */}
           <Link
-            to="/form"
+            to="/application"
             className="text-gray-700 hover:text-[#019461] font-medium transition-colors"
           >
             Form
           </Link>
 
-          {/* Profile Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-1 text-gray-700 hover:text-[#019461] font-medium focus:outline-none"
-            >
-              <User className="w-5 h-5" />
-              Profile
-            </button>
-            {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  View Profile
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Profile Direct Link */}
+          <button
+            onClick={() => navigate("/applicants_profile")}
+            className="flex items-center gap-1 text-gray-700 hover:text-[#019461] font-medium focus:outline-none"
+          >
+            <User className="w-5 h-5" />
+            Profile
+          </button>
+
         </div>
 
         {/* Mobile Hamburger */}
@@ -107,10 +88,14 @@ function FormNav() {
               }}
               className="text-[16px] w-full text-left font-medium text-black hover:text-[#019461]"
             >
-              View Profile
+              Profile
             </button>
+
             <button
-              onClick={handleLogout}
+              onClick={() => {
+                handleLogout();
+                setMenuOpen(false);
+              }}
               className="text-[16px] w-full text-left font-medium text-black hover:text-[#019461]"
             >
               Logout

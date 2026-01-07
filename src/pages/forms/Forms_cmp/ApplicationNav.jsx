@@ -101,7 +101,7 @@ function FormNav() {
         {menuOpen && (
           <div className="absolute top-[62px] left-0 w-full bg-white shadow-xl flex flex-col items-start px-6 py-4 gap-4 animate-slideDown max-h-[calc(100vh-62px)] overflow-y-auto">
             {menuItems.map((item) =>
-              item.type === "link" ? (
+              item.type === "link" ?  (
                 <Link
                   key={item.label}
                   to={item.path}

@@ -1,10 +1,10 @@
-// File: FormNav.jsx
+// File: DonorNav.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, User, X } from "lucide-react";
+import { Menu, User, X, LogOut } from "lucide-react";
 import logo from "../../../images/Logo.png";
 
-function FormNav() {
+function DonorNav() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -16,19 +16,35 @@ function FormNav() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("role");
     navigate("/landing");
   };
+
+  // Desktop and Mobile Menu Items for Donor
+  const menuItems = [
+    { label: "Donation", path: "/donation", type: "link" },
+    { label: "My Donations", path: "/donation-tracking", type: "link" },
+    {
+      label: "Profile",
+      path: "/donor-profile",
+      type: "button",
+      icon: <User className="w-5 h-5" />,
+    },
+    {
+      label: "Logout",
+      path: "/landing",
+      type: "button",
+      icon: <LogOut className="w-5 h-5" />,
+      action: handleLogout,
+      colorClass: "text-red-600 hover:text-red-800",
+    },
+  ];
 
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 font-sans transition-shadow duration-300
         shadow-lg
-        ${scrolled ? "shadow-2xl bg-white/95 backdrop-blur-sm" : "bg-white"}
-      `}
+        ${scrolled ? "shadow-2xl bg-white/95 backdrop-blur-sm" : "bg-white"}`}
     >
-      {/* Main Nav */}
       <nav className="relative flex items-center justify-between px-6 md:px-10 h-[62px] text-[15px]">
         {/* Logo */}
         <div
@@ -43,61 +59,70 @@ function FormNav() {
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden lg:flex gap-8 text-black items-center">
-          <Link
-            to="/donation"
-            className="text-gray-700 hover:text-[#019461] font-medium transition-colors"
-          >
-            Form
-          </Link>
-
-          <button
-            onClick={() => navigate("/applicants_profile")}
-            className="flex items-center gap-1 text-gray-700 hover:text-[#019461] font-medium focus:outline-none"
-          >
-            <User className="w-5 h-5" />
-            Profile
-          </button>
+        <div className="hidden lg:flex gap-8 items-center">
+          {menuItems.map((item) =>
+            item.type === "link" ? (
+              <Link
+                key={item.label}
+                to={item.path}
+                className="text-gray-700 font-medium transition-colors hover:text-[#019461]"
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <button
+                key={item.label}
+                onClick={item.action || (() => navigate(item.path))}
+                className={`flex items-center gap-1 font-medium focus:outline-none ${
+                  item.colorClass || "text-gray-700 hover:text-[#019461]"
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            )
+          )}
         </div>
 
         {/* Mobile Hamburger */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="lg:hidden text-gray-800 text-2xl focus:outline-none"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
         >
           {menuOpen ? <X /> : <Menu />}
         </button>
 
         {/* Mobile Menu */}
         {menuOpen && (
-          <div className="absolute top-[62px] left-0 w-full bg-white shadow-xl flex flex-col items-start px-6 py-4 gap-4 animate-slideDown">
-            <Link
-              to="/form"
-              className="text-[16px] w-full text-left font-medium text-black hover:text-[#019461]"
-              onClick={() => setMenuOpen(false)}
-            >
-              Form
-            </Link>
-
-            <button
-              onClick={() => {
-                navigate("/profile");
-                setMenuOpen(false);
-              }}
-              className="text-[16px] w-full text-left font-medium text-black hover:text-[#019461]"
-            >
-              Profile
-            </button>
-
-            <button
-              onClick={() => {
-                handleLogout();
-                setMenuOpen(false);
-              }}
-              className="text-[16px] w-full text-left font-medium text-black hover:text-[#019461]"
-            >
-              Logout
-            </button>
+          <div className="absolute top-[62px] left-0 w-full bg-white shadow-xl flex flex-col items-start px-6 py-4 gap-4 animate-slideDown max-h-[calc(100vh-62px)] overflow-y-auto">
+            {menuItems.map((item) =>
+              item.type === "link" ? (
+                <Link
+                  key={item.label}
+                  to={item.path}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-[16px] w-full text-left font-medium text-black hover:text-[#019461]"
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <button
+                  key={item.label}
+                  onClick={() => {
+                    (item.action || (() => navigate(item.path)))();
+                    setMenuOpen(false);
+                  }}
+                  className={`text-[16px] w-full text-left font-medium flex items-center gap-1 ${
+                    item.colorClass || "text-black hover:text-[#019461]"
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              )
+            )}
           </div>
         )}
       </nav>
@@ -116,4 +141,4 @@ function FormNav() {
   );
 }
 
-export default FormNav;
+export default DonorNav;

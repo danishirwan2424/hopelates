@@ -38,7 +38,9 @@ import SignUp from "./pages/auth/SignUp";
 // ✅ Forms
 import Application_donate from "./pages/forms/ApplicationApply"; 
 import DonationApply from "./pages/forms/DonationApply";
-import ProfileForms from "./pages/forms/ProfileForms";
+import ProfileApplicants from "./pages/forms/ProfileForms";
+import ProfileDonor from "./pages/forms/ProfileDonor";
+import MyDonation from "./pages/forms/MyDonation";
 
 
 // ✅  PDF Export Page
@@ -158,7 +160,23 @@ function App() {
           path="/applicants-profile"
           element={
             <AnimatedPage>
-              <ProfileForms />
+              <ProfileApplicants />
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/donor-profile"
+          element={
+            <AnimatedPage>
+              <ProfileDonor />
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/donation-tracking"
+          element={
+            <AnimatedPage>
+              <MyDonation />
             </AnimatedPage>
           }
         />

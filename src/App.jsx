@@ -38,6 +38,7 @@ import SignUp from "./pages/auth/SignUp";
 // ✅ Forms
 import Application_donate from "./pages/forms/ApplicationApply"; 
 import DonationApply from "./pages/forms/DonationApply";
+import ProfileForms from "./pages/forms/ProfileForms";
 
 
 // ✅  PDF Export Page
@@ -150,6 +151,14 @@ function App() {
           element={
             <AnimatedPage>
               <Application_donate />
+            </AnimatedPage>
+          }
+        />
+        <Route
+          path="/applicants-profile"
+          element={
+            <AnimatedPage>
+              <ProfileForms />
             </AnimatedPage>
           }
         />

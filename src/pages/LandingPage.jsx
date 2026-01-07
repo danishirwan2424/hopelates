@@ -8,21 +8,42 @@ import peopleImg2 from "../images/People2.jpg";
 import humanityImg1 from "../images/Humanity1.png";
 import humanityImg2 from "../images/Humanity2.png";
 import humanityImg3 from "../images/Humanity3.png";
+import donationVideo from "../images/donation.mp4";
+
 
 // ✅ Reusable Hero Section
-function HeroSection({ bgImage, subtitle, title, desc, buttonText, onClick }) {
+function HeroSection({
+  donationVideo,
+  bgImage,
+  subtitle,
+  title,
+  desc,
+  buttonText,
+  onClick
+}) {
   return (
-    <div
-      className="relative min-h-[500px] md:min-h-[700px] flex items-center justify-center"
-      style={{
-        backgroundImage: `url(${bgImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/60"></div>
+    <div className="relative min-h-[500px] md:min-h-[700px] flex items-center justify-center overflow-hidden">
+
+      {/* Background */}
+      {donationVideo ? (
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          src={donationVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      ) : (
+        <img
+          src={bgImage}
+          alt="Background"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      )}
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/40"></div>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-16 text-center">
@@ -38,8 +59,7 @@ function HeroSection({ bgImage, subtitle, title, desc, buttonText, onClick }) {
           </p>
           <button
             onClick={onClick}
-            aria-label={buttonText}
-            className="bg-[#019461] text-white font-semibold text-[15px] md:text-[16px] px-8 py-3 rounded-[12px] shadow-md hover:bg-[#017a54] hover:scale-105 transition-all duration-200"
+            className="bg-[#019461] text-white font-semibold px-8 py-3 rounded-[12px] hover:scale-105 transition"
           >
             {buttonText}
           </button>
@@ -48,6 +68,8 @@ function HeroSection({ bgImage, subtitle, title, desc, buttonText, onClick }) {
     </div>
   );
 }
+
+
 
 // ✅ Reusable Info Card with fade-in animation
 function InfoCard({ img, title, desc, custom }) {
@@ -104,7 +126,7 @@ function Landing() {
 
       {/* Hero Section */}
       <HeroSection
-        bgImage={peopleImg}
+        donationVideo={donationVideo}
         subtitle="ALWAYS DONATE FOR HUMANITY"
         title="Lend a Helping Hand to Those in Need"
         desc="A donation of RM20 allows us to distribute complete food care packages, ensuring that nutritious meals reach the most vulnerable members of our community."

@@ -40,7 +40,7 @@ function Login() {
       return;
     }
 
-    // OPTIONAL: store login info
+    // store login info
     localStorage.setItem("user", JSON.stringify(data));
 
     // ✅ REDIRECT BASED ON ROLE

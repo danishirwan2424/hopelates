@@ -11,26 +11,55 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
- const handleLogin = async (e) => {
+
+const handleLogin = async (e) => {
   e.preventDefault();
 
-  // ✅ STAFF DUMMY LOGIN (KEEP THIS)
-  if (email === "staff@email.com" && password === "password") {
-    navigate("/staff-dashboard");
-    return;
-  }
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanPassword = password.trim();
 
-  if (!email || !password) {
+  // ✅ VALIDATION FIRST
+  if (!cleanEmail || !cleanPassword) {
     alert("Please enter email and password");
     return;
   }
 
+  // ✅ SUPERADMIN
+  if (cleanEmail === "superadmin@email.com" && cleanPassword === "password") {
+    localStorage.setItem("role", "superadmin");
+    navigate("/staff-dashboard");
+    return;
+  }
+
+  // ✅ STAFF
+  if (cleanEmail === "staff@email.com" && cleanPassword === "password") {
+    localStorage.setItem("role", "staff");
+    navigate("/staff-dashboard");
+    return;
+  }
+
+  // ✅ DONOR
+  if (cleanEmail === "donor@email.com" && cleanPassword === "password") {
+    localStorage.setItem("user", JSON.stringify({ role: "donor", email: cleanEmail }));
+    navigate("/donation");
+    return;
+  }
+
+  // ✅ APPLICANT
+  if (cleanEmail === "applicant@email.com" && cleanPassword === "password") {
+    localStorage.setItem("user", JSON.stringify({ role: "applicant", email: cleanEmail }));
+    navigate("/application");
+    return;
+  }
+
   try {
-    // DATABASE LOGIN (DONOR / APPLICANT)
     const res = await fetch("http://localhost:5000/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        email: cleanEmail,
+        password: cleanPassword
+      }),
     });
 
     const data = await res.json();
@@ -40,14 +69,12 @@ function Login() {
       return;
     }
 
-    // store login info
     localStorage.setItem("user", JSON.stringify(data));
 
-    // ✅ REDIRECT BASED ON ROLE
     if (data.role === "donor") {
-      navigate("/Donations");        // direct to donation page
+      navigate("/donation");
     } else if (data.role === "applicant") {
-      navigate("/Application");    // direct to application page
+      navigate("/application");
     } else {
       alert("Unknown user role");
     }
@@ -57,6 +84,7 @@ function Login() {
     alert("Server error");
   }
 };
+
 
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row font-sans overflow-hidden bg-white">

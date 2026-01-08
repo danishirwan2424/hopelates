@@ -131,7 +131,7 @@ function StaffDash() {
                       {
                         label: "Applicants",
                         data: [statusCounts.Completed, statusCounts.Pending, statusCounts.Rejected],
-                        backgroundColor: ["#278659", "#11452E", "#9BC6B3"],
+                        backgroundColor: ["#10B981", "#3B82F6", "#EF4444"],
                         borderWidth: 1,
                       },
                     ],
@@ -162,7 +162,7 @@ function StaffDash() {
                       {
                         label: "Applicants",
                         data: monthlyApplicants,
-                        backgroundColor: "#278659",
+                        backgroundColor: ["#3B82F6", "#8B5CF6", "#10B981", "#F59E0B", "#EF4444", "#14B8A6", "#EC4899", "#6366F1", "#F97316", "#06B6D4", "#8B5CF6", "#10B981"],
                         borderRadius: 6,
                       },
                     ],

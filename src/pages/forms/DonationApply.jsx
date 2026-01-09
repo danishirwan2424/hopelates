@@ -373,14 +373,28 @@ export default function DonationApply() {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => alert("Donation Completed!")}
-          className="mt-6 w-full py-4 rounded-xl bg-[#019461] text-white font-bold text-lg hover:bg-[#017a54] transition-colors shadow-lg"
-          disabled={!uploadedFile}
-        >
-          COMPLETE DONATION
-        </button>
+        {/* Buttons Row */}
+        <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4 w-full">
+          {/* Back Button */}
+          <button
+            type="button"
+            onClick={() => setCurrentStep(2)}
+            className="px-6 py-3 rounded-xl border w-full sm:w-auto text-gray-800 font-medium"
+            style={{ borderColor: "#278659" }}
+          >
+            Back
+          </button>
+
+          {/* Complete Donation Button */}
+          <button
+            type="button"
+            onClick={() => alert("Donation Completed!")}
+            className="px-6 py-3 rounded-xl bg-[#019461] text-white w-full sm:w-auto font-bold hover:bg-[#017a54] transition-colors"
+            disabled={!uploadedFile}
+          >
+            COMPLETE DONATION
+          </button>
+        </div>
       </div>
     </div>
   </section>

@@ -1,7 +1,6 @@
-import React, { useState, useCallback } from "react";
-import { Plus, Minus } from "lucide-react";
+import React, { useState } from "react";
+import { Plus, Minus, Upload, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useDropzone } from "react-dropzone";
 import { UserIcon, BanknotesIcon } from "@heroicons/react/24/outline";
 import DonorNav from "./Forms_cmp/DonorNav";
 
@@ -18,8 +17,14 @@ export default function DonationApply() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [packageQuantities, setPackageQuantities] = useState({ A: 0, B: 0, C: 0 });
-  const [userDetails, setUserDetails] = useState({ fullName: "", email: "", phone: "", address: "" });
+  const [userDetails, setUserDetails] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    address: ""
+  });
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [fileName, setFileName] = useState("");
 
   const packages = [
     { id: "A", name: "PACKAGE A", price: 20, pax: "FOR 1-3 PAX", items: ["RICE", "BREAD", "BISCUITS"] },
@@ -34,26 +39,6 @@ export default function DonationApply() {
     setPackageQuantities(prev => ({ ...prev, [pkgId]: Math.max(0, prev[pkgId] + change) }));
   };
 
-  const calculateTotal = () =>
-    packages.reduce((total, pkg) => total + pkg.price * packageQuantities[pkg.id], 0);
-
-  const getTotalItems = () =>
-    Object.values(packageQuantities).reduce((sum, qty) => sum + qty, 0);
-
-  const onDrop = useCallback((acceptedFiles) => {
-    if (acceptedFiles[0].size > 5 * 1024 * 1024) {
-      alert("File is too large (max 5MB)");
-      return;
-    }
-    setUploadedFile(acceptedFiles[0]);
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { "image/*": [], "application/pdf": [] },
-    multiple: false,
-  });
-
   const isDonorStepValid = () =>
     userDetails.fullName && userDetails.phone && userDetails.address;
 
@@ -61,132 +46,136 @@ export default function DonationApply() {
     .filter(pkg => packageQuantities[pkg.id] > 0)
     .map(pkg => ({ ...pkg, quantity: packageQuantities[pkg.id], subtotal: pkg.price * packageQuantities[pkg.id] }));
 
+  const calculateTotal = () =>
+    packages.reduce((total, pkg) => total + pkg.price * packageQuantities[pkg.id], 0);
+
+  const getTotalItems = () =>
+    Object.values(packageQuantities).reduce((sum, qty) => sum + qty, 0);
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col sm:flex-row p-4 sm:p-0">
       {/* Navigation */}
       <DonorNav />
 
       {/* Left Step Tracker */}
-{/* Left Step Tracker */}
-<div className="hidden sm:flex w-1/6 bg-white p-6 sm:p-8 shadow-inner flex-col sticky top-0 h-screen">
-  <div className="ml-3 sm:ml-5 mt-[70px]">
-    {steps.map((step, index) => {
-      const Icon = stepIcons[index];
-      const active = index + 1 === currentStep;
-      const completed = index + 1 < currentStep;
+      <div className="hidden sm:flex w-1/6 bg-white p-6 sm:p-8 shadow-lg shadow-gray-400 flex-col sticky top-0 h-screen">
+        <div className="ml-3 sm:ml-5 mt-[70px]">
+          {steps.map((step, index) => {
+            const Icon = stepIcons[index];
+            const active = index + 1 === currentStep;
+            const completed = index + 1 < currentStep;
 
-      return (
-        <div key={index} className="flex items-start mb-6 sm:mb-8 relative">
-          {index !== steps.length - 1 && (
-            <div
-              className={`absolute left-4 top-10 w-0.5 h-full ${
-                completed ? "bg-green-600" : "bg-gray-300"
-              }`}
-            />
-          )}
+            return (
+              <div key={index} className="flex items-start mb-6 sm:mb-8 relative">
+                {index !== steps.length - 1 && (
+                  <div
+                    className={`absolute left-4 top-10 w-0.5 h-full ${completed ? "bg-green-600" : "bg-gray-300"}`}
+                  />
+                )}
 
-          <div
-            className={`p-2 rounded-full z-10 flex items-center justify-center ${
-              completed
-                ? "bg-green-600 text-white"
-                : active
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-400"
-            }`}
-          >
-            <Icon className="w-5 h-5" />
-          </div>
+                <div
+                  className={`p-2 rounded-full z-10 flex items-center justify-center ${
+                    completed
+                      ? "bg-green-600 text-white"
+                      : active
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-400"
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                </div>
 
-          <span
-            className={`ml-4 mt-2 text-sm sm:text-base ${
-              completed || active ? "text-green-700 font-medium" : "text-gray-400"
-            }`}
-          >
-            {step}
-          </span>
+                <span
+                  className={`ml-4 mt-2 text-sm sm:text-base ${
+                    completed || active ? "text-green-700 font-medium" : "text-gray-400"
+                  }`}
+                >
+                  {step}
+                </span>
+              </div>
+            );
+          })}
         </div>
-      );
-    })}
-  </div>
-</div>
-
+      </div>
 
       {/* Right Form */}
       <div className="flex-grow bg-white p-4 sm:p-10 rounded-xl sm:rounded-l-2xl shadow-xl">
         <div className="mt-[50px]">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ color: darkColor }}>Food Donation</h1>
-          <p className="italic mt-1 mb-6 text-gray-600 text-sm md:text-base">Complete the donation form step by step.</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight" style={{ color: darkColor }}>
+            Food Donation
+          </h1>
+          <p className="italic mt-1 mb-6 text-gray-600 text-sm md:text-base">
+            Complete the donation form step by step.
+          </p>
 
           <form className="space-y-12">
             {/* STEP 1: Select Package */}
             {currentStep === 1 && (
               <section>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mx-auto max-w-7xl">
-                  {packages.map(pkg => (
-                    <div
-                      key={pkg.id}
-                      className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-4 sm:p-6 flex flex-col items-center border border-gray-100 hover:-translate-y-1 w-full"
-                      style={{ minHeight: "350px" }}
-                    >
-                      {/* Image */}
-                      <div className="bg-white w-full flex items-center justify-center relative rounded-2xl mb-4 overflow-hidden h-[200px] sm:h-[250px] md:h-[280px]">
-                        <img
-                          src={packageImages[pkg.id]}
-                          alt={pkg.name}
-                          className="h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                          draggable={false}
-                        />
-                        {packageQuantities[pkg.id] > 0 && (
-                          <div className="absolute top-2 right-2 bg-[#019461] text-white rounded-full min-w-[32px] h-8 px-2 flex items-center justify-center font-semibold text-sm shadow-md">
-                            {packageQuantities[pkg.id]}
-                          </div>
-                        )}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 max-w-6xl mx-auto">
+                  {packages.map((pkg) => (
+                    <div key={pkg.id} className="flex flex-col">
+                      <div className="text-center mb-4">
+                        <h3 className="text-[20px] font-bold text-gray-900 underline decoration-2 underline-offset-4 inline-block">
+                          {pkg.name}
+                        </h3>
                       </div>
 
-                      {/* Title */}
-                      <h3 className="text-lg font-bold text-gray-900 text-center">{pkg.name}</h3>
-                      <p className="text-sm text-gray-500 mb-3">{pkg.pax}</p>
+                      <div
+                        className={`bg-white rounded-[16px] shadow-md transition-all overflow-hidden ${
+                          packageQuantities[pkg.id] > 0 ? "ring-4 ring-[#019461]" : "hover:shadow-lg"
+                        }`}
+                      >
+                        <div className="h-[180px] flex items-center justify-center relative overflow-hidden">
+                          <img src={packageImages[pkg.id]} alt={pkg.name} className="h-full object-contain" />
+                          {packageQuantities[pkg.id] > 0 && (
+                            <div className="absolute top-3 right-3 bg-[#019461] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-[14px]">
+                              {packageQuantities[pkg.id]}
+                            </div>
+                          )}
+                        </div>
 
-                      {/* Items */}
-                      <ul className="my-2 space-y-1 text-sm text-gray-700">
-                        {pkg.items.map((item, i) => (
-                          <li key={i} className="flex items-center gap-2">
-                            <span className="text-green-600">•</span>
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
+                        <div className="p-6 text-center">
+                          <p className="text-[28px] font-bold text-gray-900 mb-2">RM {pkg.price}</p>
+                          <p className="text-[14px] font-semibold text-gray-600 mb-6">{pkg.pax}</p>
 
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-3 mt-auto pt-2">
-                        <button
-                          type="button"
-                          onClick={() => handleQuantityChange(pkg.id, -1)}
-                          disabled={packageQuantities[pkg.id] === 0}
-                          className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                          aria-label={`Decrease ${pkg.name}`}
-                        >
-                          <Minus size={16} />
-                        </button>
+                          <ul className="space-y-2 text-left mb-6">
+                            {pkg.items.map((item, index) => (
+                              <li key={index} className="text-[14px] text-gray-800 font-medium flex items-center">
+                                <span className="mr-2 text-gray-600">•</span>
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
 
-                        <span className="font-semibold text-lg text-gray-800 min-w-[20px] text-center">
-                          {packageQuantities[pkg.id]}
-                        </span>
-
-                        <button
-                          type="button"
-                          onClick={() => handleQuantityChange(pkg.id, 1)}
-                          className="p-2 rounded-lg bg-[#278659] text-white hover:bg-green-700 transition"
-                          aria-label={`Increase ${pkg.name}`}
-                        >
-                          <Plus size={16} />
-                        </button>
+                          <div className="flex items-center justify-center gap-4 pt-4 border-t border-gray-200">
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(pkg.id, -1)}
+                              disabled={packageQuantities[pkg.id] === 0}
+                              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                                packageQuantities[pkg.id] === 0
+                                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              }`}
+                            >
+                              <Minus className="w-5 h-5" />
+                            </button>
+                            <span className="text-[20px] font-bold text-gray-900 w-12 text-center">{packageQuantities[pkg.id]}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(pkg.id, 1)}
+                              className="w-10 h-10 rounded-full bg-[#019461] text-white hover:bg-[#017a54] flex items-center justify-center transition-all"
+                            >
+                              <Plus className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Total + Buttons Row */}
                 <div className="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
                   {getTotalItems() > 0 && (
                     <div className="bg-gray-100 rounded-xl p-4 flex flex-col md:flex-row items-center gap-2 md:gap-4 w-full md:w-auto">
@@ -195,7 +184,6 @@ export default function DonationApply() {
                     </div>
                   )}
 
-                  {/* Buttons */}
                   <div className="flex gap-4 w-full md:w-auto justify-between md:justify-end">
                     <button
                       type="button"
@@ -220,186 +208,167 @@ export default function DonationApply() {
             )}
 
             {/* STEP 2: Donor Details */}
-            {currentStep === 2 && (
-              <section>
-                <h2 className="text-xl md:text-2xl font-semibold pl-4 border-l-4 mb-4" style={{ borderColor: primaryColor, color: darkColor }}>Donor Details</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  {["fullName", "email", "phone"].map(field => (
-                    <div key={field} className="flex flex-col">
-                      <label className="text-sm md:text-base font-medium" style={{ color: darkColor }}>
-                        {field === "fullName" ? "Full Name" : field === "phone" ? "Phone Number" : "Email"}
-                      </label>
-                      <input
-                        type={field === "email" ? "email" : "text"}
-                        value={userDetails[field]}
-                        onChange={e => setUserDetails({ ...userDetails, [field]: e.target.value })}
-                        className="p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 text-sm md:text-base"
-                        placeholder={field === "fullName" ? "Enter full name" : field === "phone" ? "0123456789" : "Email (optional)"}
-                      />
-                    </div>
-                  ))}
+{currentStep === 2 && (
+  <section>
+    <h2
+      className="text-xl md:text-2xl font-semibold pl-4 border-l-4 mb-4"
+      style={{ borderColor: primaryColor, color: darkColor }}
+    >
+      Donor Details
+    </h2>
 
-                  <div className="flex flex-col col-span-1 sm:col-span-2">
-                    <label className="text-sm md:text-base font-medium" style={{ color: darkColor }}>Address</label>
-                    <textarea
-                      value={userDetails.address}
-                      onChange={e => setUserDetails({ ...userDetails, address: e.target.value })}
-                      rows={3}
-                      className="p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 text-sm md:text-base"
-                      placeholder="Full home address"
-                    />
-                  </div>
-                </div>
-
-                {/* Buttons */}
-                <div className="flex flex-col sm:flex-row justify-between sm:justify-end mt-6 gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(1)}
-                    className="px-6 py-2 rounded-xl border w-full sm:w-auto"
-                    style={{ borderColor: primaryColor, color: darkColor }}
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(3)}
-                    className="px-6 py-2 rounded-xl text-white w-full sm:w-auto"
-                    style={{ backgroundColor: primaryColor }}
-                    disabled={!isDonorStepValid()}
-                  >
-                    Next
-                  </button>
-                </div>
-              </section>
-            )}
-
-            {/* STEP 3: Payment (Reference Layout) */}
-{currentStep === 3 && (
-  <section className="lg:grid lg:grid-cols-3 lg:gap-8 flex flex-col">
-    {/* Order Summary - Top block on mobile */}
-    <div className="lg:col-span-1 mb-4 lg:mb-0">
-      <div className="bg-white rounded-2xl shadow-sm p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-          {selectedPackages.length > 0 ? (
-            <img
-              src={packageImages[selectedPackages[0].id]}
-              alt={selectedPackages[0].name}
-              className="w-8 h-8 object-contain rounded-lg"
-            />
-          ) : (
-            <BanknotesIcon className="text-[#019461]" size={28} />
-          )}
-          Order Summary
-        </h2>
-
-        {/* Selected Packages */}
-        <div className="space-y-4 mb-6">
-          {selectedPackages.map(pkg => (
-            <div key={pkg.id} className="border-b border-gray-100 pb-4 flex items-center gap-3">
-              <img src={packageImages[pkg.id]} alt={pkg.name} className="w-16 h-16 object-contain rounded-lg" />
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-1">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{pkg.name}</h3>
-                    <p className="text-xs text-gray-500">{pkg.pax}</p>
-                  </div>
-                  <span className="text-sm text-gray-600">x{pkg.quantity}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">RM {pkg.price} each</span>
-                  <span className="font-bold text-[#019461]">RM {pkg.subtotal}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+      {["fullName", "email"].map((field) => (
+        <div key={field} className="flex flex-col">
+          <label className="text-sm md:text-base font-medium" style={{ color: darkColor }}>
+            {field === "fullName" ? "Full Name" : "Email"}
+          </label>
+          <input
+            type={field === "email" ? "email" : "text"}
+            value={userDetails[field]}
+            onChange={(e) => setUserDetails({ ...userDetails, [field]: e.target.value })}
+            className="p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 text-sm md:text-base"
+            placeholder={field === "fullName" ? "Enter full name" : "Email (optional)"}
+          />
         </div>
-
-        <div className="flex justify-between items-center mb-4 text-gray-700">
-          <span className="font-medium">Total Items:</span>
-          <span className="font-bold">{getTotalItems()}</span>
-        </div>
-
-        <div className="border-t-2 border-gray-200 pt-4">
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-bold text-gray-900">TOTAL AMOUNT:</span>
-            <span className="text-2xl font-black text-[#019461]">RM {calculateTotal()}</span>
-          </div>
-        </div>
-      </div>
+      ))}
     </div>
 
-    {/* File Upload - Bottom block on mobile */}
-    <div className="lg:col-span-2">
-      <div className="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex flex-col items-center">
-          {selectedPackages.length > 0 ? (
-            <img
-              src={packageImages[selectedPackages[0].id]}
-              alt={selectedPackages[0].name}
-              className="w-100 h-auto object-contain rounded-lg"
-            />
-          ) : (
-            <BanknotesIcon className="text-[#019461]" size={28} />
-          )}
-        </h2>
-
-        <div
-          {...getRootProps()}
-          className={`w-full h-32 sm:h-40 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition ${
-            isDragActive ? "border-green-600 bg-green-50" : "border-gray-300 bg-gray-50"
-          }`}
-        >
-          <input {...getInputProps()} />
-          <svg
-            className="w-10 h-10 text-gray-400 mb-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M4 12l4-4m0 0l4 4m-4-4v12"
-            />
-          </svg>
-          {uploadedFile ? (
-            <p className="text-gray-700 text-sm sm:text-base">{uploadedFile.name}</p>
-          ) : (
-            <p className="text-gray-500 text-sm sm:text-base">
-              Drop file here or click to upload (PNG, JPEG, PDF, max 5MB)
-            </p>
-          )}
-        </div>
-
-        {/* Buttons Row */}
-        <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4 w-full">
-          {/* Back Button */}
-          <button
-            type="button"
-            onClick={() => setCurrentStep(2)}
-            className="px-6 py-3 rounded-xl border w-full sm:w-auto text-gray-800 font-medium"
-            style={{ borderColor: "#278659" }}
-          >
-            Back
-          </button>
-
-          {/* Complete Donation Button */}
-          <button
-            type="button"
-            onClick={() => alert("Donation Completed!")}
-            className="px-6 py-3 rounded-xl bg-[#019461] text-white w-full sm:w-auto font-bold hover:bg-[#017a54] transition-colors"
-            disabled={!uploadedFile}
-          >
-            COMPLETE DONATION
-          </button>
-        </div>
-      </div>
+    <div className="flex flex-col sm:flex-row justify-between sm:justify-end mt-6 gap-4">
+      <button
+        type="button"
+        onClick={() => setCurrentStep(1)}
+        className="px-6 py-2 rounded-xl border w-full sm:w-auto"
+        style={{ borderColor: primaryColor, color: darkColor }}
+      >
+        Back
+      </button>
+      <button
+        type="button"
+        onClick={() => setCurrentStep(3)}
+        className="px-6 py-2 rounded-xl text-white w-full sm:w-auto"
+        style={{ backgroundColor: primaryColor }}
+        disabled={!userDetails.fullName} // only Full Name is required now
+      >
+        Next
+      </button>
     </div>
   </section>
 )}
 
+
+            {/* STEP 3: Payment */}
+            {currentStep === 3 && (
+              <section className="flex flex-col gap-8">
+                {/* Order Summary */}
+                <div className="bg-[#E8F5F1] p-6 rounded-[8px]">
+                  <h2 className="text-[18px] font-semibold text-gray-900 mb-4">Order Summary</h2>
+                  <div className="space-y-3 mb-4">
+                    {selectedPackages.map((pkg, index) => (
+                      <div key={index} className="flex justify-between items-center text-[14px]">
+                        <div>
+                          <p className="text-gray-900 font-medium">{pkg.name}</p>
+                          <p className="text-gray-600 text-[13px]">RM {pkg.price} × {pkg.quantity}</p>
+                        </div>
+                        <p className="text-gray-900 font-semibold">RM {pkg.subtotal}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between items-center pb-3 mb-3 border-b border-gray-300 text-[14px]">
+                    <span className="text-gray-600">Donor:</span>
+                    <span className="font-semibold text-gray-900">{userDetails.fullName || "N/A"}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2">
+                    <div>
+                      <p className="text-[#019461] text-[16px] font-semibold">Total Amount</p>
+                      <p className="text-gray-600 text-[13px]">{getTotalItems()} package{getTotalItems() > 1 ? "s" : ""}</p>
+                    </div>
+                    <p className="text-[#019461] text-[24px] font-bold">RM {calculateTotal()}</p>
+                  </div>
+                </div>
+
+                {/* Upload Proof of Payment */}
+                <div className="border-2 border-dashed border-gray-300 rounded-[8px] p-6 text-center hover:border-[#019461] transition-all duration-200">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    accept="image/*,.pdf"
+                    onChange={e => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setUploadedFile(file);
+                        setFileName(file.name);
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
+                    {uploadedFile ? (
+                      <div className="flex flex-col items-center">
+                        <CheckCircle className="w-16 h-16 text-[#019461] mb-3" />
+                        <p className="text-[#019461] font-semibold text-[14px] mb-1">File Uploaded Successfully!</p>
+                        <p className="text-gray-600 text-[13px] mb-3">{fileName}</p>
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.preventDefault();
+                            document.getElementById("file-upload").click();
+                          }}
+                          className="text-[#019461] text-[13px] underline hover:text-[#017a54]"
+                        >
+                          Change file
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                        <p className="text-gray-700 font-medium text-[14px] mb-1">Click to upload payment receipt</p>
+                        <p className="text-gray-500 text-[13px]">PNG, JPG, PDF up to 10MB</p>
+                      </div>
+                    )}
+                  </label>
+                  {!uploadedFile && (
+                    <p className="text-red-500 text-[13px] mt-2 text-center">
+                      * Payment receipt is required to complete the transaction
+                    </p>
+                  )}
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setCurrentStep(2)}
+                    className="flex-1 bg-[#E5E7EB] text-gray-700 font-semibold text-[14px] py-2.5 rounded-[6px] hover:bg-gray-300 transition-all duration-200"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!uploadedFile) return alert("Please upload proof of payment before proceeding");
+                      const donationData = {
+                        donationId: "DN" + Math.floor(Math.random() * 10000),
+                        packages: selectedPackages,
+                        totalAmount: calculateTotal(),
+                        totalItems: getTotalItems(),
+                        donor: userDetails.fullName,
+                        transactionDate: new Date().toLocaleDateString(),
+                      };
+                      navigate("/donation-confirmation", { state: donationData });
+                    }}
+                    disabled={!uploadedFile}
+                    className={`flex-1 font-semibold text-[14px] py-2.5 rounded-[6px] transition-all duration-200 ${
+                      uploadedFile
+                        ? "bg-[#019461] text-white hover:bg-[#017a54] cursor-pointer"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    Complete Payment
+                  </button>
+                </div>
+              </section>
+            )}
           </form>
         </div>
       </div>

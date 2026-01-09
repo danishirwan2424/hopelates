@@ -370,35 +370,7 @@ function StaffProfile() {
                   <p className="text-gray-800">{staff.address}</p>
                 </div>
               </div>
-            </div>
-
-            {/* Right: activity logs */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border h-full flex flex-col">
-              <h3 className="text-[#11452E] font-semibold mb-4">Activity Logs</h3>
-
-              {logsLoading ? (
-                <div className="text-sm text-gray-600">Loading logs...</div>
-              ) : logs.length === 0 ? (
-                <div className="text-sm text-gray-600">No activity yet.</div>
-              ) : (
-                <ul className="space-y-3 overflow-auto">
-                  {logs.map((log) => (
-                    <li key={log.id} className="text-sm">
-                      <div className="flex justify-between">
-                        <div>
-                          <div className="text-gray-800 font-medium">{log.action}</div>
-                          <div className="text-gray-500 text-xs">{log.detail}</div>
-                        </div>
-                        <div className="text-xs text-gray-400 text-right">
-                          <div>{log.actor}</div>
-                          <div>{new Date(log.timestamp).toLocaleString()}</div>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            </div>      
           </div>
 
           <Outlet />

@@ -62,42 +62,55 @@ export default function DonationApply() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col sm:flex-row p-4 sm:p-0">
     <DonorNav />
-      {/* Left Step Tracker */}
-      <div className="hidden sm:flex w-1/6 bg-white p-8 shadow-inner flex-col">
-        {steps.map((step, index) => {
-          const Icon = stepIcons[index];
-          const active = index + 1 === currentStep;
-          const completed = index + 1 < currentStep;
-          return (
-            <div key={index} className="flex items-start mb-8 relative">
-              {index !== steps.length - 1 && (
-                <div
-                  className={`absolute left-4 top-10 w-0.5 h-full ${completed ? "bg-green-600" : "bg-gray-300"}`}
-                />
-              )}
-              <div
-                className={`p-2 rounded-full z-10 flex items-center justify-center ${
-                  completed
-                    ? "bg-green-600 text-white"
-                    : active
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-400"
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-              </div>
-              <span
-                className={`ml-4 mt-2 text-sm ${completed || active ? "text-green-700 font-medium" : "text-gray-400"}`}
-              >
-                {step}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+{/* Left Step Tracker */}
+<div className="hidden sm:flex w-1/6 bg-white p-8 shadow-inner flex-col">
+  <div className="ml-5 mt-[70px]">
+    {steps.map((step, index) => {
+      const Icon = stepIcons[index];
+      const active = index + 1 === currentStep;
+      const completed = index + 1 < currentStep;
+
+      return (
+        <div key={index} className="flex items-start mb-8 relative">
+          {index !== steps.length - 1 && (
+            <div
+              className={`absolute left-4 top-10 w-0.5 h-full ${
+                completed ? "bg-green-600" : "bg-gray-300"
+              }`}
+            />
+          )}
+
+          <div
+            className={`p-2 rounded-full z-10 flex items-center justify-center ${
+              completed
+                ? "bg-green-600 text-white"
+                : active
+                ? "bg-green-100 text-green-700"
+                : "bg-gray-100 text-gray-400"
+            }`}
+          >
+            <Icon className="w-5 h-5" />
+          </div>
+
+          <span
+            className={`ml-4 mt-2 text-sm ${
+              completed || active
+                ? "text-green-700 font-medium"
+                : "text-gray-400"
+            }`}
+          >
+            {step}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
 
       {/* Right Form */}
       <div className="flex-grow bg-white p-4 sm:p-10 rounded-xl sm:rounded-l-2xl shadow-xl">
+      <div className="mt-[50px]">
         <h1 className="text-4xl font-extrabold tracking-tight" style={{ color: darkColor }}>Food Donation</h1>
         <p className="italic mt-1 mb-6 text-gray-600">Complete the donation form step by step.</p>
 
@@ -277,6 +290,7 @@ export default function DonationApply() {
             </section>
           )}
         </form>
+      </div>
       </div>
     </div>
   );

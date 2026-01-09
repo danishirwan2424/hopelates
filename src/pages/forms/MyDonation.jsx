@@ -58,11 +58,11 @@ function MyDonation() {
 
       {/* Main Content */}
       <section className="flex-1 flex flex-col p-4 mt-4">
-        <h1 className="text-3xl font-extrabold text-[#11452E] mb-6">
+        <h1 className="text-3xl font-extrabold text-[#11452E] mb-3 mt-9">
           My Donations
         </h1>
 
-        <div className="bg-white rounded-lg shadow-sm border w-full flex-1 overflow-auto p-4">
+        <div className="bg-white rounded-lg shadow-sm border h- w-full flex-1 overflow-auto p-4">
           {donations.length === 0 ? (
             <p className="text-gray-500 text-center py-10">
               You have not made any donations yet.

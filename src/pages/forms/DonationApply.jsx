@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { UserIcon, BanknotesIcon } from "@heroicons/react/24/outline";
 import DonorNav from "./Forms_cmp/DonorNav";
 
-import PackageA from "../../images/PackageA.png";
-import PackageB from "../../images/PackageB.png";
-import PackageC from "../../images/PackageC.png";
+import PackageA from "../../images/PACKAGEA.png";
+import PackageC from "../../images/PACKAGEB.png";
+import PackageB from "../../images/PACKAGEC.png";
 
 export default function DonationApply() {
   const primaryColor = "#278659";

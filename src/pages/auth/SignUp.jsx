@@ -23,7 +23,7 @@ function SignUp() {
               className="h-10 w-auto object-contain mx-auto mb-3"
             />
             <h2 className="text-[30px] font-bold text-gray-800 leading-snug mb-3">
-              Join HopeLates <br /> And Make a Difference
+              Join HopePlates <br /> And Make a Difference
             </h2>
             <p className="text-gray-500 text-[14px]">
               Create your account and start helping communities today.

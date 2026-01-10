@@ -79,16 +79,16 @@ function StaffReceipt() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="flex min-h-screen bg-gray-50">
+      {/* Sidebar wrapper (like StaffDash) */}
+      <div className="flex min-h-screen bg-gray-50">
         <StaffSideBar />
-      </aside>
+      </div>
 
-      {/* Main */}
-      <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-screen overflow-hidden">
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-screen overflow-auto">
         <StaffPanelBar />
 
-        <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
+        <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4">
           {/* Header */}
           <header className="flex-shrink-0">
             <h1 className="text-[20px] text-gray-800">Staff Receipt</h1>
@@ -139,41 +139,23 @@ function StaffReceipt() {
               <table className="min-w-full text-sm text-left border-collapse">
                 <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
                   <tr>
-                    <th
-                      className="py-3 px-4 w-[200px] cursor-pointer"
-                      onClick={() => handleSort("item")}
-                    >
+                    <th className="py-3 px-4 w-[200px] cursor-pointer" onClick={() => handleSort("item")}>
                       Item {sortBy === "item" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th
-                      className="py-3 px-4 w-[150px] cursor-pointer"
-                      onClick={() => handleSort("category")}
-                    >
+                    <th className="py-3 px-4 w-[150px] cursor-pointer" onClick={() => handleSort("category")}>
                       Category {sortBy === "category" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th
-                      className="py-3 px-4 w-[100px] cursor-pointer"
-                      onClick={() => handleSort("quantity")}
-                    >
+                    <th className="py-3 px-4 w-[100px] cursor-pointer" onClick={() => handleSort("quantity")}>
                       Quantity {sortBy === "quantity" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
                     <th className="py-3 px-4 w-[80px]">Unit</th>
-                    <th
-                      className="py-3 px-4 w-[120px] cursor-pointer"
-                      onClick={() => handleSort("expiry")}
-                    >
+                    <th className="py-3 px-4 w-[120px] cursor-pointer" onClick={() => handleSort("expiry")}>
                       Expiry {sortBy === "expiry" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th
-                      className="py-3 px-4 w-[150px] cursor-pointer"
-                      onClick={() => handleSort("donor")}
-                    >
+                    <th className="py-3 px-4 w-[150px] cursor-pointer" onClick={() => handleSort("donor")}>
                       Donor {sortBy === "donor" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th
-                      className="py-3 px-4 w-[100px] cursor-pointer"
-                      onClick={() => handleSort("status")}
-                    >
+                    <th className="py-3 px-4 w-[100px] cursor-pointer" onClick={() => handleSort("status")}>
                       Status {sortBy === "status" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
                     <th className="py-3 px-4 w-[100px] text-center">Action</th>

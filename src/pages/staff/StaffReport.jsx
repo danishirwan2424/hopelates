@@ -70,6 +70,7 @@ function StaffReport() {
   const [totalItems, setTotalItems] = useState(0);
   const [lowStock, setLowStock] = useState(0);
   const [monthlyDonations, setMonthlyDonations] = useState(0);
+  const [showPDFPreview, setShowPDFPreview] = useState(false);
 
   useEffect(() => {
     let t = 0, l = 0, m = 0;
@@ -155,7 +156,7 @@ function StaffReport() {
       {
         label: "Applicants",
         data: applicantTrendData.map((d) => d.applicants),
-        borderColor: (ctx) => gradientScriptable(ctx, GRADIENT_TOP, GRADIENT_BOTTOM),
+        borderColor: '#3B82F6',
         backgroundColor: (ctx) =>
           ctx.chart
             .ctx.createLinearGradient(0, 0, 0, ctx.chart.height)
@@ -163,17 +164,17 @@ function StaffReport() {
             ? // use a light translucent gradient stop
               (function () {
                 const grad = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
-                grad.addColorStop(0, "rgba(39,134,89,0.28)");
-                grad.addColorStop(1, "rgba(17,69,46,0.05)");
+                grad.addColorStop(0, "rgba(59,130,246,0.28)");
+                grad.addColorStop(1, "rgba(59,130,246,0.05)");
                 return grad;
               })()
-            : "rgba(39,134,89,0.2)",
+            : "rgba(59,130,246,0.2)",
         fill: true,
         tension: 0.35,
         pointRadius: 4,
         pointHoverRadius: 6,
         borderWidth: 3,
-        _shadow: { color: "rgba(39,134,89,0.18)", blur: 10, offsetY: 6 },
+        _shadow: { color: "rgba(59,130,246,0.18)", blur: 10, offsetY: 6 },
       },
     ],
   };
@@ -224,11 +225,11 @@ function StaffReport() {
     datasets: [
       {
         data: pieData.map((p) => p.value),
-        backgroundColor: [GRADIENT_TOP, GRADIENT_BOTTOM, GRADIENT_LIGHT],
+        backgroundColor: ['#3B82F6', '#A855F7', '#EC4899'],
         hoverBackgroundColor: [
-          "#33a06b",
-          "#1b593d",
-          "#cfe9dd",
+          "#5B9DF8",
+          "#BA6FF9",
+          "#F06BA8",
         ],
         borderWidth: 0,
         _shadow: { color: "rgba(0,0,0,0.12)", blur: 12, offsetY: 6 },
@@ -237,7 +238,20 @@ function StaffReport() {
   };
 
   const handleDownloadPDF = () => {
-    window.open("http://localhost:5000/api/export-report", "_blank");
+    setShowPDFPreview(true);
+  };
+
+  const handleClosePDFPreview = () => {
+    setShowPDFPreview(false);
+  };
+
+  const handleSavePDF = () => {
+    window.print();
+  };
+
+  const getCurrentDate = () => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date().toLocaleDateString('en-US', options);
   };
 
 
@@ -277,11 +291,19 @@ function StaffReport() {
       {
         label: "Quantity",
         data: topDonors.map((d) => d.quantity),
-        backgroundColor: (ctx) => gradientScriptable(ctx, GRADIENT_TOP, GRADIENT_BOTTOM),
+        backgroundColor: (ctx) => {
+          const chart = ctx.chart;
+          const { ctx: c } = chart;
+          const height = chart.height || 200;
+          const gradient = c.createLinearGradient(0, 0, 0, height);
+          gradient.addColorStop(0, '#3B82F6');
+          gradient.addColorStop(1, '#A855F7');
+          return gradient;
+        },
         borderRadius: 8,
         barPercentage: 0.6,
         categoryPercentage: 0.7,
-        _shadow: { color: "rgba(17,69,46,0.14)", blur: 10, offsetY: 6 },
+        _shadow: { color: "rgba(59,130,246,0.14)", blur: 10, offsetY: 6 },
       },
     ],
   };
@@ -321,15 +343,16 @@ function StaffReport() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="flex min-h-screen bg-gray-50">
-        <StaffSideBar />
-      </aside>
+    <>
+      <div className="flex min-h-screen bg-gray-50">
+        {/* Sidebar */}
+        <aside className="flex min-h-screen bg-gray-50">
+          <StaffSideBar />
+        </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-0 h-screen">
-        <StaffPanelBar />
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-0 h-screen">
+          <StaffPanelBar />
 
         {/* Scrollable Section */}
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-y-auto overflow-x-hidden">
@@ -344,7 +367,7 @@ function StaffReport() {
 
             {/* Export PDF Button */}
             <button
-              className="bg-[#11452E] hover:bg-[#0d3a26] text-white px-4 py-2 rounded-lg shadow-md          transition"
+              className="bg-[#11452E] hover:bg-[#0d3a26] text-white px-4 py-2 rounded-lg shadow-md transition"
               onClick={handleDownloadPDF}
             >
               Export as PDF
@@ -396,91 +419,78 @@ function StaffReport() {
           </div>
 
           {/* Recent Applications Table */}
-<div className="bg-white rounded-[15px] shadow-md mb-4 p-4">
-  {/* Title (not scrollable) */}
-  <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
-    Recent Applications
-  </h2>
+          <div className="bg-white rounded-[15px] shadow-md mb-4 p-4">
+            {/* Title (not scrollable) */}
+            <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
+              Recent Applications
+            </h2>
 
-  {/* Scroll container ONLY for rows */}
-  <div className="overflow-y-auto max-h-[310px]">
-    <table className="min-w-full divide-y divide-gray-200">
-      <thead className="bg-gray-50 sticky top-0 z-10">
-        <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            ID
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Applicant Name
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Date
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Status
-          </th>
-        </tr>
-      </thead>
+            {/* Scroll container ONLY for rows */}
+            <div className="overflow-y-auto max-h-[310px]">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Applicant Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
 
-      <tbody className="bg-white divide-y divide-gray-200">
-        {recentApplications.map((app) => (
-          <tr key={app.id}>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{app.id}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.name}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.date}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
-              <span className={getStatusColor(app.status)}>{app.status}</span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {recentApplications.map((app) => (
+                    <tr key={app.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{app.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{app.date}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                        <span className={getStatusColor(app.status)}>{app.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-    {recentApplications.length === 0 && (
-      <p className="text-center py-4 text-gray-500 text-sm">No recent applications found.</p>
-    )}
-  </div>
-</div>
+              {recentApplications.length === 0 && (
+                <p className="text-center py-4 text-gray-500 text-sm">No recent applications found.</p>
+              )}
+            </div>
+          </div>
 
-cl
-          {/* Stock & Category Progress Bars */}
-          <div className="flex flex-wrap gap-2 mb-4">
+          {/* Donation Stock Section */}
+          <div className="mb-4">
             {/* Donation Stock */}
-            <div className="bg-white rounded-[15px] shadow-md flex-1 min-w-[400px] p-4 flex flex-col">
-              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Donation Stock (Category Breakdown)</h2>
-              <div className="flex flex-col gap-4 mt-2 overflow-y-auto max-h-[300px] pb-7">
-                {Object.entries(categoryData).map(([category, qty]) => {
-                  const widthPercent = Math.min((qty / maxCategoryQty) * 100, 100);
-                  const color = widthPercent < 20 ? "#11452E" : "#278659";
+            <div className="bg-white rounded-[15px] shadow-md w-full p-6 flex flex-col">
+              <h2 className="text-[15px] font-semibold text-gray-700 mb-5">Donation Stock</h2>
+              <div className="flex flex-col gap-6 mt-2">
+                {[
+                  { item: 'Rice', percentage: 85 },
+                  { item: 'Canned Sardines', percentage: 55 },
+                  { item: 'Cooking Oil', percentage: 40 },
+                  { item: 'Instant Noodle', percentage: 65 },
+                  { item: 'Chocolate Drink', percentage: 30 }
+                ].map((data, index) => {
+                  const colors = ['#3B82F6', '#A855F7', '#EC4899', '#3B82F6', '#A855F7'];
+                  const color = colors[index % colors.length];
                   return (
-                    <div key={category}>
-                      <div className="flex justify-between items-center mb-1">
-                        <p className="text-[13px] text-gray-600">{category}</p>
-                        <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
+                    <div key={index}>
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-[14px] text-gray-700">{data.item}</p>
                       </div>
                       <div className="h-4 w-full bg-gray-200 rounded">
-                        <div className="h-4 rounded" style={{ width: `${widthPercent}%`, background: `linear-gradient(90deg, ${color}, ${GRADIENT_BOTTOM})` }} />
+                        <div className="h-4 rounded" style={{ width: `${data.percentage}%`, backgroundColor: color }} />
                       </div>
                     </div>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* Expiry & Low Stock Warnings */}
-            <div className="bg-white rounded-[15px] shadow-md flex-1 min-w-[283px] p-4 flex flex-col">
-              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Expiry & Low Stock Warnings</h2>
-              <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px]">
-                {donationStock.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center text-[13px]">
-                    <span>{item.item}</span>
-                    {item.status === "OK" ? (
-                      <span className="text-green-600 font-semibold">{item.status}</span>
-                    ) : (
-                      <span className="text-red-600 font-semibold">{item.status}</span>
-                    )}
-                  </div>
-                ))}
               </div>
             </div>
           </div>
@@ -489,6 +499,174 @@ cl
         </section>
       </main>
     </div>
+
+    {/* PDF Preview Modal - POPUP */}
+    {showPDFPreview && (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+          {/* Modal Header */}
+          <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-white to-gray-50">
+            <h2 className="text-xl font-semibold text-gray-800">Report Preview</h2>
+            <div className="flex gap-3">
+              <button
+                onClick={handleSavePDF}
+                className="bg-[#11452E] hover:bg-[#0d3a26] text-white px-5 py-2.5 rounded-lg shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 font-medium"
+              >
+                Save as PDF
+              </button>
+              <button
+                onClick={handleClosePDFPreview}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2.5 rounded-lg shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 font-medium"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+
+          {/* PDF Preview Content */}
+          <div className="flex-1 overflow-y-auto bg-gray-100 p-6">
+            <div id="pdf-content" className="bg-white p-8 max-w-4xl mx-auto shadow-xl rounded-xl">
+              {/* Report Header */}
+              <div className="flex justify-between items-start mb-8 pb-6 border-b-2 border-gray-200">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800 mb-2">Donation & Applicant Report</h1>
+                  <p className="text-gray-600">Comprehensive Analysis and Statistics</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-500">Generated on</p>
+                  <p className="text-lg font-semibold text-gray-800">{getCurrentDate()}</p>
+                </div>
+              </div>
+
+              {/* Stats Summary */}
+              <div className="grid grid-cols-3 gap-6 mb-8">
+                <div className="bg-gradient-to-b from-[#11452E] to-[#278659] rounded-xl p-6 text-white shadow-md">
+                  <p className="text-sm opacity-90 mb-2">Total Items in Stock</p>
+                  <p className="text-5xl font-bold">{donationStats.totalItemsInStock}</p>
+                </div>
+                <div className="border-2 border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+                  <p className="text-sm text-gray-700 mb-2">Low Stock Alerts</p>
+                  <p className="text-5xl font-bold text-red-600">{donationStats.lowStockAlerts}</p>
+                </div>
+                <div className="border-2 border-gray-200 rounded-xl p-6 bg-white shadow-sm">
+                  <p className="text-sm text-gray-700 mb-2">Monthly Donations</p>
+                  <p className="text-5xl font-bold text-green-600">{donationStats.monthlyDonations}</p>
+                </div>
+              </div>
+
+              {/* Applicant Status Breakdown */}
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Applicants Status Breakdown</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {pieData.map((item, index) => {
+                    const colors = ['#3B82F6', '#A855F7', '#EC4899'];
+                    return (
+                      <div key={index} className="border-2 border-gray-200 rounded-xl p-6 text-center bg-white shadow-sm hover:shadow-md transition-shadow">
+                        <div 
+                          className="w-20 h-20 rounded-full mx-auto mb-3 shadow-md"
+                          style={{ backgroundColor: colors[index] }}
+                        ></div>
+                        <p className="text-sm text-gray-600 mb-1 font-medium">{item.name}</p>
+                        <p className="text-3xl font-bold text-gray-800">{item.value}</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {((item.value / doughnutTotal) * 100).toFixed(1)}%
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Recent Applications */}
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Applications</h3>
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-gray-50 to-gray-100">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Applicant Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                      {recentApplications.map((app) => (
+                        <tr key={app.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{app.id}</td>
+                          <td className="px-6 py-4 text-sm text-gray-700">{app.name}</td>
+                          <td className="px-6 py-4 text-sm text-gray-600">{app.date}</td>
+                          <td className="px-6 py-4 text-sm">
+                            <span className={`font-semibold ${getStatusColor(app.status)}`}>
+                              {app.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Donation Stock */}
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Donation Stock</h3>
+                <div className="space-y-4">
+                  {[
+                    { item: 'Rice', percentage: 85 },
+                    { item: 'Canned Sardines', percentage: 55 },
+                    { item: 'Cooking Oil', percentage: 40 },
+                    { item: 'Instant Noodle', percentage: 65 },
+                    { item: 'Chocolate Drink', percentage: 30 }
+                  ].map((data, index) => {
+                    const colors = ['#3B82F6', '#A855F7', '#EC4899', '#3B82F6', '#A855F7'];
+                    const color = colors[index % colors.length];
+                    return (
+                      <div key={index} className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="text-sm text-gray-700 font-semibold">{data.item}</p>
+                          <p className="text-sm text-gray-600 font-medium">{data.percentage}%</p>
+                        </div>
+                        <div className="h-3 w-full bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-3 rounded-full transition-all duration-500" 
+                            style={{ width: `${data.percentage}%`, backgroundColor: color }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Top Donors */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Top Donors</h3>
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-gray-50 to-gray-100">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Donor</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                      {topDonors.map((donor, index) => (
+                        <tr key={index} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4 text-sm text-gray-700">{donor.donor}</td>
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{donor.quantity}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
   );
 }
 

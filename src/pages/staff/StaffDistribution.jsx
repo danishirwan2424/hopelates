@@ -11,7 +11,13 @@ function StaffDistribution() {
   const [applications, setApplications] = useState(
     initialApplications
       .filter(app => app.status === "Completed") // Only take Completed entries
-      .map(app => ({ ...app, status: "Pending" })) // Set default to Pending
+      .map((app, index) => ({ 
+        ...app, 
+        status: "Pending",
+        applicationId: `AP${String(index + 1).padStart(3, '0')}`,
+        packageCount: Math.floor(Math.random() * 3) + 1, // Random 1-3
+        dateDistributed: new Date(new Date(app.date).getTime() + (7 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0] // 7 days after date applied
+      }))
   );
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,9 +38,9 @@ function StaffDistribution() {
 const getPackageColor = (packageName) => {
   const colors = {
     "None": "text-gray-600 bg-gray-100",
-    "Basic Pack": "text-blue-600 bg-blue-100",
-    "Standard Pack": "text-purple-600 bg-purple-100",
-    "Premium Pack": "text-yellow-600 bg-yellow-100",
+    "Package A": "text-blue-600 bg-blue-100",
+    "Package B": "text-purple-600 bg-purple-100",
+    "Package C": "text-yellow-600 bg-yellow-100",
   };
   return colors[packageName] || "text-gray-600 bg-gray-100";
 };
@@ -44,18 +50,25 @@ const getPackageColor = (packageName) => {
   const filteredApps = applications
     .filter(app =>
       app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.phone.toLowerCase().includes(searchTerm.toLowerCase())
+      app.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.applicationId.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       if (!sortBy) return 0;
       let valA, valB;
       if (sortBy === "name") { valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); }
       else if (sortBy === "phone") { valA = a.phone; valB = b.phone; }
+      else if (sortBy === "applicationId") { valA = a.applicationId; valB = b.applicationId; }
       else if (sortBy === "date") { valA = new Date(a.date); valB = new Date(b.date); }
+      else if (sortBy === "dateDistributed") { valA = new Date(a.dateDistributed); valB = new Date(b.dateDistributed); }
       else if (sortBy === "status") { valA = a.status.toLowerCase(); valB = b.status.toLowerCase(); }
       else if (sortBy === "package") { 
         valA = a.package.toLowerCase(); 
         valB = b.package.toLowerCase(); 
+      }
+      else if (sortBy === "packageCount") { 
+        valA = a.packageCount; 
+        valB = b.packageCount; 
       }
       if (valA < valB) return sortOrder === "asc" ? -1 : 1;
       if (valA > valB) return sortOrder === "asc" ? 1 : -1;
@@ -137,30 +150,45 @@ const getPackageColor = (packageName) => {
               <table className="min-w-full text-sm text-left border-collapse">
                 <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
                   <tr>
-                    <th className="py-3 px-4 w-[250px] cursor-pointer" onClick={() => handleSort("name")}>
-                      <span className="ml-[30px]">
+                    <th className="py-3 px-4 w-[120px] cursor-pointer" onClick={() => handleSort("applicationId")}>
+                      <span className="ml-[10px]">
+                        Application ID {sortBy === "applicationId" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      </span>
+                    </th>
+                    <th className="py-3 px-4 w-[200px] cursor-pointer" onClick={() => handleSort("name")}>
+                      <span className="ml-[10px]">
                         Name {sortBy === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                       </span>
                     </th>
-                    <th className="py-3 px-4 w-[150px] cursor-pointer" onClick={() => handleSort("package")}>
-                    <span className="ml-[20px]">
-                      Package {sortBy === "package" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
-                    </span>                      
+                    <th className="py-3 px-4 w-[140px] cursor-pointer" onClick={() => handleSort("phone")}>
+                      <span className="ml-[10px]">
+                        Phone Number {sortBy === "phone" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      </span>                      
                     </th>
-                    <th className="py-3 px-4 w-[150px] cursor-pointer" onClick={() => handleSort("phone")}>
-                    <span className="ml-[20px]">
-                      Phone {sortBy === "phone" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
-                    </span>                      
+                    <th className="py-3 px-4 w-[130px] cursor-pointer" onClick={() => handleSort("package")}>
+                      <span className="ml-[10px]">
+                        Package {sortBy === "package" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      </span>                      
                     </th>
-                    <th className="py-3 px-[10px] w-[150px] cursor-pointer" onClick={() => handleSort("date")}>
-                    <span className="mr-[0px]">
-                      Date Applied {sortBy === "date" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
-                    </span>                      
+                    <th className="py-3 px-4 w-[100px] cursor-pointer text-center" onClick={() => handleSort("packageCount")}>
+                      <span>
+                        Total Count {sortBy === "packageCount" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      </span>                      
                     </th>
-                    <th className="py-3 px-4 w-[120px] cursor-pointer" onClick={() => handleSort("status")}>
-                    <span className="ml-[10px]">
-                      Status {sortBy === "status" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
-                    </span>                      
+                    <th className="py-3 px-4 w-[140px] cursor-pointer" onClick={() => handleSort("date")}>
+                      <span className="ml-[5px]">
+                        Date Applied {sortBy === "date" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      </span>                      
+                    </th>
+                    <th className="py-3 px-4 w-[150px] cursor-pointer" onClick={() => handleSort("dateDistributed")}>
+                      <span className="ml-[5px]">
+                        Date Distributed {sortBy === "dateDistributed" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      </span>                      
+                    </th>
+                    <th className="py-3 px-4 w-[110px] cursor-pointer" onClick={() => handleSort("status")}>
+                      <span className="ml-[10px]">
+                        Status {sortBy === "status" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                      </span>                      
                     </th>
                     <th className="py-3 px-4 w-[180px] text-center">Action</th>
                   </tr>
@@ -170,14 +198,17 @@ const getPackageColor = (packageName) => {
 <tbody className="border-none">
   {filteredApps.map((applicant) => (
     <tr key={applicant.id} className="hover:bg-gray-50 transition-colors">
-      <td className="py-3 font-medium text-gray-800 pl-[30px]">{applicant.name}</td>
+      <td className="py-3 font-medium text-gray-800 pl-[20px]">{applicant.applicationId}</td>
+      <td className="py-3 px-4 font-medium text-gray-800">{applicant.name}</td>
+      <td className="py-3 px-4 text-gray-600">{applicant.phone}</td>
       <td className="py-3 px-4">
-        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPackageColor(applicant.     package)}`}>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPackageColor(applicant.package)}`}>
           {applicant.package}
         </span>
       </td>
-      <td className="py-3 px-4 text-gray-600">{applicant.phone}</td>
+      <td className="py-3 px-4 text-center text-gray-600 font-medium">{applicant.packageCount}</td>
       <td className="py-3 px-4 text-gray-600">{applicant.date}</td>
+      <td className="py-3 px-4 text-gray-600">{applicant.dateDistributed}</td>
       <td className="py-3 px-4">
         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(applicant.status)}`}>
           {applicant.status}

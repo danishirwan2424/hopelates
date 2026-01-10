@@ -210,43 +210,51 @@ function StaffDash() {
           {/* ===== Stock & Calendar Panels ===== */}
           <div className="flex flex-wrap gap-2 mb-0">
             {/* Donation Stock */}
-            <div className="bg-white rounded-[15px] shadow-md h-[273px] flex-1 min-w-[400px] p-4 flex flex-col">
-              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
-                Donation Stock
-              </h2>
+{/* Donation Stock */}
+<div className="bg-white rounded-[15px] shadow-md h-[273px] flex-1 min-w-[400px] p-4 flex flex-col">
+  <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
+    Donation Stock
+  </h2>
 
-<div className="flex flex-col gap-4 mt-2 overflow-scroll pb-7">
-  {Object.entries(categoryData).map(([category, qty]) => {
-    const widthPercent = Math.min((qty / maxQuantity) * 100, 100);
+  <div className="flex flex-col gap-4 mt-2 overflow-scroll pb-7">
+    {/* Define color map once */}
+    {(() => {
+      const colorMap = {
+        "Rice": "#3B82F6",
+        "Canned Sardines": "#8B5CF6",
+        "Cooking Oil": "#EC4899",
+        "Instant Noodle": "#3B82F6",
+        "Chocolate Drink": "#8B5CF6",
+      };
 
-    // If the bar is less than 20% of the max, use dark green for low stock
-    const color = widthPercent < 20 ? "#11452E" : "#278659";
+      return Object.entries(categoryData).map(([category, qty]) => {
+        const widthPercent = Math.min((qty / maxQuantity) * 100, 100);
+        const cleanCategory = category.trim(); // remove extra spaces
+        const color = colorMap[cleanCategory] || "#278659";
 
-    return (
-      <div key={category}>
-        {/* Category title and quantity in same row */}
-        <div className="flex justify-between items-center mb-1">
-          <p className="text-[13px] text-gray-600">{category}</p>
-          <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
-        </div>
+        return (
+          <div key={category}>
+            {/* Category title and quantity in same row */}
+            <div className="flex justify-between items-center mb-1">
+              <p className="text-[13px] text-gray-600">{category}</p>
+              <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
+            </div>
 
-        {/* Progress bar */}
-        <div className="h-4 w-full bg-gray-200 rounded">
-          <div
-            className="h-4 rounded"
-            style={{ width: `${widthPercent}%`, backgroundColor: color }}
-          ></div>
-        </div>
-      </div>
-    );
-  })}
+            {/* Progress bar */}
+            <div className="h-4 w-full bg-gray-200 rounded">
+              <div
+                className="h-4 rounded"
+                style={{ width: `${widthPercent}%`, backgroundColor: color }}
+              ></div>
+            </div>
+          </div>
+        );
+      });
+    })()}
+  </div>
 </div>
 
 
-
-
-
-            </div>
 
             {/* Upcoming Deliveries (Calendar) */}
             <div className="bg-white rounded-[15px] shadow-md h-[273px] flex-1 min-w-[283px] p-4 flex flex-col">

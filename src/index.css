@@ -149,3 +149,13 @@ input[type="radio"]:checked::after {
 .animate-fade-in {
   animation: fade-in 0.5s ease-in-out;
 }
+
+/* Add this to your CSS */
+.custom-calendar {
+  border: none !important;
+  /* removes black border */
+  box-shadow: none !important;
+  /* removes shadow if any */
+  outline: none !important;
+  /* removes focus outline */
+}

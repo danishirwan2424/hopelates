@@ -14,13 +14,9 @@ import {
   Title,
 } from "chart.js";
 
-import { applications, statusCounts, months, monthlyApplicants } from "../dataExample/UserExp";
-import { donationStock, donationStats } from "../dataExample/DonationExp";
-
 // Components
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
-
 
 ChartJS.register(
   ArcElement,
@@ -32,8 +28,41 @@ ChartJS.register(
   Title
 );
 
-
 function StaffDash() {
+  // ===== Dummy Data =====
+  const applicationsDummy = [
+    { id: 1, status: "Completed" },
+    { id: 2, status: "Pending" },
+    { id: 3, status: "Completed" },
+    { id: 4, status: "Rejected" },
+    { id: 5, status: "Pending" },
+  ];
+
+  const statusCountsDummy = {
+    Completed: applicationsDummy.filter(a => a.status === "Completed").length,
+    Pending: applicationsDummy.filter(a => a.status === "Pending").length,
+    Rejected: applicationsDummy.filter(a => a.status === "Rejected").length,
+  };
+
+  const monthsDummy = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthlyApplicantsDummy = [5, 8, 3, 6, 2, 7, 4, 9, 1, 5, 3, 6];
+
+  const donationStockDummy = [
+    { category: "Rice", quantity: 50 },
+    { category: "Canned Sardines", quantity: 30 },
+    { category: "Cooking Oil", quantity: 20 },
+    { category: "Instant Noodle", quantity: 40 },
+    { category: "Chocolate Drink", quantity: 25 },
+  ];
+
+  const colorMap = {
+    Rice: "#3B82F6",
+    "Canned Sardines": "#8B5CF6",
+    "Cooking Oil": "#EC4899",
+    "Instant Noodle": "#3B82F6",
+    "Chocolate Drink": "#8B5CF6",
+  };
+
   // ===== Animated Stats State =====
   const [dailyTotal, setDailyTotal] = useState(0);
   const [completedDist, setCompletedDist] = useState(0);
@@ -41,21 +70,10 @@ function StaffDash() {
   const [pendingApp, setPendingApp] = useState(0);
 
   // Totals
-  const totalDaily = applications.length;
-  const totalCompleted = applications.filter(a => a.status === "Completed").length;
+  const totalDaily = applicationsDummy.length;
+  const totalCompleted = applicationsDummy.filter(a => a.status === "Completed").length;
   const totalApproved = totalCompleted; // same as completed
-  const totalPending = applications.filter(a => a.status === "Pending").length;
-
-  // Group by category and sum quantities
-  const categoryData = donationStock.reduce((acc, item) => {
-    if (!acc[item.category]) acc[item.category] = 0;
-    acc[item.category] += item.quantity;
-    return acc;
-  }, {});
-
-  // Find max quantity for scaling bars
-  const maxQuantity = Math.max(...Object.values(categoryData));
-
+  const totalPending = applicationsDummy.filter(a => a.status === "Pending").length;
 
   // Animate numbers
   useEffect(() => {
@@ -81,14 +99,22 @@ function StaffDash() {
     return () => clearInterval(timer);
   }, [totalDaily, totalCompleted, totalApproved, totalPending]);
 
+  // Donation Stock calculations
+  const categoryData = donationStockDummy.reduce((acc, item) => {
+    if (!acc[item.category]) acc[item.category] = 0;
+    acc[item.category] += item.quantity;
+    return acc;
+  }, {});
+  const maxQuantity = Math.max(...Object.values(categoryData));
+
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* ===== Sidebar ===== */}
+      {/* Sidebar */}
       <div className="flex min-h-screen bg-gray-50">
         <StaffSideBar />
       </div>
 
-      {/* ===== Main Content ===== */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-0 h-screen overflow-hidden">
         <div className="flex flex-col flex-1 min-h-0">
           <StaffPanelBar />
@@ -103,7 +129,7 @@ function StaffDash() {
               Plan, prioritize and accomplish your task with ease
             </h3>
 
-            {/* ===== Stats Panels ===== */}
+            {/* Stats Panels */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-2">
               <div className="bg-gradient-to-b from-[#11452E] to-[#278659] rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
                 <p className="text-[15px] text-white mb-2">Daily Total Application</p>
@@ -126,228 +152,120 @@ function StaffDash() {
               </div>
             </div>
 
-            {/* Charts, Stock & Calendar panels remain unchanged... */}
-            {/* <Your existing JSX code here> */}
-                      {/* ===== Charts Panels ===== */}
-          <div className="flex flex-wrap gap-2 mb-2">
-            {/* Applicants Category (Doughnut) */}
-            <div className="bg-white rounded-[15px] shadow-md h-[283px] w-[283px] p-4 flex flex-col">
-              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
-                Applicants Category
-              </h2>
-
-              <div className="flex-1 flex items-center justify-center">
-                <Doughnut
-                  data={{
-                    labels: ["Completed", "Pending", "Rejected"],
-                    datasets: [
-                      {
-                        label: "Applicants",
-                        data: [statusCounts.Completed, statusCounts.Pending, statusCounts.Rejected],
-                        backgroundColor: ["#3B82F6", "#8B5CF6", "#EC4899"],
-                        borderWidth: 1,
+            {/* Charts Panels */}
+            <div className="flex flex-wrap gap-2 mb-2">
+              {/* Applicants Category (Doughnut) */}
+              <div className="bg-white rounded-[15px] shadow-md h-[283px] w-[283px] p-4 flex flex-col">
+                <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
+                  Applicants Category
+                </h2>
+                <div className="flex-1 flex items-center justify-center">
+                  <Doughnut
+                    data={{
+                      labels: ["Completed", "Pending", "Rejected"],
+                      datasets: [
+                        {
+                          label: "Applicants",
+                          data: [
+                            statusCountsDummy.Completed,
+                            statusCountsDummy.Pending,
+                            statusCountsDummy.Rejected
+                          ],
+                          backgroundColor: ["#3B82F6", "#8B5CF6", "#EC4899"],
+                          borderWidth: 1,
+                        },
+                      ],
+                    }}
+                    options={{
+                      plugins: {
+                        legend: { position: "bottom", labels: { color: "#000", boxWidth: 12 } },
                       },
-                    ],
-                  }}
-                  options={{
-                    plugins: {
-                      legend: { position: "bottom", labels: { color: "#000", boxWidth: 12 } },
-                    },
-                    cutout: "70%",
-                    responsive: true,
-                    maintainAspectRatio: false,
-                  }}
-                />
+                      cutout: "70%",
+                      responsive: true,
+                      maintainAspectRatio: false,
+                    }}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Monthly Applicants (Bar Chart) */}
-            <div className="bg-white rounded-[15px] shadow-md h-[283px] flex-1 min-w-[200px] p-4 flex flex-col">
-              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
-                Monthly Applicants
-              </h2>
-
-              <div className="flex-1 flex items-center justify-center">
-                <Bar 
-                  data={{
-                    labels: months,
-                    datasets: [
-                      {
-                        label: "Applicants",
-                        data: monthlyApplicants,
-                        backgroundColor: monthlyApplicants.map((_, index) => {
+              {/* Monthly Applicants (Bar Chart) */}
+              <div className="bg-white rounded-[15px] shadow-md h-[283px] flex-1 min-w-[200px] p-4 flex flex-col">
+                <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
+                  Monthly Applicants
+                </h2>
+                <div className="flex-1 flex items-center justify-center">
+                  <Bar
+                    data={{
+                      labels: monthsDummy,
+                      datasets: [
+                        {
+                          label: "Applicants",
+                          data: monthlyApplicantsDummy,
+                          backgroundColor: monthlyApplicantsDummy.map((_, index) => {
                             const colors = ["#3B82F6", "#8B5CF6", "#EC4899"];
                             return colors[index % 3];
                           }),
-                        borderRadius: 6,
-                      },
-                    ],
-                  }}
-                  options={{
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      x: { 
-                        ticks: { color: "#000" }, 
-                        grid: { display: false } 
-                      },
-                      y: { 
-                        ticks: { 
-                          color: "#000",
-                          stepSize: 1,      
+                          borderRadius: 6,
                         },
-                        grid: { color: "#E5E7EB" },
+                      ],
+                    }}
+                    options={{
+                      plugins: { legend: { display: false } },
+                      scales: {
+                        x: { ticks: { color: "#000" }, grid: { display: false } },
+                        y: { ticks: { color: "#000", stepSize: 1 }, grid: { color: "#E5E7EB" } },
                       },
-                    },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                  }}
-                />
-
+                      responsive: true,
+                      maintainAspectRatio: false,
+                    }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* ===== Stock & Calendar Panels ===== */}
-          <div className="flex flex-wrap gap-2 mb-0">
-            {/* Donation Stock */}
-{/* Donation Stock */}
-<div className="bg-white rounded-[15px] shadow-md h-[273px] flex-1 min-w-[400px] p-4 flex flex-col">
-  <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
-    Donation Stock
-  </h2>
+            {/* Donation Stock & Calendar */}
+            <div className="flex flex-wrap gap-2 mb-0">
+              {/* Donation Stock */}
+              <div className="bg-white rounded-[15px] shadow-md h-[273px] flex-1 min-w-[400px] p-4 flex flex-col">
+                <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Donation Stock</h2>
+                <div className="flex flex-col gap-4 mt-2 overflow-scroll pb-7">
+                  {Object.entries(categoryData).map(([category, qty]) => {
+                    const widthPercent = Math.min((qty / maxQuantity) * 100, 100);
+                    const color = colorMap[category] || "#278659";
 
-  <div className="flex flex-col gap-4 mt-2 overflow-scroll pb-7">
-    {/* Define color map once */}
-    {(() => {
-      const colorMap = {
-        "Rice": "#3B82F6",
-        "Canned Sardines": "#8B5CF6",
-        "Cooking Oil": "#EC4899",
-        "Instant Noodle": "#3B82F6",
-        "Chocolate Drink": "#8B5CF6",
-      };
+                    return (
+                      <div key={category}>
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="text-[13px] text-gray-600">{category}</p>
+                          <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
+                        </div>
+                        <div className="h-4 w-full bg-gray-200 rounded">
+                          <div
+                            className="h-4 rounded"
+                            style={{ width: `${widthPercent}%`, backgroundColor: color }}
+                          ></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
-      return Object.entries(categoryData).map(([category, qty]) => {
-        const widthPercent = Math.min((qty / maxQuantity) * 100, 100);
-        const cleanCategory = category.trim(); // remove extra spaces
-        const color = colorMap[cleanCategory] || "#278659";
-
-        return (
-          <div key={category}>
-            {/* Category title and quantity in same row */}
-            <div className="flex justify-between items-center mb-1">
-              <p className="text-[13px] text-gray-600">{category}</p>
-              <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
-            </div>
-
-            {/* Progress bar */}
-            <div className="h-4 w-full bg-gray-200 rounded">
-              <div
-                className="h-4 rounded"
-                style={{ width: `${widthPercent}%`, backgroundColor: color }}
-              ></div>
-            </div>
-          </div>
-        );
-      });
-    })()}
-  </div>
-</div>
-
-
-
-            {/* Upcoming Deliveries (Calendar) */}
-            <div className="bg-white rounded-[15px] shadow-md h-[273px] flex-1 min-w-[283px] p-4 flex flex-col">
-              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
-                Upcoming Deliveries
-              </h2>
-
-              <div className="flex-1 overflow-auto flex">
-                <Calendar
-                  className="custom-calendar flex-1"
-                  prevLabel="<"
-                  nextLabel=">"
-                  prev2Label={null}
-                  next2Label={null}
-                  showNeighboringMonth={false}
-                />
-                <style>{`
-                  .custom-calendar {
-                    width: 100% !important;
-                    height: 100% !important;
-                    font-family: 'Inter', sans-serif !important;
-                    background-color: #ffffff !important;
-                  }
-
-                  .custom-calendar__navigation {
-                    background-color: #278659 !important;
-                    color: white !important;
-                    border-radius: 0.5rem !important;
-                    display: flex !important;
-                    justify-content: space-between !important;
-                    align-items: center !important;
-                    padding: 0.25rem 0.5rem !important;
-                    font-weight: 600 !important;
-                    margin-bottom: 0.5rem !important;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-                  }
-
-                  .custom-calendar__navigation button {
-                    color: white !important;
-                    font-weight: bold !important;
-                    padding: 0.25rem 0.5rem !important;
-                    border-radius: 0.25rem !important;
-                  }
-
-                  .custom-calendar__month-view__weekdays {
-                    color: #11452E !important;
-                    font-weight: 700 !important;
-                    text-transform: uppercase !important;
-                  }
-
-                  .custom-calendar__tile {
-                    color: #11452E !important;
-                    background-color: transparent !important;
-                    border-radius: 0 !important;
-                    height: 3rem !important;
-                    width: 3rem !important;
-                    margin: 0.15rem !important;
-                    display: flex !important;
-                    justify-content: center !important;
-                    align-items: center !important;
-                    cursor: pointer !important;
-                    transition: all 0.25s ease-in-out !important;
-                  }
-
-                  .custom-calendar__tile:hover {
-                    background-color: #27a06c !important;
-                    color: #11452E !important;
-                    border-radius: 9999px !important;
-                    transform: scale(1.05) !important;
-                  }
-
-                  .custom-calendar__tile--now {
-                    background-color: #a8e6cf !important;
-                    color: #11452E !important;
-                    border-radius: 9999px !important;
-                    font-weight: 600 !important;
-                  }
-
-                  .custom-calendar__tile--active {
-                    background-color: #a8e6cf !important;
-                    color: #11452E !important;
-                    border-radius: 9999px !important;
-                    font-weight: 600 !important;
-                  }
-
-                  .custom-calendar, .custom-calendar * {
-                    border: none !important;
-                    box-shadow: none !important;
-                  }
-                `}</style>
+              {/* Upcoming Deliveries (Calendar) */}
+              <div className="bg-white rounded-[15px] shadow-md h-[273px] flex-1 min-w-[283px] p-4 flex flex-col border-0">
+                <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Upcoming Deliveries</h2>
+                <div className="flex-1 overflow-auto flex">
+                  <Calendar
+                    className="custom-calendar flex-1 border-0 border-none"
+                    prevLabel="<"
+                    nextLabel=">"
+                    prev2Label={null}
+                    next2Label={null}
+                    showNeighboringMonth={false}
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
             <Outlet />
           </div>

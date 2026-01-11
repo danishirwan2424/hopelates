@@ -2,15 +2,11 @@
 import React, { useState, useEffect } from "react";
 import DonorNav from "./Forms_cmp/DonorNav";
 
-function ProfileDonor({ userData }) {
+function ProfileDonor({ userData, onSave }) {
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
+    fullName: "",
     email: "",
-    phone: "",
-    gender: "",
-    ic: "",
-    address: "",
+    password: "",
     coverPhoto: "",
   });
 
@@ -18,13 +14,11 @@ function ProfileDonor({ userData }) {
   useEffect(() => {
     if (userData) {
       setForm({
-        firstName: userData.firstName || "",
-        lastName: userData.lastName || "",
+        fullName:
+          userData.fullName ||
+          `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
         email: userData.email || "",
-        phone: userData.phone || "",
-        gender: userData.gender || "",
-        ic: userData.ic || "",
-        address: userData.address || "",
+        password: "", // leave blank for security
         coverPhoto: userData.coverPhoto || "",
       });
     }
@@ -35,14 +29,33 @@ function ProfileDonor({ userData }) {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const displayName = `${form.firstName || ""} ${form.lastName || ""}`.trim();
+  const handleSave = () => {
+    // Split fullName into firstName and lastName if needed
+    const [firstName, ...rest] = form.fullName.trim().split(" ");
+    const lastName = rest.join(" ");
+
+    const payload = {
+      ...form,
+      firstName,
+      lastName,
+    };
+
+    // If password is empty, remove it so backend doesn't overwrite
+    if (!payload.password) delete payload.password;
+
+    // Call API or parent callback
+    if (onSave) {
+      onSave(payload);
+    } else {
+      console.log("Save payload:", payload);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Donor Navigation */}
       <DonorNav />
 
-      {/* Main Page Container */}
       <section className="flex-1 flex flex-col p-4 mt-4">
         {/* Cover + Header */}
         <div className="relative rounded-lg overflow-hidden mb-4 mt-10 flex-shrink-0">
@@ -57,7 +70,7 @@ function ProfileDonor({ userData }) {
             <div className="absolute inset-0 bg-black opacity-10 rounded-b-xl pointer-events-none"></div>
             <div className="relative">
               <p className="text-2xl font-semibold text-white drop-shadow-md">
-                {displayName || "No Name"}
+                {form.fullName || "No Name"}
               </p>
               <p className="text-sm text-gray-200 drop-shadow-md mt-1">
                 Welcome to your donor profile
@@ -72,43 +85,39 @@ function ProfileDonor({ userData }) {
             Profile Information
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            {["firstName", "lastName", "email", "phone", "gender", "ic"].map((field) => (
-              <div key={field}>
-                <label className="text-xs font-semibold text-[#11452E]">
-                  {field === "ic"
-                    ? "IC / Passport"
-                    : field.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())}
-                </label>
-                {field === "gender" ? (
-                  <select
-                    name="gender"
-                    value={form.gender}
-                    onChange={handleChange}
-                    className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
-                  >
-                    <option value="">Select</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                ) : (
-                  <input
-                    name={field}
-                    value={form[field]}
-                    onChange={handleChange}
-                    className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
-                  />
-                )}
-              </div>
-            ))}
-
-            <div className="md:col-span-2">
-              <label className="text-xs font-semibold text-[#11452E]">Address</label>
-              <textarea
-                name="address"
-                rows="3"
-                value={form.address}
+          <div className="grid grid-cols-1 gap-4 text-sm">
+            {/* Full Name */}
+            <div>
+              <label className="text-xs font-semibold text-[#11452E]">Full Name</label>
+              <input
+                name="fullName"
+                value={form.fullName}
                 onChange={handleChange}
+                className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="text-xs font-semibold text-[#11452E]">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="text-xs font-semibold text-[#11452E]">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Leave blank to keep current password"
                 className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
               />
             </div>
@@ -116,7 +125,10 @@ function ProfileDonor({ userData }) {
 
           {/* Save Button */}
           <div className="mt-6 flex justify-end">
-            <button className="px-6 py-2 bg-[#278659] text-white rounded-lg hover:bg-[#11452E] transition">
+            <button
+              onClick={handleSave}
+              className="px-6 py-2 bg-[#278659] text-white rounded-lg hover:bg-[#11452E] transition"
+            >
               Save Changes
             </button>
           </div>

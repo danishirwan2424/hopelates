@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // ======================
-// EXISTING ROUTES (DO NOT TOUCH)
+// APPLICATION ROUTES (DO NOT TOUCH)
 // ======================
 const applicationRoutes = require("./routes/application");
 const authRoutes = require("./routes/auth");
@@ -35,13 +35,6 @@ app.use("/api/inventory", inventoryTestRoutes);
 const foodTestRoutes = require("./routes/foodTest");
 console.log("foodTestRoutes loaded");
 app.use("/api/food", foodTestRoutes);
-
-// ======================
-// BENEFICIARY DB TEST ROUTE
-// ======================
-const beneficiaryTestRoutes = require("./routes/beneficiaryTest");
-console.log("beneficiaryTestRoutes loaded");
-app.use("/api/beneficiary", beneficiaryTestRoutes);
 
 // ======================
 const PORT = process.env.PORT || 5000;

@@ -12,6 +12,10 @@ export default function Application_donate() {
   const darkColor = "#11452E";
   const navigate = useNavigate();
 
+  // 🔐 Get logged-in beneficiary
+  const user = JSON.parse(localStorage.getItem("user"));
+  const beneficiaryId = user?.beneficiary_id;
+
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
 
@@ -30,7 +34,6 @@ export default function Application_donate() {
   // STEP 3
   const [occupation, setOccupation] = useState("");
   const [salary, setSalary] = useState("");
-  const [status, setStatus] = useState("");
   const [payslip, setPayslip] = useState(null);
 
   // STEP 4
@@ -54,11 +57,63 @@ export default function Application_donate() {
   const householdOptions = [{ label: "1–3" }, { label: "4–6" }, { label: "7–9" }];
   const stepIcons = [UserIcon, HomeIcon, BanknotesIcon, CheckCircleIcon];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => navigate("/landing"), 1500);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // 🔐 Safety check
+  if (!beneficiaryId) {
+    alert("User not logged in");
+    return;
+  }
+
+  // 🔁 Map household size to family_no
+  let familyNo = 0;
+  if (householdSize === "1–3") familyNo = 3;
+  else if (householdSize === "4–6") familyNo = 6;
+  else if (householdSize === "7–9") familyNo = 9;
+
+  if (familyNo === 0) {
+    alert("Please select household size");
+    return;
+  }
+
+  // 📦 Build payload for backend
+  const payload = {
+    beneficiary_id: beneficiaryId,
+    ic_no: icNumber,
+    address: homeAddress,
+    postcode,
+    city,
+    state,
+    occupation,
+    salary,
+    family_no: familyNo
   };
+
+  try {
+    const res = await fetch("http://localhost:5000/api/application", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Submission failed");
+      return;
+    }
+
+    // ✅ Success
+    setSubmitted(true);
+
+  } catch (error) {
+    console.error("Submit error:", error);
+    alert("Server error. Please try again.");
+  }
+};
+
+
 
   // Dropzone
   const onDrop = useCallback((acceptedFiles) => {
@@ -213,8 +268,6 @@ export default function Application_donate() {
                 <label className="font-medium text-gray-700">Salary (RM): {salary || 0}</label>
                 <input type="range" min="0" max="10000" step="100" value={salary} onChange={(e) => setSalary(e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg accent-green-600 cursor-pointer" />
               </div>
-
-              <input placeholder="Employment Status" className="w-full border p-3 rounded" value={status} onChange={(e) => setStatus(e.target.value)} required />
 
               <div
                 {...getRootProps()}

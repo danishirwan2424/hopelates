@@ -146,4 +146,42 @@ router.post("/login", async (req, res) => {
   }
 });
 
+/* ======================
+   UPDATE DONOR PROFILE
+====================== */
+router.put("/donor/profile/:donor_id", async (req, res) => {
+  try {
+    const { donor_id } = req.params;
+    const { fullName, email } = req.body;
+
+    if (!fullName || !email) {
+      return res.status(400).json({ message: "Full name and email required" });
+    }
+
+    const result = await authPool.query(
+      `UPDATE donor
+       SET full_name = $1,
+           email = $2
+       WHERE donor_id = $3
+       RETURNING donor_id, full_name, email`,
+      [fullName, email, donor_id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Donor not found" });
+    }
+
+    res.json({
+      donor_id: result.rows[0].donor_id,
+      full_name: result.rows[0].full_name,
+      email: result.rows[0].email,
+      role: "donor",
+    });
+  } catch (err) {
+    console.error("UPDATE DONOR ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 module.exports = router;

@@ -10,46 +10,83 @@ function ProfileDonor({ userData, onSave }) {
     coverPhoto: "",
   });
 
-  // Populate form with API/table data
+ // Populate form from localStorage (logged-in user)
   useEffect(() => {
-    if (userData) {
-      setForm({
-        fullName:
-          userData.fullName ||
-          `${userData.firstName || ""} ${userData.lastName || ""}`.trim(),
-        email: userData.email || "",
-        password: "", // leave blank for security
-        coverPhoto: userData.coverPhoto || "",
-      });
+  const user = JSON.parse(localStorage.getItem("user"));
+  const donorId = user?.donor_id || user?.id;
+
+  if (!donorId) {
+    alert("User not found");
+    return;
+  }
+  
+  if (user) {
+    setForm((prev) => ({
+      ...prev,
+      fullName: user.name || "",
+      email: user.email || "",
+      password: "", // always blank
+    }));
     }
-  }, [userData]);
+  }, []);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    // Split fullName into firstName and lastName if needed
-    const [firstName, ...rest] = form.fullName.trim().split(" ");
-    const lastName = rest.join(" ");
+  //Allow user to update and save their profile
+const handleSave = async () => {
+  const user = JSON.parse(localStorage.getItem("user"));
 
-    const payload = {
-      ...form,
-      firstName,
-      lastName,
-    };
+  // ✅ THIS IS YOUR DONOR ID
+  const donorId = user?.id;
 
-    // If password is empty, remove it so backend doesn't overwrite
-    if (!payload.password) delete payload.password;
+  console.log("DEBUG donorId:", donorId);
 
-    // Call API or parent callback
-    if (onSave) {
-      onSave(payload);
-    } else {
-      console.log("Save payload:", payload);
+  if (!donorId) {
+    alert("User not found");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/auth/donor/profile/${donorId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: form.fullName,
+          email: form.email,
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Failed to update profile");
+      return;
     }
-  };
+
+    // ✅ UPDATE localStorage USING SAME STRUCTURE
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...user,
+        name: data.full_name,   // map DB → frontend
+        email: data.email,
+      })
+    );
+
+    alert("Profile updated successfully!");
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+};
+
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">

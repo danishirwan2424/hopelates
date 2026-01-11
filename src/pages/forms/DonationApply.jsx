@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Minus, Upload, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UserIcon, BanknotesIcon } from "@heroicons/react/24/outline";
@@ -25,6 +25,19 @@ export default function DonationApply() {
   });
   const [uploadedFile, setUploadedFile] = useState(null);
   const [fileName, setFileName] = useState("");
+
+  //For Auto-fill user details if logged in
+  useEffect(() => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (user) {
+    setUserDetails(prev => ({
+      ...prev,
+      fullName: user.full_name || "",
+      email: user.email || "",
+    }));
+  }
+}, []);
 
   const packages = [
     { id: "A", name: "PACKAGE A", price: 20, pax: "FOR 1-3 PAX", items: ["RICE", "BREAD", "BISCUITS"] },

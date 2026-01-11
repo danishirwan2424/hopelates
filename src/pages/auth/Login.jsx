@@ -40,7 +40,15 @@ const handleLogin = async (e) => {
 
   // ✅ DONOR
   if (cleanEmail === "donor@email.com" && cleanPassword === "password") {
-    localStorage.setItem("user", JSON.stringify({ role: "donor", email: cleanEmail }));
+      localStorage.setItem(
+      "user",
+      JSON.stringify({
+      role: "donor",
+      name: "Demo Donor",
+      email: cleanEmail,
+      })
+    );
+
     navigate("/donation");
     return;
   }
@@ -69,7 +77,20 @@ const handleLogin = async (e) => {
       return;
     }
 
-    localStorage.setItem("user", JSON.stringify(data));
+    // Save user data to localStorage
+    localStorage.setItem("token", data.token);
+    //Frontend user use the one standard
+    localStorage.setItem(
+  "user",
+  JSON.stringify({
+    id: data.user.donor_id,
+    name: data.user.full_name,
+    email: data.user.email,
+    role: "donor",
+  })
+);
+
+
 
     if (data.role === "donor") {
       navigate("/donation");

@@ -27,17 +27,18 @@ export default function DonationApply() {
   const [fileName, setFileName] = useState("");
 
   //For Auto-fill user details if logged in
-  useEffect(() => {
+ useEffect(() => {
   const user = JSON.parse(localStorage.getItem("user"));
 
-  if (user) {
-    setUserDetails(prev => ({
+  if (user && user.role === "donor") {
+    setUserDetails((prev) => ({
       ...prev,
-      fullName: user.full_name || "",
+      fullName: user.name || "",
       email: user.email || "",
     }));
   }
 }, []);
+
 
   const packages = [
     { id: "A", name: "PACKAGE A", price: 20, pax: "FOR 1-3 PAX", items: ["RICE", "BREAD", "BISCUITS"] },

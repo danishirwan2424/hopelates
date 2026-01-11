@@ -1,8 +1,7 @@
-// File: ProfileDonor.jsx
 import React, { useState, useEffect } from "react";
 import DonorNav from "./Forms_cmp/DonorNav";
 
-function ProfileDonor({ userData, onSave }) {
+function ProfileDonor() {
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -10,83 +9,92 @@ function ProfileDonor({ userData, onSave }) {
     coverPhoto: "",
   });
 
- // Populate form from localStorage (logged-in user)
+  // Populate form from localStorage (logged-in user)
   useEffect(() => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const donorId = user?.donor_id || user?.id;
+    const user = JSON.parse(localStorage.getItem("user"));
+    const donorId = user?.donor_id || user?.id;
 
-  if (!donorId) {
-    alert("User not found");
-    return;
-  }
-  
-  if (user) {
-    setForm((prev) => ({
-      ...prev,
-      fullName: user.name || "",
-      email: user.email || "",
-      password: "", // always blank
-    }));
+    if (!donorId) {
+      alert("User not found");
+      return;
+    }
+
+    if (user) {
+      setForm((prev) => ({
+        ...prev,
+        fullName: user.name || "",
+        email: user.email || "",
+        password: "", // always blank
+      }));
     }
   }, []);
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  //Allow user to update and save their profile
-const handleSave = async () => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  // Allow user to update and save their profile
+  const handleSave = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
 
-  // ✅ THIS IS YOUR DONOR ID
-  const donorId = user?.id;
+    // ✅ DONOR ID (keep your logic)
+    const donorId = user?.id || user?.donor_id;
 
-  console.log("DEBUG donorId:", donorId);
+    console.log("DEBUG donorId:", donorId);
 
-  if (!donorId) {
-    alert("User not found");
-    return;
-  }
-
-  try {
-    const res = await fetch(
-      `http://localhost:5000/api/auth/donor/profile/${donorId}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: form.fullName,
-          email: form.email,
-        }),
-      }
-    );
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Failed to update profile");
+    if (!donorId) {
+      alert("User not found");
       return;
     }
 
-    // ✅ UPDATE localStorage USING SAME STRUCTURE
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        ...user,
-        name: data.full_name,   // map DB → frontend
-        email: data.email,
-      })
-    );
+    // ✅ BUILD PAYLOAD (IMPORTANT FIX)
+    const payload = {
+      fullName: form.fullName,
+      email: form.email,
+    };
 
-    alert("Profile updated successfully!");
-  } catch (err) {
-    console.error(err);
-    alert("Server error");
-  }
-};
+    // ✅ only include password if user typed one
+    if (form.password && form.password.trim() !== "") {
+      payload.password = form.password;
+    }
 
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/auth/donor/profile/${donorId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to update profile");
+        return;
+      }
+
+      // ✅ UPDATE localStorage (KEEP YOUR STRUCTURE)
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...user,
+          name: data.full_name,
+          email: data.email,
+        })
+      );
+
+      // clear password field after save
+      setForm((prev) => ({ ...prev, password: "" }));
+
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -125,7 +133,9 @@ const handleSave = async () => {
           <div className="grid grid-cols-1 gap-4 text-sm">
             {/* Full Name */}
             <div>
-              <label className="text-xs font-semibold text-[#11452E]">Full Name</label>
+              <label className="text-xs font-semibold text-[#11452E]">
+                Full Name
+              </label>
               <input
                 name="fullName"
                 value={form.fullName}
@@ -136,7 +146,9 @@ const handleSave = async () => {
 
             {/* Email */}
             <div>
-              <label className="text-xs font-semibold text-[#11452E]">Email</label>
+              <label className="text-xs font-semibold text-[#11452E]">
+                Email
+              </label>
               <input
                 type="email"
                 name="email"
@@ -148,7 +160,9 @@ const handleSave = async () => {
 
             {/* Password */}
             <div>
-              <label className="text-xs font-semibold text-[#11452E]">Password</label>
+              <label className="text-xs font-semibold text-[#11452E]">
+                Password
+              </label>
               <input
                 type="password"
                 name="password"

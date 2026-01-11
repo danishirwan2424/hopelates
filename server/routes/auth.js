@@ -152,20 +152,39 @@ router.post("/login", async (req, res) => {
 router.put("/donor/profile/:donor_id", async (req, res) => {
   try {
     const { donor_id } = req.params;
-    const { fullName, email } = req.body;
+    const { fullName, email, password } = req.body;
 
     if (!fullName || !email) {
       return res.status(400).json({ message: "Full name and email required" });
     }
 
-    const result = await authPool.query(
-      `UPDATE donor
-       SET full_name = $1,
-           email = $2
-       WHERE donor_id = $3
-       RETURNING donor_id, full_name, email`,
-      [fullName, email, donor_id]
-    );
+    let result;
+
+    // 🔐 If user wants to change password
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      result = await authPool.query(
+        `UPDATE donor
+         SET full_name = $1,
+             email = $2,
+             password = $3
+         WHERE donor_id = $4
+         RETURNING donor_id, full_name, email`,
+        [fullName, email, hashedPassword, donor_id]
+      );
+    } 
+    // ✏️ No password change
+    else {
+      result = await authPool.query(
+        `UPDATE donor
+         SET full_name = $1,
+             email = $2
+         WHERE donor_id = $3
+         RETURNING donor_id, full_name, email`,
+        [fullName, email, donor_id]
+      );
+    }
 
     if (result.rowCount === 0) {
       return res.status(404).json({ message: "Donor not found" });

@@ -78,17 +78,14 @@ const handleLogin = async (e) => {
     }
 
     // Save user data to localStorage
-    localStorage.setItem("token", data.token);
-    //Frontend user use the one standard
     localStorage.setItem(
-  "user",
-  JSON.stringify({
-    id: data.user.donor_id,
-    name: data.user.full_name,
-    email: data.user.email,
-    role: "donor",
+    "user",
+    JSON.stringify({
+    ...data.user,   // ✅ keeps id (donor_id OR beneficiary_id)
+    role: data.role // ✅ donor OR applicant
   })
 );
+
 
 
 

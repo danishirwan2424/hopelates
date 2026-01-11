@@ -33,7 +33,7 @@ export default function DonationApply() {
   if (user && user.role === "donor") {
     setUserDetails((prev) => ({
       ...prev,
-      fullName: user.name || "",
+      fullName: user.full_name || "",
       email: user.email || "",
     }));
   }

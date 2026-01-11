@@ -10,24 +10,17 @@ function ProfileDonor() {
   });
 
   // Populate form from localStorage (logged-in user)
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    const donorId = user?.donor_id || user?.id;
+ useEffect(() => {
+  const user = JSON.parse(localStorage.getItem("user"));
 
-    if (!donorId) {
-      alert("User not found");
-      return;
-    }
-
-    if (user) {
-      setForm((prev) => ({
-        ...prev,
-        fullName: user.name || "",
-        email: user.email || "",
-        password: "", // always blank
-      }));
-    }
-  }, []);
+  if (user && user.role === "donor") {
+    setForm((prev) => ({
+      ...prev,
+      fullName: user.full_name || "",
+      email: user.email || "",
+    }));
+  }
+}, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -15,20 +15,80 @@ function ProfileForms({ userData }) {
 
   // Populate form from API/table
   useEffect(() => {
-    if (userData) {
-      setForm({
-        fullName: userData.fullName || "",
-        password: "",
-        confirmPassword: "",
-        coverPhoto: userData.coverPhoto || "",
-      });
-    }
-  }, [userData]);
+  const raw = localStorage.getItem("user");
+  if (!raw) return;
+
+  const user = JSON.parse(raw);
+  console.log("PROFILE FORMS auto-fill sees:", user);
+
+  setForm((prev) => ({
+    ...prev,
+    fullName: user.full_name || "", // ✅ USE full_name
+  }));
+}, []);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
+  // Allow user to update and save their profile
+  const handleSave = async () => {
+  const raw = localStorage.getItem("user");
+  if (!raw) return;
+
+  const user = JSON.parse(raw);
+
+  const payload = {
+    full_name: form.fullName,
+  };
+
+  // only send password if user typed one
+  if (form.password && form.confirmPassword) {
+    payload.password = form.password;
+  }
+
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/auth/beneficiary/profile/${user.beneficiary_id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Update failed");
+      return;
+    }
+
+    // ✅ update localStorage
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...user,
+        full_name: data.user.full_name,
+      })
+    );
+
+    alert("Profile updated successfully!");
+
+    // clear password fields
+    setForm((prev) => ({
+      ...prev,
+      password: "",
+      confirmPassword: "",
+    }));
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+};
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -116,16 +176,18 @@ function ProfileForms({ userData }) {
 
           {/* Save Button */}
           <div className="mt-6 flex justify-end">
-            <button
-              disabled={!passwordsMatch || !form.password}
-              className={`px-6 py-2 rounded-lg transition ${
-                passwordsMatch && form.password
-                  ? "bg-[#278659] text-white hover:bg-[#11452E]"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+           <button
+            onClick={handleSave}
+            disabled={!passwordsMatch}
+            className={`px-6 py-2 rounded-lg transition ${
+            passwordsMatch
+            ? "bg-[#278659] text-white hover:bg-[#11452E]"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        }`}
             >
-              Save Changes
-            </button>
+        Save Changes
+        </button>
+
           </div>
         </div>
       </section>

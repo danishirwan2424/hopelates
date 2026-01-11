@@ -202,5 +202,62 @@ router.put("/donor/profile/:donor_id", async (req, res) => {
   }
 });
 
+/* ======================
+   UPDATE BENEFICIARY PROFILE
+====================== */
+router.put("/beneficiary/profile/:beneficiary_id", async (req, res) => {
+  try {
+    const { beneficiary_id } = req.params;
+    const { full_name, password } = req.body;
+
+    if (!full_name) {
+      return res.status(400).json({ message: "Full name required" });
+    }
+
+    let result;
+
+    // 🔐 If password is provided → hash & update
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      result = await authPool.query(
+        `UPDATE beneficiary
+         SET full_name = $1,
+             password = $2
+         WHERE beneficiary_id = $3
+         RETURNING beneficiary_id, full_name, email`,
+        [full_name, hashedPassword, beneficiary_id]
+      );
+    }
+    // ✏️ Name only
+    else {
+      result = await authPool.query(
+        `UPDATE beneficiary
+         SET full_name = $1
+         WHERE beneficiary_id = $2
+         RETURNING beneficiary_id, full_name, email`,
+        [full_name, beneficiary_id]
+      );
+    }
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Beneficiary not found" });
+    }
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        beneficiary_id: result.rows[0].beneficiary_id,
+        full_name: result.rows[0].full_name,
+        email: result.rows[0].email,
+      },
+    });
+
+  } catch (err) {
+    console.error("UPDATE BENEFICIARY ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 module.exports = router;

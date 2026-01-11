@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
 import { UsersIcon, UserIcon, HomeIcon, BanknotesIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
@@ -18,7 +18,6 @@ export default function Application_donate() {
   // STEP 1
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [icNumber, setIcNumber] = useState("");
 
   // STEP 2
@@ -38,6 +37,18 @@ export default function Application_donate() {
   const [confirmInfo, setConfirmInfo] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+
+  //Auto-fill from localStorage
+  useEffect(() => {
+  const raw = localStorage.getItem("user");
+  if (!raw) return;
+
+  const user = JSON.parse(raw);
+  console.log("AUTO-FILL application sees:", user);
+
+  setFullName(user?.full_name || "");
+  setEmail(user?.email || "");
+}, []);
 
   const steps = ["Personal Info", "Household Info", "Financial Info", "Confirmation"];
   const householdOptions = [{ label: "1–3" }, { label: "4–6" }, { label: "7–9" }];
@@ -151,7 +162,6 @@ export default function Application_donate() {
             <section className="space-y-4">
               <input placeholder="Full Name" className="w-full border p-3 rounded" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
               <input placeholder="Email" type="email" className="w-full border p-3 rounded" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <input placeholder="Password" type="password" className="w-full border p-3 rounded" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <input placeholder="IC Number" className="w-full border p-3 rounded" value={icNumber} onChange={(e) => setIcNumber(e.target.value)} required />
 
               <div className="flex flex-col sm:flex-row justify-between mt-6">

@@ -43,7 +43,7 @@ router.post("/register", async (req, res) => {
     // =====================
     // APPLICANT SIGNUP
     // =====================
-    if (role === "applicant") {
+    if (role === "beneficiary") {
       const existing = await authPool.query(
         "SELECT 1 FROM beneficiary WHERE email = $1",
         [email]

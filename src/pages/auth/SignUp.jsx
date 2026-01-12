@@ -164,11 +164,11 @@ function SignUp() {
                   <input
                     type="radio"
                     name="role"
-                    checked={role === "applicant"}        // 🔴 added
-                    onChange={() => setRole("applicant")} // 🔴 added
+                    checked={role === "beneficiary"}        // 🔴 added
+                    onChange={() => setRole("beneficiary")} // 🔴 added
                     className="w-4 h-4 text-[#019461] focus:ring-[#019461] border-gray-300"
                   />
-                  <span className="text-gray-700 text-sm">Applicant</span>
+                  <span className="text-gray-700 text-sm">Beneficiary</span>
                 </label>
               </div>
             </div>

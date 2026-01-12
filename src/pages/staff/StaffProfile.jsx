@@ -88,8 +88,8 @@ function StaffProfile() {
     setForm({
       ...staff,
       // split name if needed
-      firstName: staff.firstName || staff.name?.split?.(" ")?.[0] || "",
-      lastName: staff.lastName || staff.name?.split?.(" ").slice(1).join(" ") || "",
+      firstName: staff.first_name || staff.name?.split?.(" ")?.[0] || "",
+      lastName: staff.last_name || staff.name?.split?.(" ").slice(1).join(" ") || "",
     });
     setProfilePreview(null);
     setCoverPreview(null);
@@ -298,12 +298,12 @@ function StaffProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-xs text-gray-500">First Name</p>
-                  <p className="text-gray-800">{staff.first_Name}</p>
+                  <p className="text-gray-800">{staff.first_name}</p>
                 </div>
 
                 <div>
                   <p className="text-xs text-gray-500">Last Name</p>
-                  <p className="text-gray-800">{staff.last_Name}</p>
+                  <p className="text-gray-800">{staff.last_name}</p>
                 </div>
 
                 <div>
@@ -418,7 +418,7 @@ function StaffProfile() {
             <label className="text-xs font-semibold text-[#11452E]">First Name</label>
             <input
               name="firstName"
-              value={form.first_Name || ""}
+              value={form.first_name || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
             />
@@ -428,7 +428,7 @@ function StaffProfile() {
             <label className="text-xs font-semibold text-[#11452E]">Last Name</label>
             <input
               name="lastName"
-              value={form.last_Name || ""}
+              value={form.last_name || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
             />

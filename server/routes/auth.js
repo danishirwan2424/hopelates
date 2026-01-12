@@ -85,6 +85,34 @@ router.post("/login", async (req, res) => {
     }
 
     // =====================
+// CHECK STAFF
+// =====================
+const staffResult = await authPool.query(
+  "SELECT * FROM staff WHERE email = $1",
+  [email]
+);
+
+if (staffResult.rowCount > 0) {
+  const staff = staffResult.rows[0];
+
+  // ⚠️ TEMP: plain text comparison
+  // (use bcrypt later if you want)
+  if (password !== staff.password) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
+
+  return res.json({
+    message: "Login successful",
+    role: "staff",
+    user: {
+      staff_id: staff.staff_id,
+      full_name: `${staff.first_name} ${staff.last_name}`,
+      email: staff.email,
+    },
+  });
+}
+
+    // =====================
     // CHECK DONOR
     // =====================
     const donorResult = await authPool.query(
@@ -129,7 +157,7 @@ router.post("/login", async (req, res) => {
 
       return res.json({
         message: "Login successful",
-        role: "applicant",
+        role: "beneficiary",
         user: {
           beneficiary_id: beneficiary.beneficiary_id,
           full_name: beneficiary.full_name,
@@ -258,6 +286,46 @@ router.put("/beneficiary/profile/:beneficiary_id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+/* ======================
+   GET STAFF PROFILE
+====================== */
+router.post("/staff/profile", async (req, res) => {
+  try {
+    const { staff_id } = req.body;
+
+    if (!staff_id) {
+      return res.status(400).json({ message: "Staff ID required" });
+    }
+
+    const result = await authPool.query(
+      `SELECT
+        staff_id,
+        first_name,
+        last_name,
+        phone_number,
+        positions,
+        gender,
+        ic_num,
+        address,
+        email
+       FROM staff
+       WHERE staff_id = $1`,
+      [staff_id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Staff not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("STAFF PROFILE ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 
 
 module.exports = router;

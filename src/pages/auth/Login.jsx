@@ -88,14 +88,17 @@ const handleLogin = async (e) => {
 
 
 
+//Update role for staff
+   if (data.role === "staff") {
+  navigate("/staff/profile");
+} else if (data.role === "donor") {
+  navigate("/donation");
+} else if (data.role === "applicant") {
+  navigate("/application");
+} else {
+  alert("Unknown user role");
+}
 
-    if (data.role === "donor") {
-      navigate("/donation");
-    } else if (data.role === "applicant") {
-      navigate("/application");
-    } else {
-      alert("Unknown user role");
-    }
 
   } catch (err) {
     console.error(err);

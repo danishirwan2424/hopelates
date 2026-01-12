@@ -13,92 +13,91 @@ function StaffDistribution() {
   const [sortOrder, setSortOrder] = useState("asc");
   const [sending, setSending] = useState({});
 
-  // ====== Fetch Applications ======
+  const setDefaultRow = () => {
+    setApplications([
+      {
+        applicationId: "4",
+        name: "N/A",
+        email: "N/A",
+        package: "None",
+        packageCount: 1,
+        date: "N/A",
+        dateDistributed: "N/A",
+        status: "Pending",
+        id: "default",
+      },
+    ]);
+  };
+
   const fetchApplications = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/applications"); // Replace with your API
-      const data = await response.json();
+      const response = await fetch("http://localhost:5000/api/staff-distribution");
+      const result = await response.json();
 
-      if (data && data.length > 0) {
+      const rows = Array.isArray(result?.data) ? result.data : [];
+
+      if (rows.length > 0) {
+        // Make sure all fields exist (front-end safe)
         setApplications(
-          data.map((app, index) => ({
-            ...app,
-            applicationId: app.applicationId || `AP${String(index + 1).padStart(3, "0")}`,
-            status: app.status || "Pending",
-            packageCount: app.packageCount || 1,
-            dateDistributed: app.dateDistributed || new Date(new Date(app.date).getTime() + 24*60*60*1000).toISOString().split("T")[0],
-            id: app.id || `db-${index}`,
+          rows.map((row, index) => ({
+            applicationId: row.applicationId ?? `AP${String(index + 1).padStart(3, "0")}`,
+            name: row.name ?? "N/A",
+            email: row.email ?? "N/A",
+            package: row.package ?? "None",
+            packageCount: row.packageCount ?? 1,
+            date: row.date ?? "N/A",
+            dateDistributed: row.dateDistributed ?? "N/A",
+            status: row.status ?? "Pending",
+            id: row.id ?? `db-${index}`,
           }))
         );
       } else {
-        // Default row if no data
-        setApplications([{
-          applicationId: "AP000",
-          name: "Person Name",
-          phone: "012-7237276",
-          package: "Package A",
-          packageCount: 1,
-          date: "1-1-2026",
-          dateDistributed: "2-1-2026",
-          status: "Pending",
-          id: "default"
-        }]);
+        setDefaultRow();
       }
     } catch (err) {
-      console.error("Failed to fetch applications:", err);
-      setApplications([{
-        applicationId: "AP000",
-        name: "Person Name",
-        phone: "012-7237276",
-        package: "Package A",
-        packageCount: 1,
-        date: "1-1-2026",
-        dateDistributed: "2-1-2026",
-        status: "Pending",
-        id: "default"
-      }]);
+      console.error("Failed to fetch staff distribution:", err);
+      setDefaultRow();
     }
   };
 
-  // Fetch initially and every 10 seconds
   useEffect(() => {
-    fetchApplications(); // Initial fetch
-    const interval = setInterval(fetchApplications, 10000); // Refresh every 10s
-    return () => clearInterval(interval); // Cleanup on unmount
+    fetchApplications();
+    const interval = setInterval(fetchApplications, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSort = (field) => {
     if (sortBy === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortBy(field);
       setSortOrder("asc");
     }
   };
 
-  // Package Badge Colors
   const getPackageColor = (packageName) => {
     const colors = {
-      "None": "text-gray-600 bg-gray-100",
-      "Package A": "text-blue-600 bg-blue-100",
-      "Package B": "text-purple-600 bg-purple-100",
-      "Package C": "text-yellow-600 bg-yellow-100",
+      "Package A": "text-blue-700 bg-blue-100",
+      "Package B": "text-purple-700 bg-purple-100",
+      "Package C": "text-yellow-700 bg-yellow-100",
+      None: "text-gray-700 bg-gray-100",
     };
-    return colors[packageName] || "text-gray-600 bg-gray-100";
+    return colors[packageName] || "text-gray-700 bg-gray-100";
   };
 
-  // Status Badge Color
   const getStatusColor = (status) => {
     const colors = {
-      Done: "text-green-600 bg-green-100",
-      Pending: "text-yellow-600 bg-yellow-100",
+      Done: "text-green-700 bg-green-100",
+      Completed: "text-green-700 bg-green-100",
+      Pending: "text-yellow-700 bg-yellow-100",
+      Cancelled: "text-red-700 bg-red-100",
     };
-    return colors[status] || "text-gray-600 bg-gray-100";
+    return colors[status] || "text-gray-700 bg-gray-100";
   };
 
-  // Send Email + QR: Pending -> Done
+  // Optional: keep your email function (doesn't affect table fetching)
   const sendEmailWithQR = async (applicant) => {
-    setSending(prev => ({ ...prev, [applicant.id]: true }));
+    setSending((prev) => ({ ...prev, [applicant.id]: true }));
 
     try {
       const response = await fetch("http://localhost:5000/api/email/send", {
@@ -109,57 +108,63 @@ function StaffDistribution() {
       const result = await response.json();
 
       if (result.success) {
-        // SweetAlert2 success
         Swal.fire({
-          icon: 'success',
-          title: 'Email Sent!',
-          text: `Approval email successfully sent to ${applicant.name}`,
-          confirmButtonColor: '#3085d6'
+          icon: "success",
+          title: "Email Sent",
+          text: `Approval email sent to ${applicant.email}`,
+          confirmButtonColor: "#278659",
         });
 
-        setApplications(prev =>
-          prev.map(app => app.id === applicant.id ? { ...app, status: "Done" } : app)
+        setApplications((prev) =>
+          prev.map((app) =>
+            app.id === applicant.id ? { ...app, status: "Done" } : app
+          )
         );
       } else {
-        // SweetAlert2 error
         Swal.fire({
-          icon: 'error',
-          title: 'Email Failed',
-          text: `Failed to send email: ${result.error}`,
-          confirmButtonColor: '#d33'
+          icon: "error",
+          title: "Email Failed",
+          text: `Failed to send email: ${result.error || "Unknown error"}`,
+          confirmButtonColor: "#B91C1C",
         });
       }
     } catch (err) {
       console.error(err);
       Swal.fire({
-        icon: 'error',
-        title: 'Email Failed',
-        text: 'Failed to send email. Check server connection.',
-        confirmButtonColor: '#d33'
+        icon: "error",
+        title: "Email Failed",
+        text: "Failed to send email. Check server connection.",
+        confirmButtonColor: "#B91C1C",
       });
     }
 
-    setSending(prev => ({ ...prev, [applicant.id]: false }));
+    setSending((prev) => ({ ...prev, [applicant.id]: false }));
   };
 
-  // Filter & sort applications
   const filteredApps = applications
-    .filter(app =>
-      app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.applicationId.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    .filter((app) => {
+      const q = searchTerm.toLowerCase();
+      return (
+        String(app.name || "").toLowerCase().includes(q) ||
+        String(app.email || "").toLowerCase().includes(q) ||
+        String(app.applicationId || "").toLowerCase().includes(q)
+      );
+    })
     .sort((a, b) => {
       if (!sortBy) return 0;
-      let valA, valB;
-      if (sortBy === "name") { valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); }
-      else if (sortBy === "phone") { valA = a.phone; valB = b.phone; }
-      else if (sortBy === "applicationId") { valA = a.applicationId; valB = b.applicationId; }
-      else if (sortBy === "date") { valA = new Date(a.date); valB = new Date(b.date); }
-      else if (sortBy === "dateDistributed") { valA = new Date(a.dateDistributed); valB = new Date(b.dateDistributed); }
-      else if (sortBy === "status") { valA = a.status.toLowerCase(); valB = b.status.toLowerCase(); }
-      else if (sortBy === "package") { valA = a.package.toLowerCase(); valB = b.package.toLowerCase(); }
-      else if (sortBy === "packageCount") { valA = a.packageCount; valB = b.packageCount; }
+
+      let valA = a[sortBy];
+      let valB = b[sortBy];
+
+      if (sortBy === "date" || sortBy === "dateDistributed") {
+        const dA = valA && valA !== "N/A" ? new Date(valA) : new Date(0);
+        const dB = valB && valB !== "N/A" ? new Date(valB) : new Date(0);
+        return sortOrder === "asc" ? dA - dB : dB - dA;
+      }
+
+      valA = String(valA ?? "").toLowerCase();
+      valB = String(valB ?? "").toLowerCase();
+
       if (valA < valB) return sortOrder === "asc" ? -1 : 1;
       if (valA > valB) return sortOrder === "asc" ? 1 : -1;
       return 0;
@@ -167,7 +172,7 @@ function StaffDistribution() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="flex min-h-screen bg-gray-50">
+      <aside className="flex min-h-screen">
         <StaffSideBar />
       </aside>
 
@@ -177,16 +182,19 @@ function StaffDistribution() {
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
           <header className="flex-shrink-0 mb-4">
             <h1 className="text-[20px] text-gray-800">Staff Distribution</h1>
-            <p className="text-[12px] text-black opacity-[50%]">
+            <p className="text-[12px] text-black/50">
               Manage and coordinate food aid distribution efficiently
             </p>
           </header>
 
-          <section className="flex-1 bg-white rounded-[15px] shadow-md p-4 flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between w-full bg-white rounded-lg px-3 py-2 mb-2">
-              <h2 className="text-[16px] font-semibold text-gray-700 shrink-0">Applicants List</h2>
-              <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1 w-64">
-                <Search className="text-gray-500 w-5 h-5 mr-2" />
+          <section className="flex-1 bg-white rounded-2xl shadow-md p-4 flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between w-full mb-3">
+              <h2 className="text-[16px] font-semibold text-gray-700">
+                Applicants List
+              </h2>
+
+              <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-72">
+                <Search className="text-gray-500 w-4 h-4 mr-2" />
                 <input
                   type="text"
                   placeholder="Search..."
@@ -197,59 +205,124 @@ function StaffDistribution() {
               </div>
             </div>
 
-            <div className="relative flex-1 overflow-auto rounded-lg border border-gray-200">
+            <div className="relative flex-1 overflow-auto rounded-xl">
               <table className="min-w-full text-sm text-left border-collapse">
                 <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
-                  <tr>
-                    <th className="py-3 px-4 w-[120px] cursor-pointer" onClick={() => handleSort("applicationId")}>Application ID</th>
-                    <th className="py-3 px-4 w-[200px] cursor-pointer" onClick={() => handleSort("name")}>Name</th>
-                    <th className="py-3 px-4 w-[140px] cursor-pointer" onClick={() => handleSort("phone")}>Phone Number</th>
-                    <th className="py-3 px-4 w-[130px] cursor-pointer" onClick={() => handleSort("package")}>Package</th>
-                    <th className="py-3 px-4 w-[100px] cursor-pointer text-center" onClick={() => handleSort("packageCount")}>Total Count</th>
-                    <th className="py-3 px-4 w-[140px] cursor-pointer" onClick={() => handleSort("date")}>Date Applied</th>
-                    <th className="py-3 px-4 w-[150px] cursor-pointer" onClick={() => handleSort("dateDistributed")}>Date Distributed</th>
-                    <th className="py-3 px-4 w-[110px] cursor-pointer" onClick={() => handleSort("status")}>Status</th>
-                    <th className="py-3 px-4 w-[180px] text-center">Action</th>
+                  <tr className="text-[12px] uppercase tracking-wide">
+                    <th className="py-3 px-4 w-[140px] cursor-pointer whitespace-nowrap"
+                        onClick={() => handleSort("applicationId")}>
+                      Application ID {sortBy === "applicationId" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
+
+                    <th className="py-3 px-4 w-[220px] cursor-pointer whitespace-nowrap"
+                        onClick={() => handleSort("name")}>
+                      Name {sortBy === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
+
+                    <th className="py-3 px-4 w-[260px] cursor-pointer whitespace-nowrap"
+                        onClick={() => handleSort("email")}>
+                      Email {sortBy === "email" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
+
+                    <th className="py-3 px-4 w-[150px] cursor-pointer whitespace-nowrap"
+                        onClick={() => handleSort("package")}>
+                      Package {sortBy === "package" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
+
+                    <th className="py-3 px-4 w-[120px] cursor-pointer text-center whitespace-nowrap"
+                        onClick={() => handleSort("packageCount")}>
+                      Total Count {sortBy === "packageCount" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
+
+                    <th className="py-3 px-4 w-[150px] cursor-pointer whitespace-nowrap"
+                        onClick={() => handleSort("date")}>
+                      Date Applied {sortBy === "date" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
+
+                    <th className="py-3 px-4 w-[170px] cursor-pointer whitespace-nowrap"
+                        onClick={() => handleSort("dateDistributed")}>
+                      Date Distributed {sortBy === "dateDistributed" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
+
+                    <th className="py-3 px-4 w-[120px] cursor-pointer whitespace-nowrap"
+                        onClick={() => handleSort("status")}>
+                      Status {sortBy === "status" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
+
+                    <th className="py-3 px-4 w-[170px] text-center whitespace-nowrap">
+                      Action
+                    </th>
                   </tr>
                 </thead>
 
-                <tbody className="border-none">
+                <tbody>
                   {filteredApps.map((applicant) => (
-                    <tr key={applicant.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="py-3 font-medium text-gray-800 pl-[20px]">{applicant.applicationId}</td>
-                      <td className="py-3 px-4 font-medium text-gray-800">{applicant.name}</td>
-                      <td className="py-3 px-4 text-gray-600">{applicant.phone}</td>
+                    <tr key={applicant.id}
+                        className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                      <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">
+                        {applicant.applicationId}
+                      </td>
+
+                      <td className="py-3 px-4 font-medium text-gray-900">
+                        {applicant.name}
+                      </td>
+
+                      <td className="py-3 px-4 text-gray-600">
+                        {applicant.email}
+                      </td>
+
                       <td className="py-3 px-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPackageColor(applicant.package)}`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getPackageColor(applicant.package)}`}>
                           {applicant.package}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center text-gray-600 font-medium">{applicant.packageCount}</td>
-                      <td className="py-3 px-4 text-gray-600">{applicant.date}</td>
-                      <td className="py-3 px-4 text-gray-600">{applicant.dateDistributed}</td>
+
+                      <td className="py-3 px-4 text-center text-gray-700 font-medium">
+                        {applicant.packageCount}
+                      </td>
+
+                      <td className="py-3 px-4 text-gray-600 whitespace-nowrap">
+                        {applicant.date}
+                      </td>
+
+                      <td className="py-3 px-4 text-gray-600 whitespace-nowrap">
+                        {applicant.dateDistributed}
+                      </td>
+
                       <td className="py-3 px-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(applicant.status)}`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(applicant.status)}`}>
                           {applicant.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center flex justify-center gap-2">
-                        {applicant.status === "Pending" && (
-                          <button
-                            onClick={() => sendEmailWithQR(applicant)}
-                            className="flex items-center gap-1 bg-[#278659] hover:bg-[#1f6a46] text-white px-3 py-1 rounded-lg text-sm"
-                          >
-                            <Mail size={16} />
-                            {sending[applicant.id] ? "Sending..." : "Send Email"}
-                          </button>
-                        )}
-                        {applicant.status === "Done" && (
-                          <span className="px-3 py-1 rounded-full text-xs font-medium text-green-600 bg-green-100">Done</span>
-                        )}
+
+                      <td className="py-3 px-4">
+                        <div className="flex justify-center">
+                          {applicant.status === "Pending" ? (
+                            <button
+                              onClick={() => sendEmailWithQR(applicant)}
+                              className="inline-flex items-center gap-2 bg-[#278659] hover:bg-[#1f6a46] text-white px-4 py-2 rounded-lg text-sm font-medium"
+                            >
+                              <Mail size={16} />
+                              {sending[applicant.id] ? "Sending..." : "Send Email"}
+                            </button>
+                          ) : (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-green-700 bg-green-100">
+                              Done
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
-                </tbody>
 
+                  {filteredApps.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="py-10 text-center text-gray-500">
+                        No applicants found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
               </table>
             </div>
           </section>

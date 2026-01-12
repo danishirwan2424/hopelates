@@ -1,10 +1,11 @@
+// server/db.js
 const { Pool } = require("pg");
 
 const pool = new Pool({
-  user: "postgres",
   host: "localhost",
+  user: "postgres",
+  password: "1234",
   database: "hopeplates",
-  password: "1234", // 🔴 COPY FROM DBEAVER
   port: 5432,
 });
 

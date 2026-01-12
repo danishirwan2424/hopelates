@@ -1,113 +1,217 @@
-import React from "react";
-import Navigator from "../LandingPage_cmp/Navigator";
-import DonateImg from "../images/People3.jpg"; 
-import Footer from "../LandingPage_cmp/Footer";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Minus, ShoppingCart } from "lucide-react";
 
-function Donations() {
+function Donation() {
+  const navigate = useNavigate();
+  const [packageQuantities, setPackageQuantities] = useState({
+    A: 0,
+    B: 0,
+    C: 0
+  });
+
+  const packages = [
+    {
+      id: "A",
+      name: "PACKAGE A",
+      price: 20,
+      pax: "FOR 1-3 PAX",
+      items: ["RICE", "BREAD", "BISCUITS"]
+    },
+    {
+      id: "B",
+      name: "PACKAGE B",
+      price: 50,
+      pax: "FOR 4-6 PAX",
+      items: ["RICE", "BREAD", "BISCUITS"]
+    },
+    {
+      id: "C",
+      name: "PACKAGE C",
+      price: 70,
+      pax: "FOR 7-10 PAX",
+      items: ["RICE", "BREAD", "BISCUITS"]
+    }
+  ];
+
+  const handleQuantityChange = (packageId, change) => {
+    setPackageQuantities(prev => {
+      const newQuantity = Math.max(0, prev[packageId] + change);
+      return { ...prev, [packageId]: newQuantity };
+    });
+  };
+
+  const calculateTotal = () => {
+    return packages.reduce((total, pkg) => {
+      return total + (pkg.price * packageQuantities[pkg.id]);
+    }, 0);
+  };
+
+  const getTotalItems = () => {
+    return Object.values(packageQuantities).reduce((sum, qty) => sum + qty, 0);
+  };
+
+  const handleContinue = () => {
+    const totalItems = getTotalItems();
+    if (totalItems === 0) {
+      alert("Please select at least one package");
+      return;
+    }
+
+    // Create selected packages array with quantities
+    const selectedPackages = packages
+      .filter(pkg => packageQuantities[pkg.id] > 0)
+      .map(pkg => ({
+        ...pkg,
+        quantity: packageQuantities[pkg.id],
+        subtotal: pkg.price * packageQuantities[pkg.id]
+      }));
+
+    navigate("/check-details", { 
+      state: { 
+        packages: selectedPackages,
+        totalAmount: calculateTotal(),
+        totalItems: totalItems
+      } 
+    });
+  };
+
   return (
-    <motion.div
-      className="bg-[#EDEDED] min-h-screen min-w-screen font-sans"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-    <div className="bg-[#EDEDED] min-h-screen font-sans">
-      <Navigator />
-
-      {/* 🟢 Hero Section */}
-      <section className="pt-[150px] text-center px-6">
-        <p className="text-[#019461] font-semibold tracking-wide uppercase">
-          Donate Today
-        </p>
-        <h1 className="text-[48px] md:text-[54px] font-bold leading-tight text-gray-900 mt-2">
-          Your Support Feeds Hope
-        </h1>
-        <p className="text-black/60 text-[16px] max-w-2xl mx-auto mt-4 leading-relaxed">
-          Every contribution helps us deliver food, warmth, and care to those who
-          need it most. Together, we can fight hunger and make a lasting difference.
-        </p>
-      </section>
-
-      {/* 🟢 Donation Info Section */}
-      <section className="py-20 px-6 md:px-12 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* Left Image */}
-        <div className="flex justify-center">
-          <img
-            src={DonateImg}
-            alt="Donation action"
-            className="w-[600px] h-auto object-cover rounded-[20px] shadow-lg"
-          />
+    <div className="min-h-screen bg-[#EDEDED] py-16 px-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Title */}
+        <div className="text-center mb-20 mt-12">
+          <h1 className="text-[36px] font-bold text-gray-900">
+            FOOD DONATION PACKAGE
+          </h1>
         </div>
 
-        {/* Right Content */}
-        <div className="space-y-6 text-left">
-          <h2 className="text-[36px] font-bold text-gray-900">
-            Why Your Donation Matters
-          </h2>
-          <p className="text-black/60 text-[16px] leading-relaxed">
-            Your donation provides essential meals, supports local kitchens, and
-            helps families in crisis. Every ringgit you contribute fuels our
-            mission to ensure no one goes hungry.
-          </p>
-          <ul className="list-disc list-inside text-black/70 space-y-2">
-            <li>RM10 can provide a meal for 3 people.</li>
-            <li>RM50 supports a family with food for a week.</li>
-            <li>RM100 helps run a community kitchen for a day.</li>
-          </ul>
+        {/* Package Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 max-w-6xl mx-auto">
+          {packages.map((pkg) => (
+            <div key={pkg.id} className="flex flex-col">
+              {/* Package Name - Outside Card */}
+              <div className="text-center mb-4">
+                <h3 className="text-[20px] font-bold text-gray-900 underline decoration-2 underline-offset-4 inline-block">
+                  {pkg.name}
+                </h3>
+              </div>
 
-          <button
-            onClick={() => alert("Thank you for your kindness! (Demo Button)")}
-            className="bg-[#019461] text-white font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-md hover:bg-[#017c53] transition-all duration-200"
-          >
-            Donate Now
-          </button>
+              {/* Card */}
+              <div
+                className={`bg-white rounded-[16px] shadow-md transition-all overflow-hidden ${
+                  packageQuantities[pkg.id] > 0
+                    ? "ring-4 ring-[#019461]"
+                    : "hover:shadow-lg"
+                }`}
+              >
+                {/* Image Placeholder */}
+                <div className="bg-gradient-to-br from-[#1a5c8a] to-[#004B7F] h-[180px] flex items-center justify-center relative">
+                  <div className="text-[64px]">📦</div>
+                  {packageQuantities[pkg.id] > 0 && (
+                    <div className="absolute top-3 right-3 bg-[#019461] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-[14px]">
+                      {packageQuantities[pkg.id]}
+                    </div>
+                  )}
+                </div>
+
+                {/* Package Details */}
+                <div className="p-6 text-center">
+                  <p className="text-[28px] font-bold text-gray-900 mb-2">
+                    RM {pkg.price}
+                  </p>
+                  <p className="text-[14px] font-semibold text-gray-600 mb-6">
+                    {pkg.pax}
+                  </p>
+
+                  {/* Items List */}
+                  <ul className="space-y-2 text-left mb-6">
+                    {pkg.items.map((item, index) => (
+                      <li
+                        key={index}
+                        className="text-[14px] text-gray-800 font-medium flex items-center"
+                      >
+                        <span className="mr-2 text-gray-600">•</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Quantity Controls */}
+                  <div className="flex items-center justify-center gap-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => handleQuantityChange(pkg.id, -1)}
+                      disabled={packageQuantities[pkg.id] === 0}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                        packageQuantities[pkg.id] === 0
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      <Minus className="w-5 h-5" />
+                    </button>
+                    <span className="text-[20px] font-bold text-gray-900 w-12 text-center">
+                      {packageQuantities[pkg.id]}
+                    </span>
+                    <button
+                      onClick={() => handleQuantityChange(pkg.id, 1)}
+                      className="w-10 h-10 rounded-full bg-[#019461] text-white hover:bg-[#017a54] flex items-center justify-center transition-all"
+                    >
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </section>
 
-      {/* 🟢 Ways to Donate Section */}
-      <section className="bg-white py-20 px-6 md:px-12 text-center">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <h2 className="text-[38px] font-bold text-gray-900">
-            Ways You Can Contribute
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
-            {/* Option 1 */}
-            <div className="bg-[#F8F8F8] p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
-              <div className="text-4xl mb-4">💳</div>
-              <h3 className="text-[22px] text-black/60 font-semibold mb-2">Online Donation</h3>
-              <p className="text-black/60 text-[15px]">
-                Donate securely through our website using credit/debit card or
-                online banking.
-              </p>
-            </div>
-
-            {/* Option 2 */}
-            <div className="bg-[#F8F8F8] p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
-              <div className="text-4xl mb-4">🏦</div>
-              <h3 className="text-[22px] text-black/60 font-semibold mb-2">Bank Transfer</h3>
-              <p className="text-black/60 text-[15px]">
-                Send your contribution directly to our charity bank account for
-                maximum transparency.
-              </p>
-            </div>
-
-            {/* Option 3 */}
-            <div className="bg-[#F8F8F8] p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
-              <div className="text-4xl mb-4">📦</div>
-              <h3 className="text-[22px] text-black/60 font-semibold mb-2">Food Donations</h3>
-              <p className="text-black/60 text-[15px]">
-                Contribute non-perishable food items and essentials to our
-                community pantry.
-              </p>
+        {/* Cart Summary Bar */}
+        {getTotalItems() > 0 && (
+          <div className="bg-white rounded-[12px] shadow-lg p-6 mb-8 max-w-3xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <ShoppingCart className="w-6 h-6 text-[#019461]" />
+                <div>
+                  <p className="text-[16px] font-semibold text-gray-900">
+                    {getTotalItems()} Package{getTotalItems() > 1 ? 's' : ''} Selected
+                  </p>
+                  <p className="text-[14px] text-gray-600">
+                    {packages.map(pkg => 
+                      packageQuantities[pkg.id] > 0 
+                        ? `${pkg.name}: ${packageQuantities[pkg.id]}` 
+                        : null
+                    ).filter(Boolean).join(', ')}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-[14px] text-gray-600 mb-1">Total Amount</p>
+                <p className="text-[28px] font-bold text-[#019461]">
+                  RM {calculateTotal()}
+                </p>
+              </div>
             </div>
           </div>
+        )}
+
+        {/* Continue Button */}
+        <div className="text-center">
+          <button
+            onClick={handleContinue}
+            disabled={getTotalItems() === 0}
+            className={`font-semibold text-[15px] px-12 py-3 rounded-[8px] transition-all duration-200 ${
+              getTotalItems() > 0
+                ? "bg-[#019461] text-white hover:bg-[#017a54] cursor-pointer"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            Continue to Checkout
+          </button>
         </div>
-      </section>
+      </div>
     </div>
-    </motion.div>
   );
 }
 
-export default Donations;
+export default Donation;

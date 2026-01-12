@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
 import { Edit, Trash2, Search } from "lucide-react";
 import "react-calendar/dist/Calendar.css";
 
-import axios from "axios";
 import Swal from "sweetalert2";
 
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
 function StaffApplication() {
   // ===== Search & Sort States =====
@@ -24,35 +21,147 @@ function StaffApplication() {
     }
   };
 
-  // ===== Application List =====
-  const [appList, setAppList] = useState([]);
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/application")
-      .then((res) => {
-        const mappedData = res.data.map((app) => ({
-          id: app.application_id,
-          name: app.full_name || "N/A",
-          phone: app.phone_number || "N/A",
-          date: app.created_at
-            ? new Date(app.created_at).toLocaleDateString()
-            : "N/A",
-          status: app.status || "Pending",
-          ic: app.ic_no || "N/A",
-          address: app.address || "N/A",
-          postcode: app.postcode || "N/A",
-          city: app.city || "N/A",
-          state: app.state || "N/A",
-          occupation: app.occupation || "N/A",
-          salary: app.salary || "N/A",
-          household: app.family_no || "N/A",
-          email: app.email || "N/A",
-          score: app.score || 0,
-        }));
-        setAppList(mappedData);
-      })
-      .catch((err) => console.error(err));
-  }, []);
+  // ===== Application List (Dummy Data) =====
+  const dummyApplications = [
+    {
+      id: 1,
+      name: "Ahmad bin Abdullah",
+      phone: "012-3456789",
+      date: "1/15/2025",
+      status: "Pending",
+      ic: "920315-10-5432",
+      address: "No. 45, Jalan Merdeka",
+      postcode: "75200",
+      city: "Melaka",
+      state: "Melaka",
+      occupation: "Factory Worker",
+      salary: "1800",
+      household: "5",
+      email: "ahmad.abdullah@email.com",
+      score: 75,
+    },
+    {
+      id: 2,
+      name: "Siti Nurhaliza",
+      phone: "013-9876543",
+      date: "1/20/2025",
+      status: "Completed",
+      ic: "880922-08-3421",
+      address: "No. 12, Taman Harmoni",
+      postcode: "75100",
+      city: "Melaka",
+      state: "Melaka",
+      occupation: "Part-time Cleaner",
+      salary: "1200",
+      household: "4",
+      email: "siti.nurhaliza@email.com",
+      score: 82,
+    },
+    {
+      id: 3,
+      name: "Rajesh Kumar",
+      phone: "014-2345678",
+      date: "1/22/2025",
+      status: "Pending",
+      ic: "950605-14-7654",
+      address: "No. 88, Jalan Bunga Raya",
+      postcode: "75050",
+      city: "Melaka",
+      state: "Melaka",
+      occupation: "Security Guard",
+      salary: "1500",
+      household: "6",
+      email: "rajesh.kumar@email.com",
+      score: 68,
+    },
+    {
+      id: 4,
+      name: "Tan Mei Ling",
+      phone: "016-5432109",
+      date: "1/25/2025",
+      status: "Rejected",
+      ic: "900418-12-8765",
+      address: "No. 23, Lorong Bahagia",
+      postcode: "75260",
+      city: "Melaka",
+      state: "Melaka",
+      occupation: "Restaurant Server",
+      salary: "1600",
+      household: "3",
+      email: "tan.meiling@email.com",
+      score: 45,
+    },
+    {
+      id: 5,
+      name: "Mohd Faizal",
+      phone: "017-8765432",
+      date: "1/28/2025",
+      status: "Pending",
+      ic: "850730-01-4321",
+      address: "No. 67, Jalan Cemerlang",
+      postcode: "75150",
+      city: "Melaka",
+      state: "Melaka",
+      occupation: "Delivery Rider",
+      salary: "1400",
+      household: "7",
+      email: "mohd.faizal@email.com",
+      score: 78,
+    },
+    {
+      id: 6,
+      name: "Lim Hui Ying",
+      phone: "018-3456789",
+      date: "2/1/2025",
+      status: "Completed",
+      ic: "930210-07-2345",
+      address: "No. 34, Taman Sentosa",
+      postcode: "75300",
+      city: "Melaka",
+      state: "Melaka",
+      occupation: "Shop Assistant",
+      salary: "1350",
+      household: "4",
+      email: "lim.huiying@email.com",
+      score: 71,
+    },
+    {
+      id: 7,
+      name: "Kumar a/l Subramaniam",
+      phone: "019-6543210",
+      date: "2/3/2025",
+      status: "Pending",
+      ic: "870825-10-6789",
+      address: "No. 56, Jalan Impian",
+      postcode: "75200",
+      city: "Melaka",
+      state: "Melaka",
+      occupation: "Construction Worker",
+      salary: "1700",
+      household: "5",
+      email: "kumar.subra@email.com",
+      score: 65,
+    },
+    {
+      id: 8,
+      name: "Nur Aisyah",
+      phone: "011-2345678",
+      date: "2/5/2025",
+      status: "Pending",
+      ic: "960512-06-5432",
+      address: "No. 78, Lorong Sejahtera",
+      postcode: "75100",
+      city: "Melaka",
+      state: "Melaka",
+      occupation: "Tailor",
+      salary: "1100",
+      household: "6",
+      email: "nur.aisyah@email.com",
+      score: 80,
+    },
+  ];
+
+  const [appList, setAppList] = useState(dummyApplications);
 
   // ===== Delete Application =====
   const handleDelete = (id) => {
@@ -126,28 +235,13 @@ function StaffApplication() {
       confirmButtonText: "Approve",
     }).then((result) => {
       if (result.isConfirmed) {
-        const appToUpdate = appList.find((app) => app.id === id);
-        axios
-          .put(`http://localhost:5000/api/application/${id}`, {
-            ...appToUpdate,
-            status: "Completed",
-          })
-          .then(() => {
-            setAppList((prev) =>
-              prev.map((app) =>
-                app.id === id ? { ...app, status: "Completed" } : app
-              )
-            );
-            Swal.fire("Approved!", "The application is now approved.", "success");
-            closeModal();
-          })
-          .catch(() => {
-            Swal.fire(
-              "Error",
-              "Something went wrong approving this application.",
-              "error"
-            );
-          });
+        setAppList((prev) =>
+          prev.map((app) =>
+            app.id === id ? { ...app, status: "Completed" } : app
+          )
+        );
+        Swal.fire("Approved!", "The application is now approved.", "success");
+        closeModal();
       }
     });
   };
@@ -202,19 +296,17 @@ function StaffApplication() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="flex min-h-screen bg-gray-50">
+      <aside className="w-64 bg-white">
         <StaffSideBar />
       </aside>
 
       <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] h-screen overflow-hidden">
-        <StaffPanelBar />
-
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
           {/* Header */}
           <header className="flex-shrink-0">
             <h1 className="text-[20px] text-gray-800">Staff Application</h1>
             <p className="text-[12px] text-black opacity-[50%] mb-2">
-              Review, manage, and track all food aid applications efficiently
+              Review and manage all food aid applications
             </p>
           </header>
 
@@ -375,8 +467,6 @@ function StaffApplication() {
               </div>
             </div>
           )}
-
-          <Outlet />
         </section>
       </main>
     </div>

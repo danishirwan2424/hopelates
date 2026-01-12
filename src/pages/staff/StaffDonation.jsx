@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { Outlet } from "react-router-dom";
 import { Plus, Edit2, Trash2 } from "lucide-react";
+=======
+import { Edit, Trash2, Search } from "lucide-react";
+import "react-calendar/dist/Calendar.css";
+
+import { donationStock, donationStats } from "../dataExample/DonationExp";
+
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
 import Swal from "sweetalert2";
 import axios from "axios";
 
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
 const API_URL = "http://localhost:5000/api/packages";
 
@@ -209,11 +216,23 @@ function StaffPackage() {
     <div className="flex min-h-screen bg-gray-50">
       <StaffSideBar />
 
+<<<<<<< HEAD
       <main className="flex-1 px-8 py-4">
         <StaffPanelBar />
 
         <section className="bg-[#F2F1F1] rounded-xl p-4">
           <h1 className="text-xl font-semibold mb-4">Package Management</h1>
+=======
+      <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] h-screen overflow-hidden">
+        <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
+          {/* Header */}
+          <header className="flex-shrink-0">
+            <h1 className="text-[20px] text-gray-800">Staff Donation Stock</h1>
+            <p className="text-[12px] text-black opacity-[50%] mb-2">
+              Track, manage, and monitor all food donation inventory
+            </p>
+          </header>
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="bg-green-700 text-white p-4 rounded-xl">
@@ -253,6 +272,7 @@ function StaffPackage() {
                   {pkg.items.map((i, idx) => (
                     <li key={idx}>• {i}</li>
                   ))}
+<<<<<<< HEAD
                 </ul>
 
                 <div className="flex gap-2 mt-3">
@@ -274,6 +294,12 @@ function StaffPackage() {
           </div>
 
           <Outlet />
+=======
+                </tbody>
+              </table>
+            </div>
+          </section>
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
         </section>
       </main>
 

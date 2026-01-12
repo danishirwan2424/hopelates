@@ -103,6 +103,7 @@ input[type="checkbox"]:checked::after {
 /* Optional hover effect */
 input[type="checkbox"]:hover {
   opacity: 0.8;
+<<<<<<< HEAD
 }
 
 input[type="radio"] {
@@ -158,4 +159,6 @@ input[type="radio"]:checked::after {
   /* removes shadow if any */
   outline: none !important;
   /* removes focus outline */
+=======
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
 }

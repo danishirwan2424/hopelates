@@ -1,6 +1,5 @@
 // StaffReport.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { Outlet } from "react-router-dom";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -21,7 +20,6 @@ import { applications, statusCounts, months, monthlyApplicants } from "../dataEx
 
 // Components
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
 // Register Chart.js components
 ChartJS.register(
@@ -61,9 +59,9 @@ const shadowPlugin = {
 ChartJS.register(shadowPlugin);
 
 // theme colors / gradient stops
-const GRADIENT_TOP = "#278659";
-const GRADIENT_BOTTOM = "#11452E";
-const GRADIENT_LIGHT = "#9BC6B3";
+const GRADIENT_TOP = "#8B5CF6";
+const GRADIENT_BOTTOM = "#6366F1";
+const GRADIENT_LIGHT = "#A78BFA";
 
 function StaffReport() {
   // Animated Stats
@@ -225,11 +223,19 @@ function StaffReport() {
     datasets: [
       {
         data: pieData.map((p) => p.value),
+<<<<<<< HEAD
         backgroundColor: ['#3B82F6', '#A855F7', '#EC4899'],
         hoverBackgroundColor: [
           "#5B9DF8",
           "#BA6FF9",
           "#F06BA8",
+=======
+        backgroundColor: ["#10B981", "#3B82F6", "#EF4444"],
+        hoverBackgroundColor: [
+          "#34D399",
+          "#60A5FA",
+          "#F87171",
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
         ],
         borderWidth: 0,
         _shadow: { color: "rgba(0,0,0,0.12)", blur: 12, offsetY: 6 },
@@ -350,10 +356,15 @@ function StaffReport() {
           <StaffSideBar />
         </aside>
 
+<<<<<<< HEAD
         {/* Main Content */}
         <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-0 h-screen">
           <StaffPanelBar />
 
+=======
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-0 h-screen">
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
         {/* Scrollable Section */}
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-y-auto overflow-x-hidden">
           {/* Header */}
@@ -468,6 +479,7 @@ function StaffReport() {
           {/* Donation Stock Section */}
           <div className="mb-4">
             {/* Donation Stock */}
+<<<<<<< HEAD
             <div className="bg-white rounded-[15px] shadow-md w-full p-6 flex flex-col">
               <h2 className="text-[15px] font-semibold text-gray-700 mb-5">Donation Stock</h2>
               <div className="flex flex-col gap-6 mt-2">
@@ -480,13 +492,33 @@ function StaffReport() {
                 ].map((data, index) => {
                   const colors = ['#3B82F6', '#A855F7', '#EC4899', '#3B82F6', '#A855F7'];
                   const color = colors[index % colors.length];
+=======
+            <div className="bg-white rounded-[15px] shadow-md flex-1 min-w-[400px] p-4 flex flex-col">
+              <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Donation Stock (Category Breakdown)</h2>
+              <div className="flex flex-col gap-4 mt-2 overflow-y-auto max-h-[300px] pb-7">
+                {Object.entries(categoryData).map(([category, qty], index) => {
+                  const widthPercent = Math.min((qty / maxCategoryQty) * 100, 100);
+                  const colors = [
+                    { start: "#3B82F6", end: "#6366F1" },
+                    { start: "#10B981", end: "#14B8A6" },
+                    { start: "#F59E0B", end: "#F97316" },
+                    { start: "#8B5CF6", end: "#A78BFA" },
+                    { start: "#EC4899", end: "#F472B6" },
+                    { start: "#EF4444", end: "#F87171" },
+                  ];
+                  const colorPair = colors[index % colors.length];
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
                   return (
                     <div key={index}>
                       <div className="flex justify-between items-center mb-2">
                         <p className="text-[14px] text-gray-700">{data.item}</p>
                       </div>
                       <div className="h-4 w-full bg-gray-200 rounded">
+<<<<<<< HEAD
                         <div className="h-4 rounded" style={{ width: `${data.percentage}%`, backgroundColor: color }} />
+=======
+                        <div className="h-4 rounded" style={{ width: `${widthPercent}%`, background: `linear-gradient(90deg, ${colorPair.start}, ${colorPair.end})` }} />
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
                       </div>
                     </div>
                   );
@@ -494,8 +526,6 @@ function StaffReport() {
               </div>
             </div>
           </div>
-
-          <Outlet />
         </section>
       </main>
     </div>

@@ -1,10 +1,13 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
+=======
+import React, { useState } from "react";
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
 import { Mail, Search } from "lucide-react";
 import Swal from "sweetalert2";
 
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
 function StaffDistribution() {
   const [applications, setApplications] = useState([]);
@@ -172,8 +175,6 @@ function StaffDistribution() {
       </aside>
 
       <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] h-screen overflow-hidden">
-        <StaffPanelBar />
-
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
           <header className="flex-shrink-0 mb-4">
             <h1 className="text-[20px] text-gray-800">Staff Distribution</h1>
@@ -253,8 +254,6 @@ function StaffDistribution() {
               </table>
             </div>
           </section>
-
-          <Outlet />
         </section>
       </main>
     </div>

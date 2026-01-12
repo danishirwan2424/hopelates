@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { Outlet } from "react-router-dom";
 import { Edit, Trash2, Search, X } from "lucide-react";
 import { Bar } from "react-chartjs-2";
+=======
+import { Edit, Trash2, Search } from "lucide-react";
+import { Doughnut, Bar } from "react-chartjs-2";
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,7 +18,6 @@ import {
 } from "chart.js";
 
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
-import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 import Swal from "sweetalert2";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
@@ -146,11 +150,22 @@ function StaffReceipt() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+<<<<<<< HEAD
       <StaffSideBar />
       <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] max-h-screen">
         <StaffPanelBar />
 
         <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 max-h-screen overflow-hidden">
+=======
+      {/* Sidebar */}
+      <aside className="flex min-h-screen bg-gray-50">
+        <StaffSideBar />
+      </aside>
+
+      {/* Main */}
+      <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-screen overflow-hidden">
+        <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 overflow-hidden">
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
           {/* Header */}
           <header className="flex-shrink-0">
             <h1 className="text-[20px] text-gray-800">Staff Receipt</h1>
@@ -301,6 +316,7 @@ function StaffReceipt() {
             </div>
           </section>
 
+<<<<<<< HEAD
           {/* ===== Donation Modal ===== */}
           {selectedDonation && (
             <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -347,6 +363,38 @@ function StaffReceipt() {
           )}
 
           <Outlet />
+=======
+          {/* Bar Chart */}
+          <div className="mt-4 bg-white p-4 rounded-xl shadow-md h-[300px] flex flex-col">
+            <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
+              Donations by Category
+            </h2>
+            <div className="flex-1">
+              <Bar
+                data={{
+                  labels: categories,
+                  datasets: [
+                    {
+                      label: "Quantity",
+                      data: quantities,
+                      backgroundColor: ["#3B82F6", "#8B5CF6", "#10B981", "#F59E0B", "#EF4444", "#14B8A6", "#EC4899", "#6366F1"],
+                      borderRadius: 6,
+                    },
+                  ],
+                }}
+                options={{
+                  plugins: { legend: { display: false } },
+                  scales: {
+                    x: { ticks: { color: "#000" }, grid: { display: false } },
+                    y: { ticks: { color: "#000", stepSize: 1 }, grid: { color: "#E5E7EB" } },
+                  },
+                  responsive: true,
+                  maintainAspectRatio: false,
+                }}
+              />
+            </div>
+          </div>
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
         </section>
       </main>
     </div>

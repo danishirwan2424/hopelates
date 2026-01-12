@@ -11,6 +11,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+<<<<<<< HEAD
 
 const handleLogin = async (e) => {
   e.preventDefault();
@@ -86,6 +87,19 @@ const handleLogin = async (e) => {
 };
 
 
+=======
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    // Dummy authentication
+    if (email === "staff@email.com" && password === "password") {
+      navigate("/staff-dashboard");
+    } else {
+      alert("Invalid email or password");
+    }
+  };
+
+>>>>>>> fd360aa98d21368072743ebea494a58444b42054
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row font-sans overflow-hidden bg-white">
       {/* 🟢 Left Side - Form Section */}

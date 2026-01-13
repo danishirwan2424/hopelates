@@ -8,20 +8,19 @@ import {
   Outlet,
   useLocation,
 } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 
-// ✅ Layout Components
+// Layout Components
 import Navbar from "./LandingPage_cmp/Navigator";
 import Footer from "./LandingPage_cmp/Footer";
 
-// ✅ Main Pages
+// Main Pages
 import Landing from "./pages/LandingPage";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
 import Donations from "./pages/Donations";
 import Contact from "./pages/Contact";
 
-// ✅ Staff Pages
+// Staff Pages
 import StaffDash from "./pages/staff/StaffDash";
 import StaffApplication from "./pages/staff/StaffApplication";
 import StaffProfile from "./pages/staff/StaffProfile";
@@ -30,11 +29,11 @@ import StaffDonation from "./pages/staff/StaffDonation";
 import StaffReport from "./pages/staff/StaffReport";
 import StaffReceipt from "./pages/staff/StaffReceipt";
 
-// ✅ Auth Pages
+// Auth Pages
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 
-// ✅ Forms
+// Forms
 import Application_donate from "./pages/forms/ApplicationApply";
 import DonationApply from "./pages/forms/DonationApply";
 import ProfileApplicants from "./pages/forms/ProfileForms";
@@ -42,40 +41,22 @@ import ProfileDonor from "./pages/forms/ProfileDonor";
 import MyDonation from "./pages/forms/MyDonation";
 import DonationConfirmation from "./pages/forms/Forms_cmp/DonationConfirmation";
 
-// ✅ PDF Export Page
+// PDF Export
 import PdfExp from "./pages/staff/StaffPage_cmp/pdfExp";
 
-// ✅ 404 Page
+// 404
 import NotFound from "./pages/NotFound";
 
-// ✅ Scroll to Top
+// Scroll to top on route change
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0 });
   }, [pathname]);
   return null;
 }
 
-// ✅ Animation Wrapper
-function AnimatedPage({ children }) {
-  const location = useLocation();
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.key}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
-  );
-}
-
-// ✅ Public Layout
+// Public Layout
 function PublicLayout() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -86,7 +67,7 @@ function PublicLayout() {
   );
 }
 
-// ✅ Staff Layout
+// Staff Layout
 function StaffLayout() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -95,22 +76,17 @@ function StaffLayout() {
   );
 }
 
-// ✅ Donation Layout (IMPORTANT)
+// Donation Layout (NO animation, NO remount)
 function DonationLayout() {
-  return (
-    <AnimatedPage>
-      <Outlet />
-    </AnimatedPage>
-  );
+  return <Outlet />;
 }
 
-// ✅ App Router
 function App() {
   return (
     <Router>
       <ScrollToTop />
-      <Routes>
 
+      <Routes>
         {/* Redirect root */}
         <Route path="/" element={<Navigate to="/landing" />} />
 
@@ -135,17 +111,17 @@ function App() {
           <Route path="/pdf-report" element={<PdfExp />} />
         </Route>
 
-        {/* Auth Pages */}
-        <Route path="/login" element={<AnimatedPage><Login /></AnimatedPage>} />
-        <Route path="/signUp" element={<AnimatedPage><SignUp /></AnimatedPage>} />
+        {/* Auth */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signUp" element={<SignUp />} />
 
         {/* Forms */}
-        <Route path="/application" element={<AnimatedPage><Application_donate /></AnimatedPage>} />
-        <Route path="/applicants-profile" element={<AnimatedPage><ProfileApplicants /></AnimatedPage>} />
-        <Route path="/donor-profile" element={<AnimatedPage><ProfileDonor /></AnimatedPage>} />
-        <Route path="/donation-tracking" element={<AnimatedPage><MyDonation /></AnimatedPage>} />
+        <Route path="/application" element={<Application_donate />} />
+        <Route path="/applicants-profile" element={<ProfileApplicants />} />
+        <Route path="/donor-profile" element={<ProfileDonor />} />
+        <Route path="/donation-tracking" element={<MyDonation />} />
 
-        {/* ✅ DONATION FLOW (THIS IS THE KEY PART) */}
+        {/* ✅ DONATION FLOW (FINAL & STABLE) */}
         <Route path="/donation" element={<DonationLayout />}>
           <Route index element={<DonationApply />} />
           <Route
@@ -154,15 +130,8 @@ function App() {
           />
         </Route>
 
-        {/* ✅ SAFETY REDIRECT (OPTIONAL BUT RECOMMENDED) */}
-        <Route
-          path="/donation-confirmation"
-          element={<Navigate to="/donation/donation-confirmation" />}
-        />
-
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
-
       </Routes>
     </Router>
   );

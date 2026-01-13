@@ -366,10 +366,11 @@ export default function DonationApply() {
                         packages: selectedPackages,
                         totalAmount: calculateTotal(),
                         totalItems: getTotalItems(),
-                        donor: userDetails.fullName,
-                        transactionDate: new Date().toLocaleDateString(),
+                        donorName: userDetails.fullName, // ✅ rename
+                        paymentMethod: "Online Transfer", // ✅ add
+                    transactionDate: new Date().toLocaleString(), // ✅ keep consistent
                       };
-                      navigate("/donation-confirmation", { state: donationData });
+                      navigate("/donation/donation-confirmation", { state: donationData });
                     }}
                     disabled={!uploadedFile}
                     className={`flex-1 font-semibold text-[14px] py-2.5 rounded-[6px] transition-all duration-200 ${

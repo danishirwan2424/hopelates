@@ -8,45 +8,115 @@ const router = express.Router();
 // ======================
 router.post("/register", async (req, res) => {
   try {
-    console.log("SIGNUP BODY:", req.body); // Debug
+    console.log("SIGNUP BODY:", req.body);
 
-    const { full_name, email, password, role } = req.body;
+    // 🔴 FIX: use let, not const
+    let { full_name, email, password, role, accessCode } = req.body;
+
     if (!full_name || !email || !password || !role) {
       return res.status(400).json({ message: "All fields required" });
     }
 
-     // ✅ FORMAT HERE
+    // normalize
     email = email.toLowerCase().trim();
     full_name = full_name.toUpperCase().trim();
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // =====================
+    // DONOR
+    // =====================
     if (role === "donor") {
-      const existing = await authPool.query("SELECT 1 FROM donor WHERE email = $1", [email]);
-      if (existing.rowCount > 0) return res.status(409).json({ message: "Email already registered as donor" });
+      const existing = await authPool.query(
+        "SELECT 1 FROM donor WHERE email = $1",
+        [email]
+      );
+      if (existing.rowCount > 0)
+        return res.status(409).json({ message: "Email already registered as donor" });
 
-      await authPool.query("INSERT INTO donor (full_name, email, password) VALUES ($1,$2,$3)", [full_name, email, hashedPassword]);
+      await authPool.query(
+        "INSERT INTO donor (full_name, email, password) VALUES ($1,$2,$3)",
+        [full_name, email, hashedPassword]
+      );
       return res.status(201).json({ message: "Donor signup successful" });
     }
+
     // =====================
-    // APPLICANT SIGNUP
+    // BENEFICIARY
     // =====================
     if (role === "beneficiary") {
       const existing = await authPool.query(
         "SELECT 1 FROM beneficiary WHERE email = $1",
         [email]
       );
+      if (existing.rowCount > 0)
+        return res.status(409).json({ message: "Email already registered as beneficiary" });
 
-      await authPool.query("INSERT INTO beneficiary (full_name, email, password) VALUES ($1,$2,$3)", [full_name, email, hashedPassword]);
-      return res.status(201).json({ message: "Applicant signup successful" });
+      await authPool.query(
+        "INSERT INTO beneficiary (full_name, email, password) VALUES ($1,$2,$3)",
+        [full_name, email, hashedPassword]
+      );
+      return res.status(201).json({ message: "Beneficiary signup successful" });
     }
 
+    // =====================
+    // STAFF
+    // =====================
+    if (role === "staff") {
+  // access code check
+  if (accessCode !== "8888") {
+    return res.status(403).json({ message: "Invalid staff access code" });
+  }
+
+  // split full name
+  const parts = full_name.trim().split(/\s+/);
+  const first_name = parts[0];
+  const last_name = parts.slice(1).join(" ") || "-";
+
+  // ✅ REQUIRED DEFAULT VALUES (VERY IMPORTANT)
+  const phone_number = "0000000000";
+  const gender = "Male";
+  const ic_num = "000000-00-0000";
+  const positions = "Staff";
+
+  const existing = await authPool.query(
+    "SELECT 1 FROM staff WHERE email = $1",
+    [email]
+  );
+
+  if (existing.rowCount > 0) {
+    return res.status(409).json({ message: "Email already registered as staff" });
+  }
+
+  await authPool.query(
+    `INSERT INTO staff
+     (first_name, last_name, phone_number, positions, gender, ic_num, email, password)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+    [
+      first_name,
+      last_name,
+      phone_number,
+      positions,
+      gender,
+      ic_num,
+      email,
+      hashedPassword
+    ]
+  );
+
+  return res.status(201).json({ message: "Staff signup successful" });
+}
+
+
     return res.status(400).json({ message: "Invalid role" });
+
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    console.error("REGISTER ERROR:", err); // 👈 you will no longer see const error
     return res.status(500).json({ message: "Server error during registration" });
   }
 });
+
+
 
 // ======================
 // LOGIN
@@ -61,32 +131,33 @@ router.post("/login", async (req, res) => {
     }
 
     // =====================
-// CHECK STAFF
-// =====================
-const staffResult = await authPool.query(
-  "SELECT * FROM staff WHERE email = $1",
-  [email]
-);
+    // CHECK STAFF
+    // =====================
+    const staffResult = await authPool.query(
+    "SELECT * FROM staff WHERE email = $1",
+    [email]
+    );
 
-if (staffResult.rowCount > 0) {
-  const staff = staffResult.rows[0];
+    if (staffResult.rowCount > 0) {
+    const staff = staffResult.rows[0];
 
-  // ⚠️ TEMP: plain text comparison
-  // (use bcrypt later if you want)
-  if (password !== staff.password) {
+    // ✅ bcrypt comparison (CORRECT)
+    const match = await bcrypt.compare(password, staff.password);
+    if (!match) {
     return res.status(401).json({ message: "Invalid credentials" });
-  }
+    }
 
-  return res.json({
+    return res.json({
     message: "Login successful",
     role: "staff",
     user: {
       staff_id: staff.staff_id,
       full_name: `${staff.first_name} ${staff.last_name}`,
       email: staff.email,
-    },
-  });
-}
+      },
+      });
+    }
+
 
     // =====================
     // CHECK DONOR
@@ -279,6 +350,55 @@ router.post("/staff/profile", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+/* ======================
+  UPDATE STAFF PROFILE
+====================== */
+router.put("/staff/profile/:staff_id", async (req, res) => {
+  const { staff_id } = req.params;
+  const {
+    first_name,
+    last_name,
+    phone_number,
+    gender,
+    ic_num,
+    address,
+  } = req.body;
+
+  try {
+    await authPool.query(
+      `
+      UPDATE staff
+      SET
+        first_name = $1,
+        last_name = $2,
+        phone_number = $3,
+        gender = $4,
+        ic_num = $5,
+        address = $6
+      WHERE staff_id = $7
+      `,
+      [
+        first_name,
+        last_name,
+        phone_number,
+        gender,
+        ic_num,
+        address,
+        staff_id,
+      ]
+    );
+
+    return res.json({ message: "Profile updated successfully" });
+  } catch (err) {
+    console.error("UPDATE STAFF ERROR:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+
 
 
 

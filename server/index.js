@@ -7,13 +7,16 @@ app.use(cors());
 app.use(express.json());
 
 // ======================
+// USER ACCESS AND MANAGEMENT ROUTES (DO NOT TOUCH)
+// ======================
+const authRoutes = require("./routes/auth");
+app.use("/api/auth", authRoutes);
+
+// ======================
 // APPLICATION ROUTES (DO NOT TOUCH)
 // ======================
 const applicationRoutes = require("./routes/application");
-const authRoutes = require("./routes/auth");
-
 app.use("/api/application", applicationRoutes);
-app.use("/api/auth", authRoutes);
 
 // ======================
 // TEMPORARY DONATION DB TEST ROUTE

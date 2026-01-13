@@ -19,6 +19,9 @@ function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("donor");
 
+  // 🔴 ADDED: staff access code
+  const [accessCode, setAccessCode] = useState("");
+
   // 🔴 ADDED: submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +36,12 @@ function SignUp() {
       return;
     }
 
+     // 🔴 NEW: staff access code validation
+    if (role === "staff" && accessCode !== "8888") {
+      alert("Invalid staff access code");
+      return;
+    }
+
     try {
       const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
@@ -42,6 +51,7 @@ function SignUp() {
           email,
           password,
           role,
+          accessCode: role === "staff" ? accessCode : null, // 🔴 NEW
         }),
       });
 
@@ -170,9 +180,40 @@ function SignUp() {
                   />
                   <span className="text-gray-700 text-sm">Beneficiary</span>
                 </label>
+
+                    {/* 🔴 NEW: Staff */}
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="role"
+                    checked={role === "staff"}
+                    onChange={() => setRole("staff")}
+                    className="w-4 h-4 text-[#019461]"
+                  />
+                  <span className="text-gray-700 text-sm">Staff</span>
+                </label>
+
               </div>
             </div>
 
+             {/* 🔴 NEW: Access Code */}
+            {role === "staff" && (
+              <div>
+                <label className="block text-gray-600 text-sm font-medium mb-1">
+                  Staff Access Code
+                </label>
+                <input
+                  type="password"
+                  placeholder="Enter access code"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:ring-2 focus:ring-[#019461] focus:outline-none"
+                  value={accessCode}
+                  onChange={(e) =>
+                    setAccessCode(e.target.value)
+                  }
+                />
+              </div>
+            )}
+            
             <div className="flex flex-col gap-3 pt-3">
               <button
                 type="submit"

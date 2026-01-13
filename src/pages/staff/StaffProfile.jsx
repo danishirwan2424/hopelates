@@ -20,6 +20,25 @@ const API_BASE = "/api"; // change to your base URL if needed
 const storedUser = JSON.parse(localStorage.getItem("user"));
 const STAFF_ID = storedUser?.staff_id;
 
+// ===== Input format helpers =====
+
+// Phone: XXX-XXXXXXX
+const formatPhone = (value) => {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  if (digits.length <= 3) return digits;
+  return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+};
+
+// IC: XXXXXX-XX-XXXX
+const formatIC = (value) => {
+  const digits = value.replace(/\D/g, "").slice(0, 12);
+  if (digits.length <= 6) return digits;
+  if (digits.length <= 8)
+    return `${digits.slice(0, 6)}-${digits.slice(6)}`;
+  return `${digits.slice(0, 6)}-${digits.slice(6, 8)}-${digits.slice(8)}`;
+};
+
+
 function StaffProfile() {
   // UI state
   const [loading, setLoading] = useState(true);
@@ -85,22 +104,42 @@ function StaffProfile() {
 
   // helpers: open edit modal & set form
   const openEdit = () => {
-    setForm({
-      ...staff,
-      // split name if needed
-      firstName: staff.first_name || staff.name?.split?.(" ")?.[0] || "",
-      lastName: staff.last_name || staff.name?.split?.(" ").slice(1).join(" ") || "",
-    });
-    setProfilePreview(null);
-    setCoverPreview(null);
-    setEditing(true);
-  };
+  setForm({
+    ...staff,
+    first_name: staff.first_name || "",
+    last_name: staff.last_name || "",
+    phone_number: staff.phone_number || "",
+    gender: staff.gender || "",
+    ic_num: staff.ic_num || "",
+    address: staff.address || "",
+  });
+  setEditing(true);
+};
+
 
   // handle form input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
-  };
+  const { name, value } = e.target;
+
+  if (name === "phone_number") {
+    setForm((f) => ({
+      ...f,
+      phone_number: formatPhone(value),
+    }));
+    return;
+  }
+
+  if (name === "ic_num") {
+    setForm((f) => ({
+      ...f,
+      ic_num: formatIC(value),
+    }));
+    return;
+  }
+
+  setForm((f) => ({ ...f, [name]: value }));
+};
+
 
   // handle profile file pick
   const handleProfilePick = (e) => {
@@ -132,73 +171,58 @@ function StaffProfile() {
     coverFileRef.current = file;
   };
 
+  const user = JSON.parse(localStorage.getItem("user"));
   // Save handler: send to API as multipart/form-data
   const handleSave = async () => {
-    setSaving(true);
+  try {
 
-    try {
-      const fd = new FormData();
-     fd.append("first_name", form.first_name);
-    fd.append("last_name", form.last_name);
-    fd.append("phone_number", form.phone_number);
-    fd.append("positions", form.positions);
-    fd.append("gender", form.gender);
-    fd.append("ic_num", form.ic_num);
-    fd.append("address", form.address);
-
-
-      if (profileFileRef.current) {
-        fd.append("profile_picture", profileFileRef.current);
-      }
-      if (coverFileRef.current) {
-        fd.append("cover_photo", coverFileRef.current);
-      }
-
-      // Example: PATCH to /api/staff/:id
-      const res = await axios.patch(`${API_BASE}/staff/${STAFF_ID}`, fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      // use returned data if provided
-      const updated = res?.data || { ...staff, ...form };
-
-      // update local state
-      setStaff((s) => ({ ...s, ...updated }));
-
-      // create activity log entry and push to logs (you should let backend create it too)
-      const newLog = {
-        id: Date.now(),
-        action: "Updated profile",
-        detail: "Profile fields updated",
-        actor: "current_user", // replace with actual actor id / name
-        timestamp: new Date().toISOString(),
-      };
-
-      // optionally post log to backend
-      try {
-        await axios.post(`${API_BASE}/staff/${STAFF_ID}/logs`, newLog);
-      } catch {
-        // ignore if logs API missing — still append locally
-      }
-
-      setLogs((prev) => [newLog, ...prev]);
-
-      // update image URLs if backend returned them
-      if (updated.profileImage) setProfilePreview(null);
-      if (updated.coverPhoto) setCoverPreview(null);
-
-      alert("Profile saved successfully.");
-      setEditing(false);
-    } catch (err) {
-      console.error("save error", err);
-      alert("Failed to save profile. See console for details.");
-    } finally {
-      setSaving(false);
-      // cleanup file refs
-      profileFileRef.current = null;
-      coverFileRef.current = null;
+    // ===== Validation =====
+    if (form.phone_number.replace(/\D/g, "").length < 10) {
+      alert("Phone number must be at least 10 digits");
+      return;
     }
-  };
+
+    if (form.ic_num.replace(/\D/g, "").length < 12) {
+      alert("IC number must be 12 digits");
+      return;
+    }
+
+    const res = await fetch(
+      `http://localhost:5000/api/auth/staff/profile/${user.staff_id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: form.first_name,
+          last_name: form.last_name,
+          phone_number: form.phone_number,
+          gender: form.gender,
+          ic_num: form.ic_num,
+          address: form.address,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const text = await res.text(); // 🔴 SAFE DEBUG
+      throw new Error(text);
+    }
+
+    const data = await res.json();
+
+    setStaff((prev) => ({
+      ...prev,
+      ...form,
+    }));
+
+    setEditing(false);
+    alert("Profile updated successfully");
+  } catch (err) {
+    console.error("SAVE ERROR:", err);
+    alert("Server error");
+  }
+};
+
 
   // cancel edit: cleanup previews and close
   const handleCancel = () => {
@@ -417,7 +441,7 @@ function StaffProfile() {
           <div>
             <label className="text-xs font-semibold text-[#11452E]">First Name</label>
             <input
-              name="firstName"
+              name="first_ame"
               value={form.first_name || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
@@ -427,7 +451,7 @@ function StaffProfile() {
           <div>
             <label className="text-xs font-semibold text-[#11452E]">Last Name</label>
             <input
-              name="lastName"
+              name="last_name"
               value={form.last_name || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
@@ -437,7 +461,7 @@ function StaffProfile() {
           <div>
             <label className="text-xs font-semibold text-[#11452E]">Phone</label>
             <input
-              name="phone"
+              name="phone_number"
               value={form.phone_number || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
@@ -447,9 +471,9 @@ function StaffProfile() {
           <div>
             <label className="text-xs font-semibold text-[#11452E]">Position</label>
             <input
-              name="position"
-              value={form.positions || ""}
-              onChange={handleChange}
+              name="positions"
+              value={form.positions}
+              disabled
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
             />
           </div>
@@ -471,7 +495,7 @@ function StaffProfile() {
           <div className="md:col-span-2">
             <label className="text-xs font-semibold text-[#11452E]">IC / Passport</label>
             <input
-              name="ic"
+              name="ic_num"
               value={form.ic_num || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"

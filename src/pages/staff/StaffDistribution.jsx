@@ -6,6 +6,8 @@ import Swal from "sweetalert2";
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
+const API_BASE = "http://localhost:5000";
+
 function StaffDistribution() {
   const [applications, setApplications] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,50 +15,27 @@ function StaffDistribution() {
   const [sortOrder, setSortOrder] = useState("asc");
   const [sending, setSending] = useState({});
 
-  const setDefaultRow = () => {
-    setApplications([
-      {
-        applicationId: "4",
-        name: "N/A",
-        email: "N/A",
-        package: "None",
-        packageCount: 1,
-        date: "N/A",
-        dateDistributed: "N/A",
-        status: "Pending",
-        id: "default",
-      },
-    ]);
-  };
-
   const fetchApplications = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/staff-distribution");
+      const response = await fetch(`${API_BASE}/api/staff-distribution`);
       const result = await response.json();
-
       const rows = Array.isArray(result?.data) ? result.data : [];
 
-      if (rows.length > 0) {
-        // Make sure all fields exist (front-end safe)
-        setApplications(
-          rows.map((row, index) => ({
-            applicationId: row.applicationId ?? `AP${String(index + 1).padStart(3, "0")}`,
-            name: row.name ?? "N/A",
-            email: row.email ?? "N/A",
-            package: row.package ?? "None",
-            packageCount: row.packageCount ?? 1,
-            date: row.date ?? "N/A",
-            dateDistributed: row.dateDistributed ?? "N/A",
-            status: row.status ?? "Pending",
-            id: row.id ?? `db-${index}`,
-          }))
-        );
-      } else {
-        setDefaultRow();
-      }
+      setApplications(
+        rows.map((row, index) => ({
+          applicationId: row.applicationId ?? `AP${String(index + 1).padStart(3, "0")}`,
+          name: row.name ?? "N/A",
+          email: row.email ?? "N/A",
+          package: row.package ?? "None",
+          packageCount: row.packageCount ?? 1,
+          dateDistributed: row.dateDistributed ?? "N/A",
+          status: row.status ?? "Pending",
+          id: row.id ?? `dist-${index}`,
+        }))
+      );
     } catch (err) {
       console.error("Failed to fetch staff distribution:", err);
-      setDefaultRow();
+      setApplications([]);
     }
   };
 
@@ -67,9 +46,8 @@ function StaffDistribution() {
   }, []);
 
   const handleSort = (field) => {
-    if (sortBy === field) {
-      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
+    if (sortBy === field) setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    else {
       setSortBy(field);
       setSortOrder("asc");
     }
@@ -88,55 +66,72 @@ function StaffDistribution() {
   const getStatusColor = (status) => {
     const colors = {
       Done: "text-green-700 bg-green-100",
-      Completed: "text-green-700 bg-green-100",
       Pending: "text-yellow-700 bg-yellow-100",
       Cancelled: "text-red-700 bg-red-100",
+      Completed: "text-blue-700 bg-blue-100",
     };
     return colors[status] || "text-gray-700 bg-gray-100";
   };
 
-  // Optional: keep your email function (doesn't affect table fetching)
-  const sendEmailWithQR = async (applicant) => {
+  // ✅ DUMMY send email endpoint
+  const sendEmailInDb = async (distributionId) => {
+    const url = `${API_BASE}/api/staff-distribution/${encodeURIComponent(
+      distributionId
+    )}/send-email`;
+
+    let r;
+    try {
+      r = await fetch(url, { method: "POST" });
+    } catch (e) {
+      return { success: false, message: `NETWORK ERROR: ${e.message}` };
+    }
+
+    let body = null;
+    try {
+      body = await r.json();
+    } catch {
+      body = null;
+    }
+
+    if (!r.ok) {
+      return {
+        success: false,
+        message: `HTTP ${r.status} ${r.statusText} | ${body?.message || "No body"}`,
+      };
+    }
+
+    return body || { success: true };
+  };
+
+  const sendEmailAndUpdate = async (applicant) => {
     setSending((prev) => ({ ...prev, [applicant.id]: true }));
 
-    try {
-      const response = await fetch("http://localhost:5000/api/email/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(applicant),
-      });
-      const result = await response.json();
+    const res = await sendEmailInDb(applicant.id);
 
-      if (result.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Email Sent",
-          text: `Approval email sent to ${applicant.email}`,
-          confirmButtonColor: "#278659",
-        });
-
-        setApplications((prev) =>
-          prev.map((app) =>
-            app.id === applicant.id ? { ...app, status: "Done" } : app
-          )
-        );
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Email Failed",
-          text: `Failed to send email: ${result.error || "Unknown error"}`,
-          confirmButtonColor: "#B91C1C",
-        });
-      }
-    } catch (err) {
-      console.error(err);
+    if (!res?.success) {
       Swal.fire({
         icon: "error",
         title: "Email Failed",
-        text: "Failed to send email. Check server connection.",
+        text: res?.message || "Unknown error",
         confirmButtonColor: "#B91C1C",
       });
+      setSending((prev) => ({ ...prev, [applicant.id]: false }));
+      return;
     }
+
+    const today = new Date().toISOString().slice(0, 10);
+    setApplications((prev) =>
+      prev.map((app) =>
+        app.id === applicant.id ? { ...app, status: "Completed", dateDistributed: today } : app
+      )
+    );
+
+    Swal.fire({
+      icon: "success",
+      title: "Email Sent (Dummy)",
+      text: "Dummy email sent & DB updated to Completed.",
+      confirmButtonColor: "#278659",
+    });
 
     setSending((prev) => ({ ...prev, [applicant.id]: false }));
   };
@@ -156,7 +151,7 @@ function StaffDistribution() {
       let valA = a[sortBy];
       let valB = b[sortBy];
 
-      if (sortBy === "date" || sortBy === "dateDistributed") {
+      if (sortBy === "dateDistributed") {
         const dA = valA && valA !== "N/A" ? new Date(valA) : new Date(0);
         const dB = valB && valB !== "N/A" ? new Date(valB) : new Date(0);
         return sortOrder === "asc" ? dA - dB : dB - dA;
@@ -189,9 +184,7 @@ function StaffDistribution() {
 
           <section className="flex-1 bg-white rounded-2xl shadow-md p-4 flex flex-col overflow-hidden">
             <div className="flex items-center justify-between w-full mb-3">
-              <h2 className="text-[16px] font-semibold text-gray-700">
-                Applicants List
-              </h2>
+              <h2 className="text-[16px] font-semibold text-gray-700">Applicants List</h2>
 
               <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-72">
                 <Search className="text-gray-500 w-4 h-4 mr-2" />
@@ -209,67 +202,37 @@ function StaffDistribution() {
               <table className="min-w-full text-sm text-left border-collapse">
                 <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
                   <tr className="text-[12px] uppercase tracking-wide">
-                    <th className="py-3 px-4 w-[140px] cursor-pointer whitespace-nowrap"
-                        onClick={() => handleSort("applicationId")}>
+                    <th className="py-3 px-4 w-[140px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("applicationId")}>
                       Application ID {sortBy === "applicationId" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-
-                    <th className="py-3 px-4 w-[220px] cursor-pointer whitespace-nowrap"
-                        onClick={() => handleSort("name")}>
+                    <th className="py-3 px-4 w-[220px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("name")}>
                       Name {sortBy === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-
-                    <th className="py-3 px-4 w-[260px] cursor-pointer whitespace-nowrap"
-                        onClick={() => handleSort("email")}>
+                    <th className="py-3 px-4 w-[260px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("email")}>
                       Email {sortBy === "email" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-
-                    <th className="py-3 px-4 w-[150px] cursor-pointer whitespace-nowrap"
-                        onClick={() => handleSort("package")}>
+                    <th className="py-3 px-4 w-[150px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("package")}>
                       Package {sortBy === "package" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-
-                    <th className="py-3 px-4 w-[120px] cursor-pointer text-center whitespace-nowrap"
-                        onClick={() => handleSort("packageCount")}>
+                    <th className="py-3 px-4 w-[120px] cursor-pointer text-center whitespace-nowrap" onClick={() => handleSort("packageCount")}>
                       Total Count {sortBy === "packageCount" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-
-                    <th className="py-3 px-4 w-[150px] cursor-pointer whitespace-nowrap"
-                        onClick={() => handleSort("date")}>
-                      Date Applied {sortBy === "date" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
-                    </th>
-
-                    <th className="py-3 px-4 w-[170px] cursor-pointer whitespace-nowrap"
-                        onClick={() => handleSort("dateDistributed")}>
+                    <th className="py-3 px-4 w-[170px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("dateDistributed")}>
                       Date Distributed {sortBy === "dateDistributed" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-
-                    <th className="py-3 px-4 w-[120px] cursor-pointer whitespace-nowrap"
-                        onClick={() => handleSort("status")}>
+                    <th className="py-3 px-4 w-[120px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("status")}>
                       Status {sortBy === "status" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-
-                    <th className="py-3 px-4 w-[170px] text-center whitespace-nowrap">
-                      Action
-                    </th>
+                    <th className="py-3 px-4 w-[170px] text-center whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {filteredApps.map((applicant) => (
-                    <tr key={applicant.id}
-                        className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                      <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">
-                        {applicant.applicationId}
-                      </td>
-
-                      <td className="py-3 px-4 font-medium text-gray-900">
-                        {applicant.name}
-                      </td>
-
-                      <td className="py-3 px-4 text-gray-600">
-                        {applicant.email}
-                      </td>
+                    <tr key={applicant.id} className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                      <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">{applicant.applicationId}</td>
+                      <td className="py-3 px-4 font-medium text-gray-900">{applicant.name}</td>
+                      <td className="py-3 px-4 text-gray-600">{applicant.email}</td>
 
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getPackageColor(applicant.package)}`}>
@@ -277,17 +240,9 @@ function StaffDistribution() {
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 text-center text-gray-700 font-medium">
-                        {applicant.packageCount}
-                      </td>
+                      <td className="py-3 px-4 text-center text-gray-700 font-medium">{applicant.packageCount}</td>
 
-                      <td className="py-3 px-4 text-gray-600 whitespace-nowrap">
-                        {applicant.date}
-                      </td>
-
-                      <td className="py-3 px-4 text-gray-600 whitespace-nowrap">
-                        {applicant.dateDistributed}
-                      </td>
+                      <td className="py-3 px-4 text-gray-600 whitespace-nowrap">{applicant.dateDistributed}</td>
 
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(applicant.status)}`}>
@@ -299,15 +254,16 @@ function StaffDistribution() {
                         <div className="flex justify-center">
                           {applicant.status === "Pending" ? (
                             <button
-                              onClick={() => sendEmailWithQR(applicant)}
-                              className="inline-flex items-center gap-2 bg-[#278659] hover:bg-[#1f6a46] text-white px-4 py-2 rounded-lg text-sm font-medium"
+                              onClick={() => sendEmailAndUpdate(applicant)}
+                              disabled={!!sending[applicant.id]}
+                              className="inline-flex items-center gap-2 bg-[#278659] hover:bg-[#1f6a46] disabled:opacity-60 text-white px-4 py-2 rounded-lg text-sm font-medium"
                             >
                               <Mail size={16} />
                               {sending[applicant.id] ? "Sending..." : "Send Email"}
                             </button>
                           ) : (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-green-700 bg-green-100">
-                              Done
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(applicant.status)}`}>
+                              {applicant.status}
                             </span>
                           )}
                         </div>
@@ -317,7 +273,7 @@ function StaffDistribution() {
 
                   {filteredApps.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="py-10 text-center text-gray-500">
+                      <td colSpan={8} className="py-10 text-center text-gray-500">
                         No applicants found
                       </td>
                     </tr>

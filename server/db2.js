@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 
-const mysqlPool = mysql.createPool({
+const distributionPool = mysql.createPool({
   host: "10.11.244.55",   // ✅ sama macam DBeaver (hopeplates 5)
   user: "root",
   password: "Arl1n@23",

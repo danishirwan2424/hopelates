@@ -1,6 +1,6 @@
+// server/db/foodDb.js
 const mysql = require("mysql2/promise");
 
-// DEBUG: check env
 console.log("Food DB Host:", process.env.FOOD_DB_HOST);
 console.log("Food DB User:", process.env.FOOD_DB_USER);
 console.log("Food DB Name:", process.env.FOOD_DB_NAME);
@@ -13,7 +13,7 @@ const foodPool = mysql.createPool({
   database: process.env.FOOD_DB_NAME,
   port: Number(process.env.FOOD_DB_PORT),
   waitForConnections: true,
-  connectionLimit: 5
+  connectionLimit: 5,
 });
 
 module.exports = foodPool;

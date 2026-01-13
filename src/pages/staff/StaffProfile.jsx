@@ -50,6 +50,33 @@ function StaffProfile() {
   const profileFileRef = useRef(null);
   const coverFileRef = useRef(null);
 
+  // DB status state
+// DB status state
+const [dbStatus, setDbStatus] = useState({});
+const [dbLoading, setDbLoading] = useState(true);
+
+// fetch DB status function
+const fetchDbStatus = async () => {
+  setDbLoading(true);
+  try {
+    const res = await axios.get(`${API_BASE}/db-status`);
+    setDbStatus(res.data);
+  } catch (err) {
+    console.error("Failed to fetch DB status", err);
+  } finally {
+    setDbLoading(false);
+  }
+};
+
+// fetch on mount
+useEffect(() => {
+  let mounted = true;
+  if (mounted) fetchDbStatus();
+  return () => { mounted = false; };
+}, []);
+
+
+
   // activity logs
   const [logs, setLogs] = useState([]);
   const [logsLoading, setLogsLoading] = useState(true);
@@ -370,7 +397,58 @@ function StaffProfile() {
                   <p className="text-gray-800">{staff.address}</p>
                 </div>
               </div>
-            </div>      
+            </div>
+
+{/* ===== Database Panel ===== */}
+<div className="lg:col-span-2 bg-white rounded-lg p-6 shadow-sm border mt-6">
+  <div className="flex items-center justify-between mb-4">
+    <h3 className="text-[#11452E] font-semibold">Database Status</h3>
+    <button
+      onClick={fetchDbStatus}
+      disabled={dbLoading}
+      className="text-sm bg-[#278659] text-white px-3 py-1 rounded-md hover:bg-[#1f6b49] disabled:opacity-60 transition"
+    >
+      {dbLoading ? "Checking..." : "Refresh"}
+    </button>
+  </div>
+
+  {dbLoading ? (
+    <p className="text-gray-500 text-sm">Checking database connections...</p>
+  ) : Object.keys(dbStatus).length === 0 ? (
+    <p className="text-gray-500 text-sm">No databases found.</p>
+  ) : (
+    <div className="flex flex-col gap-3 text-sm font-mono">
+      {Object.entries(dbStatus).map(([dbKey, db]) => (
+        <div key={dbKey} className="p-3 rounded-md border bg-gray-50 shadow-sm">
+          {/* Header: DB Name + Status */}
+          <div className="flex justify-between items-center mb-1">
+            <span className="capitalize font-semibold">{dbKey} DB</span>
+            <span>
+              {db.status === "active" || db.status === true ? (
+                <span className="text-green-600">✅ Connected</span>
+              ) : (
+                <span className="text-red-600">❌ Failed</span>
+              )}
+            </span>
+          </div>
+
+          {/* Connection details */}
+          <div className="space-y-1 text-gray-700 text-xs">
+            {db.host && <p>Host: {db.host}</p>}
+            {db.user && <p>User: {db.user}</p>}
+            {db.database && <p>Database: {db.database}</p>}
+            {db.port && <p>Port: {db.port}</p>}
+            {db.error && <p className="text-red-600">Error: {db.error}</p>}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+
+
+      
           </div>
 
           <Outlet />

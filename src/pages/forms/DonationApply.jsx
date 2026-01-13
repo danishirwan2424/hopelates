@@ -3,6 +3,7 @@ import { Plus, Minus, Upload, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UserIcon, BanknotesIcon } from "@heroicons/react/24/outline";
 import DonorNav from "./Forms_cmp/DonorNav";
+import axios from "axios";
 
 import PackageA from "../../images/PACKAGEA.png";
 import PackageC from "../../images/PACKAGEB.png";
@@ -26,19 +27,24 @@ export default function DonationApply() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [fileName, setFileName] = useState("");
 
+  // ✅ NEW: prevent double submit
+  const [submitting, setSubmitting] = useState(false);
+
+  // ✅ NEW: backend URL (change port if your backend not 3000)
+  const API_BASE = "http://localhost:5000";
+
   //For Auto-fill user details if logged in
- useEffect(() => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
 
-  if (user && user.role === "donor") {
-    setUserDetails((prev) => ({
-      ...prev,
-      fullName: user.full_name || "",
-      email: user.email || "",
-    }));
-  }
-}, []);
-
+    if (user && user.role === "donor") {
+      setUserDetails((prev) => ({
+        ...prev,
+        fullName: user.full_name || "",
+        email: user.email || "",
+      }));
+    }
+  }, []);
 
   const packages = [
     { id: "A", name: "PACKAGE A", price: 20, pax: "FOR 1-3 PAX", items: ["RICE", "BREAD", "BISCUITS"] },
@@ -65,6 +71,30 @@ export default function DonationApply() {
 
   const getTotalItems = () =>
     Object.values(packageQuantities).reduce((sum, qty) => sum + qty, 0);
+
+  // ✅ NEW: send data to backend
+  const submitDonationToBackend = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user || !user.donor_id) {
+      alert("No donor found. Please login again.");
+      return null;
+    }
+
+    const payload = {
+      donor_id: user.donor_id,
+      total_amount: calculateTotal(),
+      packages: [
+        { package_id: 1, quantity: packageQuantities.A },
+        { package_id: 2, quantity: packageQuantities.B },
+        { package_id: 3, quantity: packageQuantities.C }
+      ]
+    };
+
+    // ✅ IMPORTANT: call backend port, not 5173
+    const res = await axios.post(`${API_BASE}/api/donation`, payload);
+    return res.data; // { donation_id: ... }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col sm:flex-row p-4 sm:p-0">
@@ -222,54 +252,53 @@ export default function DonationApply() {
             )}
 
             {/* STEP 2: Donor Details */}
-{currentStep === 2 && (
-  <section>
-    <h2
-      className="text-xl md:text-2xl font-semibold pl-4 border-l-4 mb-4"
-      style={{ borderColor: primaryColor, color: darkColor }}
-    >
-      Donor Details
-    </h2>
+            {currentStep === 2 && (
+              <section>
+                <h2
+                  className="text-xl md:text-2xl font-semibold pl-4 border-l-4 mb-4"
+                  style={{ borderColor: primaryColor, color: darkColor }}
+                >
+                  Donor Details
+                </h2>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-      {["fullName", "email"].map((field) => (
-        <div key={field} className="flex flex-col">
-          <label className="text-sm md:text-base font-medium" style={{ color: darkColor }}>
-            {field === "fullName" ? "Full Name" : "Email"}
-          </label>
-          <input
-            type={field === "email" ? "email" : "text"}
-            value={userDetails[field]}
-            onChange={(e) => setUserDetails({ ...userDetails, [field]: e.target.value })}
-            className="p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 text-sm md:text-base"
-            placeholder={field === "fullName" ? "Enter full name" : "Email (optional)"}
-          />
-        </div>
-      ))}
-    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  {["fullName", "email"].map((field) => (
+                    <div key={field} className="flex flex-col">
+                      <label className="text-sm md:text-base font-medium" style={{ color: darkColor }}>
+                        {field === "fullName" ? "Full Name" : "Email"}
+                      </label>
+                      <input
+                        type={field === "email" ? "email" : "text"}
+                        value={userDetails[field]}
+                        onChange={(e) => setUserDetails({ ...userDetails, [field]: e.target.value })}
+                        className="p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400 text-sm md:text-base"
+                        placeholder={field === "fullName" ? "Enter full name" : "Email (optional)"}
+                      />
+                    </div>
+                  ))}
+                </div>
 
-    <div className="flex flex-col sm:flex-row justify-between sm:justify-end mt-6 gap-4">
-      <button
-        type="button"
-        onClick={() => setCurrentStep(1)}
-        className="px-6 py-2 rounded-xl border w-full sm:w-auto"
-        style={{ borderColor: primaryColor, color: darkColor }}
-      >
-        Back
-      </button>
-      <button
-        type="button"
-        onClick={() => setCurrentStep(3)}
-        className="px-6 py-2 rounded-xl text-white w-full sm:w-auto"
-        style={{ backgroundColor: primaryColor }}
-        disabled={!userDetails.fullName} // only Full Name is required now
-      >
-        Next
-      </button>
-    </div>
-  </section>
-)}
-
+                <div className="flex flex-col sm:flex-row justify-between sm:justify-end mt-6 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    className="px-6 py-2 rounded-xl border w-full sm:w-auto"
+                    style={{ borderColor: primaryColor, color: darkColor }}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(3)}
+                    className="px-6 py-2 rounded-xl text-white w-full sm:w-auto"
+                    style={{ backgroundColor: primaryColor }}
+                    disabled={!userDetails.fullName}
+                  >
+                    Next
+                  </button>
+                </div>
+              </section>
+            )}
 
             {/* STEP 3: Payment */}
             {currentStep === 3 && (
@@ -353,33 +382,56 @@ export default function DonationApply() {
                 {/* Buttons */}
                 <div className="flex gap-4">
                   <button
+                    type="button"
                     onClick={() => setCurrentStep(2)}
                     className="flex-1 bg-[#E5E7EB] text-gray-700 font-semibold text-[14px] py-2.5 rounded-[6px] hover:bg-gray-300 transition-all duration-200"
                   >
                     Back
                   </button>
+
                   <button
-                    onClick={() => {
+                    type="button"
+                    disabled={!uploadedFile || submitting}
+                    onClick={async () => {
                       if (!uploadedFile) return alert("Please upload proof of payment before proceeding");
-                      const donationData = {
-                        donationId: "DN" + Math.floor(Math.random() * 10000),
-                        packages: selectedPackages,
-                        totalAmount: calculateTotal(),
-                        totalItems: getTotalItems(),
-                        donorName: userDetails.fullName, // ✅ rename
-                        paymentMethod: "Online Transfer", // ✅ add
-                    transactionDate: new Date().toLocaleString(), // ✅ keep consistent
-                      };
-                      navigate("/donation/donation-confirmation", { state: donationData });
+                      if (submitting) return;
+
+                      try {
+                        setSubmitting(true);
+
+                        // ✅ insert into DB
+                        const result = await submitDonationToBackend();
+                        if (!result || !result.donation_id) {
+                          alert("Donation failed (no donation_id returned)");
+                          return;
+                        }
+
+                        const donationData = {
+                          donationId: result.donation_id, // ✅ real DB id
+                          packages: selectedPackages,
+                          totalAmount: calculateTotal(),
+                          totalItems: getTotalItems(),
+                          donorName: userDetails.fullName,
+                          paymentMethod: "Online Transfer",
+                          transactionDate: new Date().toLocaleString(),
+                        };
+
+                        navigate("/donation/donation-confirmation", { state: donationData });
+
+                      } catch (err) {
+                        console.error(err);
+                        alert("Donation failed");
+                      } finally {
+                        setSubmitting(false);
+                      }
                     }}
-                    disabled={!uploadedFile}
                     className={`flex-1 font-semibold text-[14px] py-2.5 rounded-[6px] transition-all duration-200 ${
-                      uploadedFile
+                      uploadedFile && !submitting
                         ? "bg-[#019461] text-white hover:bg-[#017a54] cursor-pointer"
                         : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     }`}
                   >
-                    Complete Payment
+                    {submitting ? "Processing..." : "Complete Payment"}
                   </button>
                 </div>
               </section>

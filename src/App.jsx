@@ -7,7 +7,6 @@ import {
   Navigate,
   Outlet,
   useLocation,
-  useNavigate,
 } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -36,19 +35,18 @@ import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 
 // ✅ Forms
-import Application_donate from "./pages/forms/ApplicationApply"; 
+import Application_donate from "./pages/forms/ApplicationApply";
 import DonationApply from "./pages/forms/DonationApply";
 import ProfileApplicants from "./pages/forms/ProfileForms";
 import ProfileDonor from "./pages/forms/ProfileDonor";
 import MyDonation from "./pages/forms/MyDonation";
+import DonationConfirmation from "./pages/forms/Forms_cmp/DonationConfirmation";
 
-
-// ✅  PDF Export Page
+// ✅ PDF Export Page
 import PdfExp from "./pages/staff/StaffPage_cmp/pdfExp";
 
 // ✅ 404 Page
-import NotFound from "./pages/NotFound"; 
-
+import NotFound from "./pages/NotFound";
 
 // ✅ Scroll to Top
 function ScrollToTop() {
@@ -59,19 +57,17 @@ function ScrollToTop() {
   return null;
 }
 
-// ✅ Animation Wrapper (for public & auth pages only)
+// ✅ Animation Wrapper
 function AnimatedPage({ children }) {
   const location = useLocation();
-
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="wait">
       <motion.div
         key={location.key}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="min-h-screen"
+        transition={{ duration: 0.4 }}
       >
         {children}
       </motion.div>
@@ -79,38 +75,46 @@ function AnimatedPage({ children }) {
   );
 }
 
-// ✅ Public Layout (Navbar + Footer + animation)
+// ✅ Public Layout
 function PublicLayout() {
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-800">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow">
-          <Outlet />
-      </main>
+      <Outlet />
       <Footer />
     </div>
   );
 }
 
-// ✅ Staff Layout (No Navbar/Footer, instant render)
+// ✅ Staff Layout
 function StaffLayout() {
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <Outlet /> {/* instantly render staff pages */}
+    <div className="min-h-screen bg-gray-50">
+      <Outlet />
     </div>
   );
 }
 
-// ✅ Main App Router
+// ✅ Donation Layout (IMPORTANT)
+function DonationLayout() {
+  return (
+    <AnimatedPage>
+      <Outlet />
+    </AnimatedPage>
+  );
+}
+
+// ✅ App Router
 function App() {
   return (
     <Router>
       <ScrollToTop />
       <Routes>
-        {/* Redirect root → landing */}
+
+        {/* Redirect root */}
         <Route path="/" element={<Navigate to="/landing" />} />
 
-        {/* ✅ Public Routes */}
+        {/* Public Pages */}
         <Route element={<PublicLayout />}>
           <Route path="/landing" element={<Landing />} />
           <Route path="/about" element={<AboutUs />} />
@@ -119,11 +123,11 @@ function App() {
           <Route path="/contact" element={<Contact />} />
         </Route>
 
-        {/* ✅ Staff Routes */}
+        {/* Staff Pages */}
         <Route element={<StaffLayout />}>
           <Route path="/staff-dashboard" element={<StaffDash />} />
-          <Route path="/staff-application" element={<StaffApplication />} /> 
-          <Route path="/staff-profile" element={<StaffProfile />} /> 
+          <Route path="/staff-application" element={<StaffApplication />} />
+          <Route path="/staff-profile" element={<StaffProfile />} />
           <Route path="/staff-distribution" element={<StaffDistribution />} />
           <Route path="/staff-donation" element={<StaffDonation />} />
           <Route path="/staff-report" element={<StaffReport />} />
@@ -131,65 +135,34 @@ function App() {
           <Route path="/pdf-report" element={<PdfExp />} />
         </Route>
 
-        {/* ✅ Auth Pages (animated) */}
+        {/* Auth Pages */}
+        <Route path="/login" element={<AnimatedPage><Login /></AnimatedPage>} />
+        <Route path="/signUp" element={<AnimatedPage><SignUp /></AnimatedPage>} />
+
+        {/* Forms */}
+        <Route path="/application" element={<AnimatedPage><Application_donate /></AnimatedPage>} />
+        <Route path="/applicants-profile" element={<AnimatedPage><ProfileApplicants /></AnimatedPage>} />
+        <Route path="/donor-profile" element={<AnimatedPage><ProfileDonor /></AnimatedPage>} />
+        <Route path="/donation-tracking" element={<AnimatedPage><MyDonation /></AnimatedPage>} />
+
+        {/* ✅ DONATION FLOW (THIS IS THE KEY PART) */}
+        <Route path="/donation" element={<DonationLayout />}>
+          <Route index element={<DonationApply />} />
+          <Route
+            path="donation-confirmation"
+            element={<DonationConfirmation />}
+          />
+        </Route>
+
+        {/* ✅ SAFETY REDIRECT (OPTIONAL BUT RECOMMENDED) */}
         <Route
-          path="/login"
-          element={
-            <AnimatedPage>
-              <Login />
-            </AnimatedPage>
-          }
+          path="/donation-confirmation"
+          element={<Navigate to="/donation/donation-confirmation" />}
         />
-        <Route
-          path="/signUp"
-          element={
-            <AnimatedPage>
-              <SignUp />
-            </AnimatedPage>
-          }
-        />
-        <Route
-          path="/application"
-          element={
-            <AnimatedPage>
-              <Application_donate />
-            </AnimatedPage>
-          }
-        />
-        <Route
-          path="/applicants-profile"
-          element={
-            <AnimatedPage>
-              <ProfileApplicants />
-            </AnimatedPage>
-          }
-        />
-        <Route
-          path="/donor-profile"
-          element={
-            <AnimatedPage>
-              <ProfileDonor />
-            </AnimatedPage>
-          }
-        />
-        <Route
-          path="/donation-tracking"
-          element={
-            <AnimatedPage>
-              <MyDonation />
-            </AnimatedPage>
-          }
-        />
-        <Route
-          path="/donation"
-          element={
-            <AnimatedPage>
-              <DonationApply />
-            </AnimatedPage>
-          }
-        />
-        {/* ✅ 404 Fallback */}
+
+        {/* 404 */}
         <Route path="*" element={<NotFound />} />
+
       </Routes>
     </Router>
   );

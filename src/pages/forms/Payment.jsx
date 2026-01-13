@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navigator from "../../LandingPage_cmp/Navigator";
 import { Upload, CheckCircle } from "lucide-react";
+import axios from "axios";
 
 function Payment() {
   const navigate = useNavigate();
@@ -24,11 +25,15 @@ function Payment() {
     }
   };
 
-  const handlePayment = () => {
-    if (!uploadedFile) {
-      alert("Please upload proof of payment before proceeding");
-      return;
-    }
+  const handlePayment = async () => {
+  if (!uploadedFile) {
+    alert("Please upload proof of payment before proceeding");
+    return;
+  }
+
+  try {
+    // OPTIONAL backend call
+    // await axios.post("/api/donations", {...});
 
     const donationData = {
       donationId: "DN" + Math.floor(Math.random() * 10000),
@@ -36,11 +41,20 @@ function Payment() {
       totalAmount: totalAmount,
       totalItems: totalItems,
       donor: userDetails.fullName,
-      transactionDate: new Date().toLocaleDateString()
+      transactionDate: new Date().toLocaleString(),
+      receiptFile: uploadedFile.name,
     };
 
-    navigate("/donation-confirmation", { state: donationData });
-  };
+    // ✅ CORRECT navigation path
+    navigate("/donation/donation-confirmation", {
+      state: donationData,
+    });
+  } catch (error) {
+    console.error("Payment error:", error);
+    alert("Payment failed. Please try again.");
+  }
+};
+
 
   return (
     <>

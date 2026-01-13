@@ -85,7 +85,7 @@ function SignUp() {
                 placeholder="Enter your full name"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
                 value={full_name}                         // 🔴 added
-                onChange={(e) => setFullName(e.target.value)} // 🔴 added
+                onChange={(e) => setFullName(e.target.value.toUpperCase())} // 🔴 added
               />
             </div>
 
@@ -98,7 +98,7 @@ function SignUp() {
                 placeholder="Enter your email"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
                 value={email}                             // 🔴 added
-                onChange={(e) => setEmail(e.target.value)} // 🔴 added
+                onChange={(e) => setEmail(e.target.value.toLowerCase())} // 🔴 added
               />
             </div>
 

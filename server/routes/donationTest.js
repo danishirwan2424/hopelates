@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
       [donor_id, total_amount]
     );
 
-    const donationId = donationResult.insertId;
+   const donationId = Number(donationResult.insertId);
 
     // 3️⃣ Insert donation_detail (only quantity > 0)
     for (const pkg of packages) {
@@ -59,10 +59,11 @@ router.post("/", async (req, res) => {
     // 5️⃣ Commit transaction
     await conn.commit();
 
-    res.json({
-      message: "Donation successful",
-      donation_id: donationId
-    });
+    res.status(201).json({
+  message: "Donation successful",
+  donation_id: donationId // now NUMBER, JSON-safe
+});
+
 
   } catch (err) {
     if (conn) await conn.rollback();

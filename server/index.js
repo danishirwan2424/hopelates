@@ -29,7 +29,7 @@ app.use("/api/donation", donationTestRoutes);
 // ======================
 // NEW: INVENTORY DB TEST ROUTE (CONNECTION ONLY)
 // ======================
-const inventoryTestRoutes = require("./routes/inventoryTest");
+const inventoryTestRoutes = require("./routes/InventoryTest");
 console.log("inventoryTestRoutes loaded");
 app.use("/api/inventory", inventoryTestRoutes);
 

@@ -74,9 +74,9 @@ router.post("/register", async (req, res) => {
   const last_name = parts.slice(1).join(" ") || "-";
 
   // ✅ REQUIRED DEFAULT VALUES (VERY IMPORTANT)
-  const phone_number = "0000000000";
+  const phone_number = null;
   const gender = "Male";
-  const ic_num = "000000-00-0000";
+  const ic_num = null;
   const positions = "Staff";
 
   const existing = await authPool.query(
@@ -89,20 +89,21 @@ router.post("/register", async (req, res) => {
   }
 
   await authPool.query(
-    `INSERT INTO staff
-     (first_name, last_name, phone_number, positions, gender, ic_num, email, password)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-    [
-      first_name,
-      last_name,
-      phone_number,
-      positions,
-      gender,
-      ic_num,
-      email,
-      hashedPassword
-    ]
-  );
+  `INSERT INTO staff
+   (first_name, last_name, phone_number, positions, gender, ic_num, email, password)
+   VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+  [
+    first_name,
+    last_name,
+    phone_number || null,   // ✅ IMPORTANT
+    positions,
+    gender,
+    ic_num || null,         // ✅ IMPORTANT
+    email,
+    hashedPassword
+  ]
+);
+
 
   return res.status(201).json({ message: "Staff signup successful" });
 }

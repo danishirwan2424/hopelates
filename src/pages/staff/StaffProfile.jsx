@@ -56,7 +56,6 @@ function StaffProfile() {
   gender: "",
   ic_num: "",
   address: "",
-  profileImage: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
   coverPhoto: "",
 });
 
@@ -65,9 +64,7 @@ function StaffProfile() {
   const [form, setForm] = useState({ ...staff });
 
   // previews for newly selected files (object URLs)
-  const [profilePreview, setProfilePreview] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
-  const profileFileRef = useRef(null);
   const coverFileRef = useRef(null);
 
   // activity logs
@@ -141,21 +138,7 @@ function StaffProfile() {
 };
 
 
-  // handle profile file pick
-  const handleProfilePick = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    // optional: validate size/type
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file for profile picture.");
-      return;
-    }
-    // cleanup old preview
-    if (profilePreview) URL.revokeObjectURL(profilePreview);
-    const url = URL.createObjectURL(file);
-    setProfilePreview(url);
-    profileFileRef.current = file;
-  };
+  
 
   // handle cover pick
   const handleCoverPick = (e) => {
@@ -279,26 +262,16 @@ function StaffProfile() {
   }}
 >
 
-    {/* ===== Profile Picture INSIDE Banner ===== */}
-    <div className="absolute left-6 bottom-4 flex items-center">
-      <div className="w-28 h-28 rounded-full border-4 border-white overflow-hidden shadow-lg">
-        <img
-          src={profilePreview || staff.profileImage}
-          alt="profile"
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Name & Position (inside banner next to picture) */}
-      <div className="ml-4">
-        <p className="text-2xl font-semibold text-white drop-shadow-md">
-          {displayName}
-        </p>
-        <p className="text-sm text-gray-200 drop-shadow-md">
-          {staff.positions}
-        </p>
-      </div>
+  
+      <div className="absolute left-6 bottom-6">
+      <p className="text-3xl font-semibold text-white drop-shadow-md">
+        {displayName}
+      </p>
+      <p className="text-sm text-gray-200 drop-shadow-md">
+        {staff.positions}
+      </p>
     </div>
+
 
     {/* Edit button (top right inside banner) */}
     <button

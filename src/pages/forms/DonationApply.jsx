@@ -9,6 +9,10 @@ import PackageA from "../../images/PACKAGEA.png";
 import PackageC from "../../images/PACKAGEB.png";
 import PackageB from "../../images/PACKAGEC.png";
 
+// THE NEW IMAGE IMPORT
+import QRCodeImg from "../../images/qr.png";
+import { Copy } from "lucide-react";
+
 export default function DonationApply() {
   const primaryColor = "#278659";
   const darkColor = "#11452E";
@@ -341,6 +345,34 @@ const getBase64 = (file) => {
                     <p className="text-[#019461] text-[24px] font-bold">RM {calculateTotal()}</p>
                   </div>
                 </div>
+
+                {/* --- NEW: QR Code & Bank Account Section --- */}
+<div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+  <h2 className="text-[18px] font-bold text-gray-900 mb-4 text-center">Payment Information</h2>
+  
+  <div className="flex flex-col md:flex-row items-center gap-8 justify-center">
+    {/* QR Image Part */}
+    <div className="text-center">
+      <div className="bg-gray-50 p-3 rounded-lg border-2 border-gray-100">
+        <img src={QRCodeImg} alt="Payment QR Code" className="w-40 h-40 object-contain mx-auto" />
+      </div>
+      <p className="text-[12px] text-gray-500 mt-2 font-medium">Scan to Pay via DuitNow</p>
+    </div>
+
+    {/* Account Number Part */}
+    <div className="space-y-4 flex-1 max-w-xs">
+      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <p className="text-[11px] text-gray-500 uppercase font-bold">Bank Name</p>
+        <p className="text-[15px] font-semibold text-gray-800">MAYBANK BERHAD</p>
+      </div>
+      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <p className="text-[11px] text-gray-500 uppercase font-bold">Account Number</p>
+        <p className="text-[16px] font-mono font-bold text-[#019461]">1622 8412 3456</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 
                 {/* Upload Proof of Payment */}
                 <div className="border-2 border-dashed border-gray-300 rounded-[8px] p-6 text-center hover:border-[#019461] transition-all duration-200">

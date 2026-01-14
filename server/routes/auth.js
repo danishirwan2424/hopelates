@@ -8,7 +8,7 @@ const router = express.Router();
 // ======================
 router.post("/register", async (req, res) => {
   try {
-    console.log("SIGNUP BODY:", req.body); // Debug
+    console.log("SIGNUP BODY:", req.body);
 
     const { full_name, email, password, role } = req.body;
     if (!full_name || !email || !password || !role) {
@@ -21,7 +21,10 @@ router.post("/register", async (req, res) => {
       const existing = await authPool.query("SELECT 1 FROM donor WHERE email = $1", [email]);
       if (existing.rowCount > 0) return res.status(409).json({ message: "Email already registered as donor" });
 
-      await authPool.query("INSERT INTO donor (full_name, email, password) VALUES ($1,$2,$3)", [full_name, email, hashedPassword]);
+      await authPool.query(
+        "INSERT INTO donor (full_name, email, password) VALUES ($1,$2,$3)",
+        [full_name, email, hashedPassword]
+      );
       return res.status(201).json({ message: "Donor signup successful" });
     }
 
@@ -29,7 +32,10 @@ router.post("/register", async (req, res) => {
       const existing = await authPool.query("SELECT 1 FROM beneficiary WHERE email = $1", [email]);
       if (existing.rowCount > 0) return res.status(409).json({ message: "Email already registered as applicant" });
 
-      await authPool.query("INSERT INTO beneficiary (full_name, email, password) VALUES ($1,$2,$3)", [full_name, email, hashedPassword]);
+      await authPool.query(
+        "INSERT INTO beneficiary (full_name, email, password) VALUES ($1,$2,$3)",
+        [full_name, email, hashedPassword]
+      );
       return res.status(201).json({ message: "Applicant signup successful" });
     }
 
@@ -68,10 +74,139 @@ router.post("/login", async (req, res) => {
       return res.json({ message: "Login successful", role: "applicant", user: { beneficiary_id: beneficiary.beneficiary_id, full_name: beneficiary.full_name, email: beneficiary.email } });
     }
 
+    // Hardcoded staff login
+    if (email === "staff@email.com" && password === "password") {
+      return res.json({
+        message: "Login successful",
+        role: "staff",
+        user: {
+          staff_id: "STAFF-001",
+          full_name: "Staff User",
+          email: "staff@email.com",
+        },
+      });
+    }
+
     return res.status(401).json({ message: "Invalid credentials" });
   } catch (err) {
     console.error("LOGIN ERROR:", err);
     return res.status(500).json({ message: "Server error during login" });
+  }
+});
+
+// ======================
+// STAFF PROFILE (Dummy)
+// ======================
+router.post("/staff/profile", async (req, res) => {
+  const { staff_id } = req.body;
+  if (!staff_id) return res.status(400).json({ message: "Staff ID required" });
+
+  const dummyStaff = {
+    staff_id: "STAFF-001",
+    first_name: "Staff",
+    last_name: "User",
+    email: "staff@email.com",
+    phone_number: "012-3456789",
+    positions: "Coordinator",
+    gender: "Male",
+    ic_num: "123456-78-9012",
+    address: "123 Staff St, City",
+    profileImage: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+    coverPhoto: "",
+  };
+
+  return res.json(dummyStaff);
+});
+
+// ======================
+// UPDATE DONOR PROFILE
+// ======================
+router.put("/donor/profile/:donor_id", async (req, res) => {
+  try {
+    const { donor_id } = req.params;
+    const { fullName, email, password } = req.body;
+
+    if (!fullName || !email) return res.status(400).json({ message: "Full name and email required" });
+
+    let result;
+
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      result = await authPool.query(
+        `UPDATE donor
+         SET full_name = $1, email = $2, password = $3
+         WHERE donor_id = $4
+         RETURNING donor_id, full_name, email`,
+        [fullName, email, hashedPassword, donor_id]
+      );
+    } else {
+      result = await authPool.query(
+        `UPDATE donor
+         SET full_name = $1, email = $2
+         WHERE donor_id = $3
+         RETURNING donor_id, full_name, email`,
+        [fullName, email, donor_id]
+      );
+    }
+
+    if (result.rowCount === 0) return res.status(404).json({ message: "Donor not found" });
+
+    return res.json({
+      donor_id: result.rows[0].donor_id,
+      full_name: result.rows[0].full_name,
+      email: result.rows[0].email,
+      role: "donor",
+    });
+  } catch (err) {
+    console.error("UPDATE DONOR ERROR:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ======================
+// UPDATE BENEFICIARY PROFILE
+// ======================
+router.put("/beneficiary/profile/:beneficiary_id", async (req, res) => {
+  try {
+    const { beneficiary_id } = req.params;
+    const { full_name, password } = req.body;
+
+    if (!full_name) return res.status(400).json({ message: "Full name required" });
+
+    let result;
+
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      result = await authPool.query(
+        `UPDATE beneficiary
+         SET full_name = $1, password = $2
+         WHERE beneficiary_id = $3
+         RETURNING beneficiary_id, full_name, email`,
+        [full_name, hashedPassword, beneficiary_id]
+      );
+    } else {
+      result = await authPool.query(
+        `UPDATE beneficiary
+         SET full_name = $1
+         WHERE beneficiary_id = $2
+         RETURNING beneficiary_id, full_name, email`,
+        [full_name, beneficiary_id]
+      );
+    }
+
+    if (result.rowCount === 0) return res.status(404).json({ message: "Beneficiary not found" });
+
+    return res.json({
+      message: "Profile updated successfully",
+      user: {
+        beneficiary_id: result.rows[0].beneficiary_id,
+        full_name: result.rows[0].full_name,
+        email: result.rows[0].email,
+      },
+    });
+  } catch (err) {
+    console.error("UPDATE BENEFICIARY ERROR:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 });
 

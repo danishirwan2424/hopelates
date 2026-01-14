@@ -51,9 +51,9 @@ export default function DonationApply() {
   }, []);
 
   const packages = [
-    { id: "A", name: "PACKAGE A", price: 20, pax: "FOR 1-3 PAX", items: ["RICE", "BREAD", "BISCUITS"] },
-    { id: "B", name: "PACKAGE B", price: 50, pax: "FOR 4-6 PAX", items: ["RICE", "BREAD", "BISCUITS"] },
-    { id: "C", name: "PACKAGE C", price: 70, pax: "FOR 7-10 PAX", items: ["RICE", "BREAD", "BISCUITS"] },
+    { id: "A", name: "PACKAGE A", price: 20, pax: "FOR 1-3 PAX", items: ["RICE-1", "OIL COOKING-1", "CANNED SARDINES-1", "CHOCOLATE DRINK-1", "INSTANT NOODLES-1"] },
+    { id: "B", name: "PACKAGE B", price: 50, pax: "FOR 4-6 PAX", items: ["RICE-2", "OIL COOKING-2", "CANNED SARDINES-2", "CHOCOLATE DRINK-2", "INSTANT NOODLES-2"] },
+    { id: "C", name: "PACKAGE C", price: 70, pax: "FOR 7-10 PAX", items: ["RICE-3", "OIL COOKING-3", "CANNED SARDINES-3", "CHOCOLATE DRINK-3", "INSTANT NOODLES-3"]  },
   ];
 
   const packageImages = { A: PackageA, B: PackageB, C: PackageC };

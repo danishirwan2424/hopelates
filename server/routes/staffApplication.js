@@ -7,6 +7,7 @@ const router = express.Router();
 const applicationPool = require("../db/applicationDb"); // Postgres
 const authPool = require("../db/authDb");               // Postgres
 const foodPool = require("../db/foodDb");               // MySQL
+const inventoryPool = require("../db/InventoryDb");     // MariaDB
 
 // =========================
 // Helper
@@ -18,6 +19,14 @@ const normalizeStatus = (s) => {
 
 const makeDistributionId = () =>
   `D-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+const getPackageName = (familyNo) => {
+  const num = Number(familyNo);
+  if (num >= 1 && num <= 3) return 'PACKAGE A';
+  if (num >= 4 && num <= 7) return 'PACKAGE B';
+  if (num >= 8) return 'PACKAGE C';
+  return 'PACKAGE A'; // default
+};
 
 // =========================
 // GET ALL APPLICATIONS
@@ -105,15 +114,62 @@ router.patch("/:id/status", async (req, res) => {
 
       if (!rows || rows.length === 0) {
         const distId = makeDistributionId();
+        console.log("📍 Creating distribution with ID:", distId);
 
-        await foodPool.query(
+        const [insertResult] = await foodPool.query(
           `INSERT INTO distribution
            (distribution_id, staff_id, application_id, status, total_package_count)
            VALUES (?, ?, ?, 'Pending', 1)`,
           [distId, finalStaffId, applicationId]
         );
 
-        console.log("✅ Distribution created:", distId);
+        console.log("✅ Distribution created:", {
+          distribution_id: distId,
+          staff_id: finalStaffId,
+          application_id: applicationId
+        });
+
+        // 3️⃣ Insert distribution_detail based on family_no
+        const appDetail = await applicationPool.query(
+          `SELECT family_no FROM application WHERE application_id = $1`,
+          [applicationId]
+        );
+        const familyNo = appDetail.rows[0]?.family_no;
+        console.log("👨‍👩‍👧‍👦 Family size:", familyNo);
+        
+        if (familyNo) {
+          const packageName = getPackageName(familyNo);
+          console.log("📦 Package determined:", packageName);
+          
+          const conn = await inventoryPool.getConnection();
+          try {
+            const packageRows = await conn.query(
+              `SELECT package_id FROM donation_package WHERE name = ?`,
+              [packageName]
+            );
+            if (packageRows.length > 0) {
+              const packageId = packageRows[0].package_id;
+              console.log("✓ Package found:", { packageName, packageId });
+              
+              const [detailResult] = await foodPool.query(
+                `INSERT INTO distribution_detail (distribution_id, package_id, quantity) VALUES (?, ?, 1)`,
+                [distId, packageId]
+              );
+              console.log("✅ Distribution detail inserted with same distribution_id:", {
+                distribution_id: distId,
+                package_id: packageId,
+                quantity: 1,
+                insertId: detailResult.insertId
+              });
+            } else {
+              console.warn("⚠️ Package not found for:", packageName);
+            }
+          } catch (err) {
+            console.error("❌ Error inserting distribution_detail:", err);
+          } finally {
+            conn.release();
+          }
+        }
       }
     }
 

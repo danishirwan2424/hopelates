@@ -94,15 +94,29 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Hardcoded staff login
-    if (email === "staff@email.com" && password === "password") {
+    // Check staff from authDb.staff table
+    const staffResult = await authPool.query("SELECT * FROM staff WHERE email = $1", [email]);
+    if (staffResult.rowCount > 0) {
+      const staff = staffResult.rows[0];
+      
+      // If password column exists and has a value, verify it
+      if (staff.password) {
+        const match = await bcrypt.compare(password, staff.password);
+        if (!match) return res.status(401).json({ message: "Invalid credentials" });
+      }
+      // If no password in DB, just allow login with any password (for testing)
+      
+      console.log("✅ Staff logged in:", { staff_id: staff.staff_id, email: staff.email });
+      
       return res.json({
         message: "Login successful",
         role: "staff",
         user: {
-          staff_id: "STAFF-001",
-          full_name: "Staff User",
-          email: "staff@email.com",
+          staff_id: staff.staff_id,
+          first_name: staff.first_name,
+          last_name: staff.last_name,
+          full_name: `${staff.first_name} ${staff.last_name}`,
+          email: staff.email,
         },
       });
     }
@@ -123,7 +137,7 @@ router.post("/staff/profile", async (req, res) => {
 
   // Dummy staff data
   const dummyStaff = {
-    staff_id: "STAFF-001",
+    staff_id: "S001",
     first_name: "Staff",
     last_name: "User",
     email: "staff@email.com",

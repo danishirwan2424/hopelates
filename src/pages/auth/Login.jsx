@@ -30,22 +30,6 @@ function Login() {
       return;
     }
 
-    // ✅ STAFF
-    if (cleanEmail === "staff@email.com" && cleanPassword === "password") {
-      localStorage.setItem("role", "staff");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          staff_id: "STAFF-001",
-          full_name: "Staff User",
-          email: cleanEmail,
-          role: "staff",
-        })
-      );
-      navigate("/staff-dashboard");
-      return;
-    }
-
     // ✅ DONOR
     if (cleanEmail === "donor@email.com" && cleanPassword === "password") {
       localStorage.setItem(

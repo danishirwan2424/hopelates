@@ -39,7 +39,7 @@ function StaffApplication() {
         email: a.email || "N/A",
 
         date: a.created_at ? new Date(a.created_at).toLocaleDateString() : "N/A",
-        status: a.status || "Pending",
+        status: a.status || "PENDING",
 
         ic: a.ic_no || "N/A",
         address: a.address || "N/A",
@@ -220,9 +220,9 @@ function StaffApplication() {
   };
 
   // ===== Stats =====
-  const totalPending = appList.filter((a) => a.status === "Pending").length;
-  const totalApproved = appList.filter((a) => a.status === "Completed").length;
-  const totalRejected = appList.filter((a) => a.status === "Rejected").length;
+  const totalPending = appList.filter((a) => a.status === "PENDING").length;
+  const totalApproved = appList.filter((a) => a.status === "COMPLETED").length;
+  const totalRejected = appList.filter((a) => a.status === "REJECTED").length;
 
   const [pendingCount, setPendingCount] = useState(0);
   const [approvedCount, setApprovedCount] = useState(0);
@@ -455,7 +455,7 @@ function StaffApplication() {
               <p className="text-sm text-gray-600 mt-1">{displayScore}/100</p>
             </div>
             <div className="flex justify-end space-x-2">
-              {selectedUser.status === "Pending" && (
+              {selectedUser.status === "PENDING" && (
                 <>
                   <button
                     onClick={() => handleApprove(selectedUser.id)}

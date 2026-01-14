@@ -18,6 +18,11 @@ const normalizeStatus = (s) => {
   return s;
 };
 
+// ✅ Handle preflight just in case
+router.options("*", (req, res) => {
+  return res.sendStatus(204);
+});
+
 // ======================
 // GET /api/staff-distribution
 // ✅ show ONLY rows that exist in MySQL distribution
@@ -36,7 +41,6 @@ router.get("/", async (req, res) => {
 
     const appIds = [...new Set(dists.map(d => String(d.application_id)).filter(Boolean))];
 
-    // application -> beneficiary_id
     const appsRes = await applicationPool.query(
       `SELECT application_id, beneficiary_id
        FROM application
@@ -49,7 +53,6 @@ router.get("/", async (req, res) => {
       appMap[String(a.application_id)] = a;
     });
 
-    // beneficiaries -> name/email
     const beneficiaryIds = [
       ...new Set((appsRes.rows || []).map(a => String(a.beneficiary_id)).filter(Boolean)),
     ];
@@ -74,8 +77,10 @@ router.get("/", async (req, res) => {
       const ben = benMap[String(app.beneficiary_id)] || {};
 
       return {
-        id: String(d.distribution_id || `dist-${idx}`),
+        // ✅ IMPORTANT: frontend should use this
+        distributionId: String(d.distribution_id || `dist-${idx}`),
         applicationId: appId,
+        staff_id: d.staff_id,
         name: ben.full_name || "N/A",
         email: ben.email || "N/A",
         package: "None",
@@ -95,64 +100,61 @@ router.get("/", async (req, res) => {
 });
 
 // ======================
-// PUT /api/staff-distribution/:distributionId/done
-// ✅ mark distribution row as Done + set date_distributed if null
-// ======================
-router.put("/:distributionId/done", async (req, res) => {
-  try {
-    const { distributionId } = req.params;
-
-    const [result] = await foodPool.query(
-      `UPDATE distribution
-       SET status = 'Done',
-           date_distributed = COALESCE(date_distributed, NOW())
-       WHERE distribution_id = ?`,
-      [String(distributionId)]
-    );
-
-    if ((result?.affectedRows ?? 0) === 0) {
-      return res.status(404).json({ success: false, message: "Distribution not found" });
-    }
-
-    return res.json({ success: true, message: "Marked Done" });
-  } catch (err) {
-    console.error("DISTRIBUTION DONE ERROR:", err);
-    return res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-// ======================
 // POST /api/staff-distribution/:distributionId/send-email
-// ✅ DUMMY EMAIL: no real sending
-// ✅ Just mark Completed + set date_distributed
+// ✅ Dummy email: update status Completed + set staff_id + date_distributed
 // ======================
 router.post("/:distributionId/send-email", async (req, res) => {
-  try {
-    const { distributionId } = req.params;
+  const { distributionId } = req.params;
+  const { staff_id } = req.body || {};
 
+  console.log("➡️ HIT POST /api/staff-distribution/:distributionId/send-email", {
+    distributionId,
+    staff_id,
+  });
+
+  if (!staff_id) {
+    return res.status(400).json({ success: false, message: "staff_id required" });
+  }
+
+  try {
     const [rows] = await foodPool.query(
-      `SELECT distribution_id FROM distribution WHERE distribution_id = ?`,
+      `SELECT distribution_id FROM distribution WHERE distribution_id = ? LIMIT 1`,
       [String(distributionId)]
     );
 
     if (!rows || rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Distribution not found" });
+      return res.status(404).json({
+        success: false,
+        message: `Distribution not found for distribution_id=${distributionId}`,
+      });
     }
 
-    await foodPool.query(
+    const [result] = await foodPool.query(
       `UPDATE distribution
        SET status='Completed',
+           staff_id=?,
            date_distributed = COALESCE(date_distributed, NOW())
-       WHERE distribution_id = ?`,
-      [String(distributionId)]
+       WHERE distribution_id=?`,
+      [String(staff_id), String(distributionId)]
     );
 
-    console.log(`📧 DUMMY EMAIL SENT for distribution_id=${distributionId}`);
-    return res.json({ success: true, message: "Dummy email sent & marked Completed" });
+    return res.json({
+      success: true,
+      message: "Dummy email sent & marked Completed",
+      affectedRows: result?.affectedRows ?? 0,
+    });
   } catch (err) {
-    console.error("DUMMY SEND EMAIL ERROR:", err);
+    console.error("SEND EMAIL ERROR:", err);
     return res.status(500).json({ success: false, message: err.message });
   }
+});
+
+// ✅ if route mismatch, you will see JSON here instead of default HTML 404
+router.use((req, res) => {
+  return res.status(404).json({
+    success: false,
+    message: `Route not found in distribution router: ${req.method} ${req.originalUrl}`,
+  });
 });
 
 module.exports = router;

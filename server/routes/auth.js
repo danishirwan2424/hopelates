@@ -94,11 +94,49 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    // Hardcoded staff login
+    if (email === "staff@email.com" && password === "password") {
+      return res.json({
+        message: "Login successful",
+        role: "staff",
+        user: {
+          staff_id: "STAFF-001",
+          full_name: "Staff User",
+          email: "staff@email.com",
+        },
+      });
+    }
+
     return res.status(401).json({ message: "Invalid credentials" });
   } catch (err) {
     console.error("LOGIN ERROR:", err);
     return res.status(500).json({ message: "Server error during login" });
   }
+});
+
+// ======================
+// STAFF PROFILE (Dummy)
+// ======================
+router.post("/staff/profile", async (req, res) => {
+  const { staff_id } = req.body;
+  if (!staff_id) return res.status(400).json({ message: "Staff ID required" });
+
+  // Dummy staff data
+  const dummyStaff = {
+    staff_id: "STAFF-001",
+    first_name: "Staff",
+    last_name: "User",
+    email: "staff@email.com",
+    phone_number: "012-3456789",
+    positions: "Coordinator",
+    gender: "Male",
+    ic_num: "123456-78-9012",
+    address: "123 Staff St, City",
+    profileImage: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+    coverPhoto: "",
+  };
+
+  return res.json(dummyStaff);
 });
 
 // ======================

@@ -157,9 +157,12 @@ function StaffApplication() {
 
   // ===== Approve / Reject =====
   const updateStatus = async (id, newStatus) => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const staffId = storedUser?.staff_id;
+
     await axios.patch(
       `http://localhost:5000/api/staff-application/${id}/status`,
-      { status: newStatus }
+      { status: newStatus, staff_id: staffId }
     );
 
     setAppList((prev) =>
@@ -298,257 +301,186 @@ function StaffApplication() {
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-3 flex-shrink-0">
             <div className="bg-gradient-to-b from-[#11452E] to-[#278659] rounded-2xl shadow-md flex flex-col items-start justify-start h-[150px] p-4">
               <p className="text-[14px] text-white/90 mb-2">Pending</p>
-              <h2 className="text-[56px] text-white font-bold leading-none">
-                {pendingCount}
-              </h2>
+              <p className="text-[32px] font-bold text-white">{pendingCount}</p>
+              <p className="text-[12px] text-white/70">Applications</p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-md flex flex-col items-start justify-start h-[150px] p-4">
-              <p className="text-[14px] text-black/80 mb-2">Approved</p>
-              <h2 className="text-[56px] text-black font-bold leading-none">
-                {approvedCount}
-              </h2>
+            <div className="bg-gradient-to-b from-[#11452E] to-[#278659] rounded-2xl shadow-md flex flex-col items-start justify-start h-[150px] p-4">
+              <p className="text-[14px] text-white/90 mb-2">Approved</p>
+              <p className="text-[32px] font-bold text-white">{approvedCount}</p>
+              <p className="text-[12px] text-white/70">Applications</p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-md flex flex-col items-start justify-start h-[150px] p-4">
-              <p className="text-[14px] text-black/80 mb-2">Rejected</p>
-              <h2 className="text-[56px] text-black font-bold leading-none">
-                {rejectedCount}
-              </h2>
+            <div className="bg-gradient-to-b from-[#11452E] to-[#278659] rounded-2xl shadow-md flex flex-col items-start justify-start h-[150px] p-4">
+              <p className="text-[14px] text-white/90 mb-2">Rejected</p>
+              <p className="text-[32px] font-bold text-white">{rejectedCount}</p>
+              <p className="text-[12px] text-white/70">Applications</p>
             </div>
           </section>
 
+          {/* Search */}
+          <section className="flex items-center bg-white rounded-lg px-4 py-2 mb-4 flex-shrink-0">
+            <Search className="text-gray-500 w-5 h-5 mr-2" />
+            <input
+              type="text"
+              placeholder="Search applications..."
+              className="flex-1 outline-none text-gray-700"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </section>
+
           {/* Table */}
-          <section className="flex-1 bg-white rounded-2xl shadow-md p-4 flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between w-full mb-3">
-              <h2 className="text-[16px] font-semibold text-gray-700">
-                Applicants List
-              </h2>
-
-              <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 w-72">
-                <Search className="text-gray-500 w-4 h-4 mr-2" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="bg-transparent outline-none w-full text-gray-700 placeholder-gray-500 text-sm"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="relative flex-1 overflow-auto rounded-xl">
-              <table className="min-w-full text-sm text-left border-collapse">
-                <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
-                  <tr className="text-[12px] uppercase tracking-wide">
-                    <th
-                      className="py-3 px-4 cursor-pointer whitespace-nowrap"
-                      onClick={() => handleSort("applicationId")}
-                    >
-                      Application ID{" "}
-                      {sortBy === "applicationId"
-                        ? sortOrder === "asc"
-                          ? "▲"
-                          : "▼"
-                        : ""}
+          <section className="flex-1 bg-white rounded-2xl shadow-md overflow-hidden flex flex-col">
+            <div className="overflow-auto flex-1">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("applicationId")}>
+                      Application ID
                     </th>
-                    <th
-                      className="py-3 px-4 cursor-pointer whitespace-nowrap"
-                      onClick={() => handleSort("name")}
-                    >
-                      Name{" "}
-                      {sortBy === "name"
-                        ? sortOrder === "asc"
-                          ? "▲"
-                          : "▼"
-                        : ""}
+                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("name")}>
+                      Name
                     </th>
-                    <th
-                      className="py-3 px-4 cursor-pointer whitespace-nowrap"
-                      onClick={() => handleSort("email")}
-                    >
-                      Email{" "}
-                      {sortBy === "email"
-                        ? sortOrder === "asc"
-                          ? "▲"
-                          : "▼"
-                        : ""}
+                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("email")}>
+                      Email
                     </th>
-                    <th
-                      className="py-3 px-4 cursor-pointer whitespace-nowrap"
-                      onClick={() => handleSort("date")}
-                    >
-                      Date Applied{" "}
-                      {sortBy === "date"
-                        ? sortOrder === "asc"
-                          ? "▲"
-                          : "▼"
-                        : ""}
+                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("date")}>
+                      Date
                     </th>
-                    <th
-                      className="py-3 px-4 cursor-pointer whitespace-nowrap"
-                      onClick={() => handleSort("status")}
-                    >
-                      Status{" "}
-                      {sortBy === "status"
-                        ? sortOrder === "asc"
-                          ? "▲"
-                          : "▼"
-                        : ""}
+                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("status")}>
+                      Status
                     </th>
-                    <th className="py-3 px-4 text-center whitespace-nowrap">
-                      Action
-                    </th>
+                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600">Actions</th>
                   </tr>
                 </thead>
-
                 <tbody>
                   {filteredApps.map((app) => (
-                    <tr
-                      key={app.id}
-                      className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-                    >
-                      <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">
-                        {app.applicationId}
-                      </td>
-                      <td className="py-3 px-4 font-medium text-gray-900">
-                        {app.name}
-                      </td>
-                      <td className="py-3 px-4 text-gray-600">{app.email}</td>
-                      <td className="py-3 px-4 text-gray-600 whitespace-nowrap">
-                        {app.date}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            app.status
-                          )}`}
-                        >
+                    <tr key={app.id} className="border-t border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3 text-[12px] text-gray-700">{app.applicationId}</td>
+                      <td className="px-4 py-3 text-[12px] text-gray-700">{app.name}</td>
+                      <td className="px-4 py-3 text-[12px] text-gray-700">{app.email}</td>
+                      <td className="px-4 py-3 text-[12px] text-gray-700">{app.date}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-medium ${getStatusColor(app.status)}`}>
                           {app.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="flex justify-center gap-3">
-                          <button
-                            className="text-blue-600 hover:text-blue-800"
-                            onClick={() => openEditModal(app)}
-                          >
-                            <Edit size={18} />
-                          </button>
-                          <button
-                            className="text-red-600 hover:text-red-800"
-                            onClick={() => handleDelete(app.id)}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
+                      <td className="px-4 py-3 flex space-x-2">
+                        <button
+                          onClick={() => openEditModal(app)}
+                          className="text-blue-500 hover:text-blue-700"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(app.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
-
-                  {filteredApps.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="py-12 text-center text-gray-500"
-                      >
-                        No applications found
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </table>
             </div>
           </section>
+        </section>
+      </main>
 
-          {/* Modal */}
-          {showModal && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-              <div className="bg-white w-[420px] p-6 rounded-2xl shadow-lg relative">
-                <button
-                  onClick={closeModal}
-                  className="absolute right-4 top-4 text-gray-600 hover:text-black"
-                >
-                  ✕
-                </button>
-
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Applicant Details
-                </h2>
-
-                <div className="space-y-2 text-gray-700 text-sm">
-                  <p>
-                    <strong>Full Name:</strong> {selectedUser?.name}
-                  </p>
-                  <p>
-                    <strong>IC Number / Serial:</strong> {selectedUser?.ic}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {selectedUser?.email}
-                  </p>
-                  <p>
-                    <strong>Home Address:</strong> {selectedUser?.address}
-                  </p>
-                  <p>
-                    <strong>City:</strong> {selectedUser?.city}
-                  </p>
-                  <p>
-                    <strong>State:</strong> {selectedUser?.state}
-                  </p>
-                  <p>
-                    <strong>Post Code:</strong> {selectedUser?.postcode}
-                  </p>
-                  <p>
-                    <strong>Occupation:</strong> {selectedUser?.occupation}
-                  </p>
-                  <p>
-                    <strong>Monthly Salary (RM):</strong> {selectedUser?.salary}
-                  </p>
-                  <p>
-                    <strong>Household Members:</strong> {selectedUser?.household}
-                  </p>
-                </div>
-
-                <div className="mt-5">
-                  <p className="text-sm font-medium text-gray-700 mb-1">
-                    Eligibility Score
-                  </p>
-                  <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-700 ${
-                        (selectedUser?.score ?? 0) < 60
-                          ? "bg-red-500"
-                          : "bg-green-600"
-                      }`}
-                      style={{ width: `${displayScore}%` }}
-                    />
-                  </div>
-                  <p className="text-right text-sm text-gray-600 mt-1">
-                    {displayScore}% Match
-                  </p>
-                </div>
-
-                <div className="mt-6 flex gap-3">
+      {/* Modal */}
+      {showModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-auto">
+            <h2 className="text-xl font-bold mb-4">Application Details</h2>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Application ID</label>
+                <p className="text-sm text-gray-900">{selectedUser.applicationId}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <p className="text-sm text-gray-900">{selectedUser.name}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <p className="text-sm text-gray-900">{selectedUser.email}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">IC Number</label>
+                <p className="text-sm text-gray-900">{selectedUser.ic}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Address</label>
+                <p className="text-sm text-gray-900">{selectedUser.address}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Postcode</label>
+                <p className="text-sm text-gray-900">{selectedUser.postcode}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">City</label>
+                <p className="text-sm text-gray-900">{selectedUser.city}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">State</label>
+                <p className="text-sm text-gray-900">{selectedUser.state}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Occupation</label>
+                <p className="text-sm text-gray-900">{selectedUser.occupation}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Salary</label>
+                <p className="text-sm text-gray-900">{selectedUser.salary}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Household Size</label>
+                <p className="text-sm text-gray-900">{selectedUser.household}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <p className="text-sm text-gray-900">{selectedUser.status}</p>
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Score</label>
+              <div className="w-full bg-gray-200 rounded-full h-4">
+                <div
+                  className="bg-green-500 h-4 rounded-full"
+                  style={{ width: `${(displayScore / 100) * 100}%` }}
+                ></div>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">{displayScore}/100</p>
+            </div>
+            <div className="flex justify-end space-x-2">
+              {selectedUser.status === "Pending" && (
+                <>
                   <button
                     onClick={() => handleApprove(selectedUser.id)}
-                    className="w-1/2 bg-[#278659] text-white py-2 rounded-lg hover:bg-[#11452E]"
+                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                   >
                     Approve
                   </button>
                   <button
                     onClick={() => handleReject(selectedUser.id)}
-                    className="w-1/2 bg-[#EF4444] text-white py-2 rounded-lg hover:bg-[#B91C1C]"
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                   >
                     Reject
                   </button>
-                </div>
-              </div>
+                </>
+              )}
+              <button
+                onClick={closeModal}
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              >
+                Close
+              </button>
             </div>
-          )}
-
-          <Outlet />
-        </section>
-      </main>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

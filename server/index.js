@@ -18,7 +18,7 @@ app.get("/ping", (req, res) => res.json({ ok: true }));
 
 // ✅ ROUTES
 const distributionRoutes = require("./routes/distribution");
-app.use("/api/staff-distribution", distributionRoutes);
+app.use("/api/staff-distribution", require("./routes/distribution"));
 
 // ✅ IMPORTANT: mount staff-application route
 const staffApplicationRoutes = require("./routes/staffApplication");

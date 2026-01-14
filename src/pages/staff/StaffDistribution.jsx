@@ -1,3 +1,4 @@
+// src/pages/staff/StaffDistribution.jsx
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { Mail, Search } from "lucide-react";
@@ -15,24 +16,53 @@ function StaffDistribution() {
   const [sortOrder, setSortOrder] = useState("asc");
   const [sending, setSending] = useState({});
 
+  // ✅ get staff_id from localStorage
+  const getStaffId = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+      return user?.staff_id || null;
+    } catch {
+      return null;
+    }
+  };
+
   const fetchApplications = async () => {
     try {
       const response = await fetch(`${API_BASE}/api/staff-distribution`);
       const result = await response.json();
       const rows = Array.isArray(result?.data) ? result.data : [];
 
-      setApplications(
-        rows.map((row, index) => ({
-          applicationId: row.applicationId ?? `AP${String(index + 1).padStart(3, "0")}`,
+      const mapped = rows.map((row) => {
+        // ✅ IMPORTANT: ONLY use real distribution id from backend
+        const realDistId = row.distributionId ?? row.id ?? null;
+
+        return {
+          distributionId: realDistId ? String(realDistId) : "",
+          applicationId: row.applicationId ?? "N/A",
           name: row.name ?? "N/A",
           email: row.email ?? "N/A",
           package: row.package ?? "None",
           packageCount: row.packageCount ?? 1,
           dateDistributed: row.dateDistributed ?? "N/A",
           status: row.status ?? "Pending",
-          id: row.id ?? `dist-${index}`,
-        }))
-      );
+        };
+      });
+
+      // ✅ remove invalid rows that have no distributionId
+      const clean = mapped.filter((x) => x.distributionId);
+
+      // if backend didn’t return ids, show warning once
+      if (mapped.length > 0 && clean.length === 0) {
+        console.warn("Backend did not return distributionId/id in /api/staff-distribution");
+        Swal.fire({
+          icon: "error",
+          title: "Backend Data Missing",
+          text: "No distributionId returned from /api/staff-distribution. Please check backend response fields.",
+          confirmButtonColor: "#B91C1C",
+        });
+      }
+
+      setApplications(clean);
     } catch (err) {
       console.error("Failed to fetch staff distribution:", err);
       setApplications([]);
@@ -57,7 +87,7 @@ function StaffDistribution() {
     const colors = {
       "Package A": "text-blue-700 bg-blue-100",
       "Package B": "text-purple-700 bg-purple-100",
-      "Package C": "text-yellow-700 bg-yellow-100",
+      "Package C": "text-yellow-700 bg-blue-100",
       None: "text-gray-700 bg-gray-100",
     };
     return colors[packageName] || "text-gray-700 bg-gray-100";
@@ -73,67 +103,93 @@ function StaffDistribution() {
     return colors[status] || "text-gray-700 bg-gray-100";
   };
 
-  // ✅ DUMMY send email endpoint
+  // ✅ Dummy send email endpoint (robust)
   const sendEmailInDb = async (distributionId) => {
+    const staffId = getStaffId();
+
+    if (!staffId) {
+      return { success: false, message: "No staff_id found. Please login as staff." };
+    }
+
+    if (!distributionId) {
+      return { success: false, message: "Missing distributionId. Backend did not return it." };
+    }
+
     const url = `${API_BASE}/api/staff-distribution/${encodeURIComponent(
-      distributionId
+      String(distributionId)
     )}/send-email`;
 
-    let r;
+    console.log("📌 Sending email to:", url, "| staff_id:", staffId);
+
     try {
-      r = await fetch(url, { method: "POST" });
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ staff_id: staffId }),
+      });
+
+      const text = await r.text();
+      let body = null;
+      try {
+        body = text ? JSON.parse(text) : null;
+      } catch {
+        body = null;
+      }
+
+      if (!r.ok) {
+        return {
+          success: false,
+          message: body?.message || `HTTP ${r.status} ${r.statusText}`,
+          detail: body?.detail || text,
+        };
+      }
+
+      return body || { success: true };
     } catch (e) {
       return { success: false, message: `NETWORK ERROR: ${e.message}` };
     }
-
-    let body = null;
-    try {
-      body = await r.json();
-    } catch {
-      body = null;
-    }
-
-    if (!r.ok) {
-      return {
-        success: false,
-        message: `HTTP ${r.status} ${r.statusText} | ${body?.message || "No body"}`,
-      };
-    }
-
-    return body || { success: true };
   };
 
   const sendEmailAndUpdate = async (applicant) => {
-    setSending((prev) => ({ ...prev, [applicant.id]: true }));
+    const key = applicant.distributionId;
+    setSending((prev) => ({ ...prev, [key]: true }));
 
-    const res = await sendEmailInDb(applicant.id);
+    try {
+      const res = await sendEmailInDb(applicant.distributionId);
 
-    if (!res?.success) {
+      if (!res?.success) {
+        Swal.fire({
+          icon: "error",
+          title: "Email Failed",
+          text: res?.message || "Unknown error",
+          confirmButtonColor: "#B91C1C",
+        });
+        console.error("Send email failed detail:", res?.detail);
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.distributionId === applicant.distributionId
+            ? { ...app, status: "Completed", dateDistributed: today }
+            : app
+        )
+      );
+
       Swal.fire({
-        icon: "error",
-        title: "Email Failed",
-        text: res?.message || "Unknown error",
-        confirmButtonColor: "#B91C1C",
+        icon: "success",
+        title: "Email Sent",
+        text: "Dummy email sent & distribution updated to Completed.",
+        confirmButtonColor: "#278659",
       });
-      setSending((prev) => ({ ...prev, [applicant.id]: false }));
-      return;
+
+      // Optional refresh
+      fetchApplications();
+    } finally {
+      // ✅ never stuck
+      setSending((prev) => ({ ...prev, [key]: false }));
     }
-
-    const today = new Date().toISOString().slice(0, 10);
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.id === applicant.id ? { ...app, status: "Completed", dateDistributed: today } : app
-      )
-    );
-
-    Swal.fire({
-      icon: "success",
-      title: "Email Sent (Dummy)",
-      text: "Dummy email sent & DB updated to Completed.",
-      confirmButtonColor: "#278659",
-    });
-
-    setSending((prev) => ({ ...prev, [applicant.id]: false }));
   };
 
   const filteredApps = applications
@@ -142,7 +198,8 @@ function StaffDistribution() {
       return (
         String(app.name || "").toLowerCase().includes(q) ||
         String(app.email || "").toLowerCase().includes(q) ||
-        String(app.applicationId || "").toLowerCase().includes(q)
+        String(app.applicationId || "").toLowerCase().includes(q) ||
+        String(app.distributionId || "").toLowerCase().includes(q)
       );
     })
     .sort((a, b) => {
@@ -202,25 +259,52 @@ function StaffDistribution() {
               <table className="min-w-full text-sm text-left border-collapse">
                 <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
                   <tr className="text-[12px] uppercase tracking-wide">
-                    <th className="py-3 px-4 w-[140px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("applicationId")}>
+                    <th
+                      className="py-3 px-4 w-[160px] cursor-pointer whitespace-nowrap"
+                      onClick={() => handleSort("distributionId")}
+                    >
+                      Distribution ID {sortBy === "distributionId" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
+                    <th
+                      className="py-3 px-4 w-[140px] cursor-pointer whitespace-nowrap"
+                      onClick={() => handleSort("applicationId")}
+                    >
                       Application ID {sortBy === "applicationId" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th className="py-3 px-4 w-[220px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("name")}>
+                    <th
+                      className="py-3 px-4 w-[220px] cursor-pointer whitespace-nowrap"
+                      onClick={() => handleSort("name")}
+                    >
                       Name {sortBy === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th className="py-3 px-4 w-[260px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("email")}>
+                    <th
+                      className="py-3 px-4 w-[260px] cursor-pointer whitespace-nowrap"
+                      onClick={() => handleSort("email")}
+                    >
                       Email {sortBy === "email" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th className="py-3 px-4 w-[150px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("package")}>
+                    <th
+                      className="py-3 px-4 w-[150px] cursor-pointer whitespace-nowrap"
+                      onClick={() => handleSort("package")}
+                    >
                       Package {sortBy === "package" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th className="py-3 px-4 w-[120px] cursor-pointer text-center whitespace-nowrap" onClick={() => handleSort("packageCount")}>
+                    <th
+                      className="py-3 px-4 w-[120px] cursor-pointer text-center whitespace-nowrap"
+                      onClick={() => handleSort("packageCount")}
+                    >
                       Total Count {sortBy === "packageCount" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th className="py-3 px-4 w-[170px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("dateDistributed")}>
+                    <th
+                      className="py-3 px-4 w-[170px] cursor-pointer whitespace-nowrap"
+                      onClick={() => handleSort("dateDistributed")}
+                    >
                       Date Distributed {sortBy === "dateDistributed" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
-                    <th className="py-3 px-4 w-[120px] cursor-pointer whitespace-nowrap" onClick={() => handleSort("status")}>
+                    <th
+                      className="py-3 px-4 w-[120px] cursor-pointer whitespace-nowrap"
+                      onClick={() => handleSort("status")}
+                    >
                       Status {sortBy === "status" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
                     <th className="py-3 px-4 w-[170px] text-center whitespace-nowrap">Action</th>
@@ -229,23 +313,43 @@ function StaffDistribution() {
 
                 <tbody>
                   {filteredApps.map((applicant) => (
-                    <tr key={applicant.id} className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                      <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">{applicant.applicationId}</td>
+                    <tr
+                      key={applicant.distributionId}
+                      className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    >
+                      <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">
+                        {applicant.distributionId}
+                      </td>
+                      <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">
+                        {applicant.applicationId}
+                      </td>
                       <td className="py-3 px-4 font-medium text-gray-900">{applicant.name}</td>
                       <td className="py-3 px-4 text-gray-600">{applicant.email}</td>
 
                       <td className="py-3 px-4">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getPackageColor(applicant.package)}`}>
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getPackageColor(
+                            applicant.package
+                          )}`}
+                        >
                           {applicant.package}
                         </span>
                       </td>
 
-                      <td className="py-3 px-4 text-center text-gray-700 font-medium">{applicant.packageCount}</td>
+                      <td className="py-3 px-4 text-center text-gray-700 font-medium">
+                        {applicant.packageCount}
+                      </td>
 
-                      <td className="py-3 px-4 text-gray-600 whitespace-nowrap">{applicant.dateDistributed}</td>
+                      <td className="py-3 px-4 text-gray-600 whitespace-nowrap">
+                        {applicant.dateDistributed}
+                      </td>
 
                       <td className="py-3 px-4">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(applicant.status)}`}>
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            applicant.status
+                          )}`}
+                        >
                           {applicant.status}
                         </span>
                       </td>
@@ -255,14 +359,18 @@ function StaffDistribution() {
                           {applicant.status === "Pending" ? (
                             <button
                               onClick={() => sendEmailAndUpdate(applicant)}
-                              disabled={!!sending[applicant.id]}
+                              disabled={!!sending[applicant.distributionId]}
                               className="inline-flex items-center gap-2 bg-[#278659] hover:bg-[#1f6a46] disabled:opacity-60 text-white px-4 py-2 rounded-lg text-sm font-medium"
                             >
                               <Mail size={16} />
-                              {sending[applicant.id] ? "Sending..." : "Send Email"}
+                              {sending[applicant.distributionId] ? "Sending..." : "Send Email"}
                             </button>
                           ) : (
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(applicant.status)}`}>
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                applicant.status
+                              )}`}
+                            >
                               {applicant.status}
                             </span>
                           )}
@@ -273,7 +381,7 @@ function StaffDistribution() {
 
                   {filteredApps.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="py-10 text-center text-gray-500">
+                      <td colSpan={9} className="py-10 text-center text-gray-500">
                         No applicants found
                       </td>
                     </tr>

@@ -17,7 +17,27 @@ import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 */
 
 const API_BASE = "/api"; // change to your base URL if needed
-const STAFF_ID = 1; // replace with dynamic id as required
+const storedUser = JSON.parse(localStorage.getItem("user"));
+const STAFF_ID = storedUser?.staff_id;
+
+// ===== Input format helpers =====
+
+// Phone: XXX-XXXXXXX
+const formatPhone = (value) => {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  if (digits.length <= 3) return digits;
+  return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+};
+
+// IC: XXXXXX-XX-XXXX
+const formatIC = (value) => {
+  const digits = value.replace(/\D/g, "").slice(0, 12);
+  if (digits.length <= 6) return digits;
+  if (digits.length <= 8)
+    return `${digits.slice(0, 6)}-${digits.slice(6)}`;
+  return `${digits.slice(0, 6)}-${digits.slice(6, 8)}-${digits.slice(8)}`;
+};
+
 
 function StaffProfile() {
   // UI state
@@ -26,20 +46,20 @@ function StaffProfile() {
   const [saving, setSaving] = useState(false);
 
   // Staff data
-  const [staff, setStaff] = useState({
-    id: STAFF_ID,
-    firstName: "Ali",
-    lastName: "Abu",
-    email: "alih@example.com",
-    phone: "012-3456789",
-    position: "Volunteer Staff",
-    joinedDate: "2024-08-12",
-    gender: "Male",
-    ic: "020304-04-5678",
-    address: "No. 12, Jalan Harmoni, Melaka",
-    profileImage: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-    coverPhoto: "",
-  });
+ const [staff, setStaff] = useState({
+  staff_id: "",
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone_number: "",
+  positions: "",
+  gender: "",
+  ic_num: "",
+  address: "",
+  profileImage: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+  coverPhoto: "",
+});
+
 
   // Editable form state (separate so we can cancel)
   const [form, setForm] = useState({ ...staff });
@@ -56,84 +76,70 @@ function StaffProfile() {
 
   // fetch staff & logs on mount
   useEffect(() => {
-    let mounted = true;
+  async function fetchStaff() {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (!storedUser?.staff_id) return;
 
-    async function fetchData() {
-      try {
-        // Try fetching real data if API exists — otherwise fallback to mock that's already set
-        const [staffRes, logsRes] = await Promise.allSettled([
-          axios.get(`${API_BASE}/staff/${STAFF_ID}`),
-          axios.get(`${API_BASE}/staff/${STAFF_ID}/logs`),
-        ]);
-
-        if (mounted) {
-          if (staffRes.status === "fulfilled" && staffRes.value.data) {
-            setStaff((s) => ({ ...s, ...staffRes.value.data }));
-            setForm((f) => ({ ...f, ...staffRes.value.data }));
-          } else {
-            // use mock that's already in state
-          }
-
-          if (logsRes.status === "fulfilled" && Array.isArray(logsRes.value.data)) {
-            setLogs(logsRes.value.data);
-          } else {
-            // fallback mock logs
-            setLogs([
-              {
-                id: 1,
-                action: "Profile created",
-                detail: "Initial profile created",
-                actor: "system",
-                timestamp: "2024-08-12T09:30:00Z",
-              },
-              {
-                id: 2,
-                action: "Updated phone",
-                detail: "Phone changed to 012-3456789",
-                actor: "admin",
-                timestamp: "2025-10-11T10:12:00Z",
-              },
-            ]);
-          }
+     const res = await axios.post(
+        "http://localhost:5000/api/auth/staff/profile",
+        {
+          staff_id: storedUser.staff_id,
         }
-      } catch (err) {
-        console.error("fetch error", err);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-          setLogsLoading(false);
-        }
-      }
+      );
+
+
+      setStaff(res.data);
+      setForm(res.data);
+    } catch (err) {
+      console.error("Failed to fetch staff profile", err);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    fetchData();
-    return () => {
-      mounted = false;
-      // cleanup previews if any
-      if (profilePreview) URL.revokeObjectURL(profilePreview);
-      if (coverPreview) URL.revokeObjectURL(coverPreview);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  fetchStaff();
+}, []);
+
 
   // helpers: open edit modal & set form
   const openEdit = () => {
-    setForm({
-      ...staff,
-      // split name if needed
-      firstName: staff.firstName || staff.name?.split?.(" ")?.[0] || "",
-      lastName: staff.lastName || staff.name?.split?.(" ").slice(1).join(" ") || "",
-    });
-    setProfilePreview(null);
-    setCoverPreview(null);
-    setEditing(true);
-  };
+  setForm({
+    ...staff,
+    first_name: staff.first_name || "",
+    last_name: staff.last_name || "",
+    phone_number: staff.phone_number || "",
+    gender: staff.gender || "",
+    ic_num: staff.ic_num || "",
+    address: staff.address || "",
+  });
+  setEditing(true);
+};
+
 
   // handle form input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
-  };
+  const { name, value } = e.target;
+
+  if (name === "phone_number") {
+    setForm((f) => ({
+      ...f,
+      phone_number: formatPhone(value),
+    }));
+    return;
+  }
+
+  if (name === "ic_num") {
+    setForm((f) => ({
+      ...f,
+      ic_num: formatIC(value),
+    }));
+    return;
+  }
+
+  setForm((f) => ({ ...f, [name]: value }));
+};
+
 
   // handle profile file pick
   const handleProfilePick = (e) => {
@@ -165,74 +171,58 @@ function StaffProfile() {
     coverFileRef.current = file;
   };
 
+  const user = JSON.parse(localStorage.getItem("user"));
   // Save handler: send to API as multipart/form-data
   const handleSave = async () => {
-    setSaving(true);
+  try {
 
-    try {
-      const fd = new FormData();
-      fd.append("firstName", form.firstName || "");
-      fd.append("lastName", form.lastName || "");
-      fd.append("email", form.email || "");
-      fd.append("phone", form.phone || "");
-      fd.append("position", form.position || "");
-      fd.append("joinedDate", form.joinedDate || "");
-      fd.append("gender", form.gender || "");
-      fd.append("ic", form.ic || "");
-      fd.append("address", form.address || "");
-
-      if (profileFileRef.current) {
-        fd.append("profile_picture", profileFileRef.current);
-      }
-      if (coverFileRef.current) {
-        fd.append("cover_photo", coverFileRef.current);
-      }
-
-      // Example: PATCH to /api/staff/:id
-      const res = await axios.patch(`${API_BASE}/staff/${STAFF_ID}`, fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      // use returned data if provided
-      const updated = res?.data || { ...staff, ...form };
-
-      // update local state
-      setStaff((s) => ({ ...s, ...updated }));
-
-      // create activity log entry and push to logs (you should let backend create it too)
-      const newLog = {
-        id: Date.now(),
-        action: "Updated profile",
-        detail: "Profile fields updated",
-        actor: "current_user", // replace with actual actor id / name
-        timestamp: new Date().toISOString(),
-      };
-
-      // optionally post log to backend
-      try {
-        await axios.post(`${API_BASE}/staff/${STAFF_ID}/logs`, newLog);
-      } catch {
-        // ignore if logs API missing — still append locally
-      }
-
-      setLogs((prev) => [newLog, ...prev]);
-
-      // update image URLs if backend returned them
-      if (updated.profileImage) setProfilePreview(null);
-      if (updated.coverPhoto) setCoverPreview(null);
-
-      alert("Profile saved successfully.");
-      setEditing(false);
-    } catch (err) {
-      console.error("save error", err);
-      alert("Failed to save profile. See console for details.");
-    } finally {
-      setSaving(false);
-      // cleanup file refs
-      profileFileRef.current = null;
-      coverFileRef.current = null;
+    // ===== Validation =====
+    if (form.phone_number.replace(/\D/g, "").length < 10) {
+      alert("Phone number must be at least 10 digits");
+      return;
     }
-  };
+
+    if (form.ic_num.replace(/\D/g, "").length < 12) {
+      alert("IC number must be 12 digits");
+      return;
+    }
+
+    const res = await fetch(
+      `http://localhost:5000/api/auth/staff/profile/${user.staff_id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name: form.first_name,
+          last_name: form.last_name,
+          phone_number: form.phone_number,
+          gender: form.gender,
+          ic_num: form.ic_num,
+          address: form.address,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const text = await res.text(); // 🔴 SAFE DEBUG
+      throw new Error(text);
+    }
+
+    const data = await res.json();
+
+    setStaff((prev) => ({
+      ...prev,
+      ...form,
+    }));
+
+    setEditing(false);
+    alert("Profile updated successfully");
+  } catch (err) {
+    console.error("SAVE ERROR:", err);
+    alert("Server error");
+  }
+};
+
 
   // cancel edit: cleanup previews and close
   const handleCancel = () => {
@@ -258,7 +248,7 @@ function StaffProfile() {
   }
 
   // formatting helper
-  const displayName = `${staff.firstName || ""} ${staff.lastName || ""}`.trim() || staff.name || "No Name";
+ const displayName = `${staff.first_name || ""} ${staff.last_name || ""}`.trim();
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -305,7 +295,7 @@ function StaffProfile() {
           {displayName}
         </p>
         <p className="text-sm text-gray-200 drop-shadow-md">
-          {staff.position}
+          {staff.positions}
         </p>
       </div>
     </div>
@@ -332,27 +322,22 @@ function StaffProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-xs text-gray-500">First Name</p>
-                  <p className="text-gray-800">{staff.firstName}</p>
+                  <p className="text-gray-800">{staff.first_name}</p>
                 </div>
 
                 <div>
                   <p className="text-xs text-gray-500">Last Name</p>
-                  <p className="text-gray-800">{staff.lastName}</p>
+                  <p className="text-gray-800">{staff.last_name}</p>
                 </div>
 
                 <div>
                   <p className="text-xs text-gray-500">Phone Number</p>
-                  <p className="text-gray-800">{staff.phone}</p>
+                  <p className="text-gray-800">{staff.phone_number}</p>
                 </div>
 
                 <div>
                   <p className="text-xs text-gray-500">Position</p>
-                  <p className="text-gray-800">{staff.position}</p>
-                </div>
-
-                <div>
-                  <p className="text-xs text-gray-500">Joined Date</p>
-                  <p className="text-gray-800">{staff.joinedDate}</p>
+                  <p className="text-gray-800">{staff.positions}</p>
                 </div>
 
                 <div>
@@ -362,7 +347,7 @@ function StaffProfile() {
 
                 <div className="md:col-span-2">
                   <p className="text-xs text-gray-500">IC / Passport</p>
-                  <p className="text-gray-800">{staff.ic}</p>
+                  <p className="text-gray-800">{staff.ic_num}</p>
                 </div>
 
                 <div className="md:col-span-2">
@@ -456,8 +441,8 @@ function StaffProfile() {
           <div>
             <label className="text-xs font-semibold text-[#11452E]">First Name</label>
             <input
-              name="firstName"
-              value={form.firstName || ""}
+              name="first_ame"
+              value={form.first_name || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
             />
@@ -466,8 +451,8 @@ function StaffProfile() {
           <div>
             <label className="text-xs font-semibold text-[#11452E]">Last Name</label>
             <input
-              name="lastName"
-              value={form.lastName || ""}
+              name="last_name"
+              value={form.last_name || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
             />
@@ -476,8 +461,8 @@ function StaffProfile() {
           <div>
             <label className="text-xs font-semibold text-[#11452E]">Phone</label>
             <input
-              name="phone"
-              value={form.phone || ""}
+              name="phone_number"
+              value={form.phone_number || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
             />
@@ -486,20 +471,9 @@ function StaffProfile() {
           <div>
             <label className="text-xs font-semibold text-[#11452E]">Position</label>
             <input
-              name="position"
-              value={form.position || ""}
-              onChange={handleChange}
-              className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-[#11452E]">Joined Date</label>
-            <input
-              name="joinedDate"
-              type="date"
-              value={form.joinedDate || ""}
-              onChange={handleChange}
+              name="positions"
+              value={form.positions}
+              disabled
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
             />
           </div>
@@ -521,8 +495,8 @@ function StaffProfile() {
           <div className="md:col-span-2">
             <label className="text-xs font-semibold text-[#11452E]">IC / Passport</label>
             <input
-              name="ic"
-              value={form.ic || ""}
+              name="ic_num"
+              value={form.ic_num || ""}
               onChange={handleChange}
               className="w-full p-3 border rounded-md focus:ring-1 focus:ring-[#278659] focus:outline-none"
             />

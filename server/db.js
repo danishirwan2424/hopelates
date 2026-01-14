@@ -44,11 +44,11 @@ const foodDB = mysql.createPool({
 
 // Beneficiary / Application DB
 const beneficiaryDB = new Pool({
-  host: process.env.BENEFICIARY_DB_HOST,
-  user: process.env.BENEFICIARY_DB_USER,
-  password: process.env.BENEFICIARY_DB_PASSWORD,
-  database: process.env.BENEFICIARY_DB_NAME,
-  port: Number(process.env.BENEFICIARY_DB_PORT),
+  host: process.env.APPLICATION_DB_HOST,
+  user: process.env.APPLICATION_DB_USER,
+  password: process.env.APPLICATION_DB_PASSWORD,
+  database: process.env.APPLICATION_DB_NAME,
+  port: Number(process.env.APPLICATION_DB_PORT),
 });
 
 // Auth DB

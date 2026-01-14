@@ -4,7 +4,6 @@ import { Eye, EyeOff } from "lucide-react";
 import leaves from "../../images/leaves.jpg";
 import logo from "../../images/Logo2.png";
 import '../../index.css';
-import axios from "axios";
 
 function Login() {
   const navigate = useNavigate();
@@ -12,40 +11,84 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async (e) => {
+
+const handleLogin = async (e) => {
   e.preventDefault();
 
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanPassword = password.trim();
+
+  // 🔐 Basic validation
+  if (!cleanEmail || !cleanPassword) {
+    alert("Please enter email and password");
+    return;
+  }
+
+  // ✅ SUPER ADMIN (FRONTEND ONLY)
+  if (cleanEmail === "superadmin@email.com" && cleanPassword === "password") {
+    localStorage.clear();
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        role: "superadmin",
+        superadmin_id: "SA001",
+        full_name: "System Super Admin",
+        email: cleanEmail,
+      })
+    );
+
+    navigate("/staff-dashboard");
+    return;
+  }
+
   try {
-    const res = await axios.post("http://localhost:5000/api/auth/login", {
-      email,
-      password
+    // 🔁 Backend login for staff / donor / beneficiary
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: cleanEmail,
+        password: cleanPassword,
+      }),
     });
 
-    const { token, role, user } = res.data;
+    const data = await res.json();
 
-    // Save auth info
-    if (token) {
-      localStorage.setItem("token", token);
+    if (!res.ok) {
+      alert(data.message || "Invalid email or password");
+      return;
     }
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("role", role);
 
-    // Redirect based on role
-    if (role === "staff") {
-      navigate("/staff-dashboard");
-    } else if (role === "donor") {
-      navigate("/donor-dashboard");
-    } else if (role === "applicant") {
-      navigate("/applicant-dashboard");
+    // 🔥 IMPORTANT: clear any old user data
+    localStorage.clear();
+
+    // 💾 Save user (统一 format)
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...data.user,   // staff_id OR donor_id OR beneficiary_id
+        role: data.role // staff | donor | beneficiary
+      })
+    );
+
+    // 🔀 Role-based navigation
+    if (data.role === "staff") {
+      navigate("/staff-profile");
+    } else if (data.role === "donor") {
+      navigate("/donation");
+    } else if (data.role === "beneficiary") {
+      navigate("/application");
     } else {
-      alert("Unknown role");
+      alert("Unknown user role");
     }
 
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    alert(err.response?.data?.message || "Login failed");
+    console.error(err);
+    alert("Server error");
   }
 };
+
 
 
   return (

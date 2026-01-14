@@ -72,6 +72,15 @@ export default function DonationApply() {
   const getTotalItems = () =>
     Object.values(packageQuantities).reduce((sum, qty) => sum + qty, 0);
 
+  //payment_receipt as base64
+const getBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
   // ✅ NEW: send data to backend
   const submitDonationToBackend = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -80,10 +89,11 @@ export default function DonationApply() {
       alert("No donor found. Please login again.");
       return null;
     }
-
+    const receiptBase64 = uploadedFile ? await getBase64(uploadedFile) : null;
     const payload = {
       donor_id: user.donor_id,
       total_amount: calculateTotal(),
+      payment_receipt: receiptBase64,
       packages: [
         { package_id: 1, quantity: packageQuantities.A },
         { package_id: 2, quantity: packageQuantities.B },

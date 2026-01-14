@@ -18,6 +18,8 @@ router.post("/", async (req, res) => {
   try {
     const { name, category, unit, quantity, expiry_date } = req.body;
 
+    console.log("📝 ADD ITEM REQUEST:", { name, category, unit, quantity, expiry_date });
+
     if (!name || !category || !unit || !quantity || !expiry_date) {
       return res.status(400).json({
         error: "name, category, unit, quantity, expiry_date are required"
@@ -36,6 +38,8 @@ router.post("/", async (req, res) => {
     );
 
     const itemId = Number(result.insertId);
+
+    console.log("✅ ITEM INSERTED:", { itemId });
 
     // Record in inventory (stock_in)
     await conn.query(
@@ -69,6 +73,14 @@ router.put("/:id", async (req, res) => {
     const { name, category, unit, quantity, expiry_date } = req.body;
     const itemId = req.params.id;
 
+    console.log("📝 UPDATE ITEM REQUEST:", { itemId, name, category, unit, quantity, expiry_date });
+
+    if (!name || !category || !unit || !quantity || !expiry_date) {
+      return res.status(400).json({
+        error: "name, category, unit, quantity, expiry_date are required"
+      });
+    }
+
     conn = await inventoryPool.getConnection();
     await conn.beginTransaction();
 
@@ -87,11 +99,15 @@ router.put("/:id", async (req, res) => {
     const newQuantity = Number(quantity);
     const quantityDiff = newQuantity - oldQuantity;
 
+    console.log("🔄 QUANTITY CHANGE:", { oldQuantity, newQuantity, diff: quantityDiff });
+
     // Update item
-    await conn.query(
+    const updateResult = await conn.query(
       "UPDATE item SET item_name=?, category=?, unit=?, quantity=?, expiry_date=? WHERE item_id=?",
       [name, category, unit, newQuantity, expiry_date, itemId]
     );
+
+    console.log("✅ ITEM UPDATED:", updateResult);
 
     // Update inventory if quantity increased
     if (quantityDiff > 0) {
@@ -121,7 +137,7 @@ router.put("/:id", async (req, res) => {
       affectedRows: 1
     });
   } catch (err) {
-    console.error("UPDATE ITEM ERROR:", err);
+    console.error("❌ UPDATE ITEM ERROR:", err);
     if (conn) {
       await conn.rollback();
       conn.release();

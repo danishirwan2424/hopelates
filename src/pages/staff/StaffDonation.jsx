@@ -6,16 +6,24 @@ import Swal from "sweetalert2";
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
-function StaffPackage() {
+function StaffDonation() {
   const API_URL = "http://localhost:5000/api/packages";
   const ITEM_API = "http://localhost:5000/api/items";
 
   const token = localStorage.getItem("token");
+  console.log("🔐 Auth token present:", !!token);
+  console.log("🔐 Token value:", token);
+  console.log("🔐 Full localStorage:", localStorage);
+  if (!token) {
+    console.warn("⚠️ No authentication token found in localStorage!");
+  }
 
-const authHeaders = {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${token}`
-};
+  const authHeaders = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  };
+  
+  console.log("🔐 Auth headers being used:", authHeaders);
 
   // Package data
   const [packages, setPackages] = useState([]);
@@ -176,18 +184,30 @@ const authHeaders = {
     };
 
     try {
-      await fetch(API_URL, {
-  method: "POST",
-  headers: authHeaders,
-  body: JSON.stringify(payload)
-});
+      const addRes = await fetch(API_URL, {
+        method: "POST",
+        headers: authHeaders,
+        body: JSON.stringify(payload)
+      });
 
+      console.log("🚀 Add Package Response Status:", addRes.status, addRes.statusText);
+      const addData = await addRes.json();
+      console.log("📦 Add Package Response Data:", addData);
+
+      if (!addRes.ok) {
+        throw new Error(addData.error || "Failed to add package");
+      }
 
       const res = await fetch(API_URL);
-      setPackages(await res.json());
+      if (!res.ok) throw new Error("Failed to fetch packages");
+      const packages = await res.json();
+      console.log("📋 Fetched Packages:", packages);
+      setPackages(packages);
 
       setIsAddModalOpen(false);
       setNewPackage({ name: "", price: "", pax: "", items: [], image: "" });
+      setSelectedItemId("");
+      setSelectedItemQuantity(1);
 
       Swal.fire({
         icon: "success",
@@ -195,7 +215,7 @@ const authHeaders = {
         confirmButtonColor: "#278659"
       });
     } catch (err) {
-      console.error(err);
+      console.error("Add package error:", err);
       Swal.fire({
         icon: "error",
         title: "Failed to Add Package",
@@ -221,6 +241,16 @@ const authHeaders = {
   };
 
   // Add Stock Handler
+  // Helper function to convert ISO date to YYYY-MM-DD format
+  const formatDateForDB = (dateString) => {
+    if (!dateString) return "";
+    // If it's already in YYYY-MM-DD format, return it
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+    // If it's ISO format, extract just the date part
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0];
+  };
+
   const handleAddStock = async () => {
     if (!newStock.name || !newStock.quantity || !newStock.unit || !newStock.expiry_date) {
       Swal.fire({
@@ -234,24 +264,29 @@ const authHeaders = {
     try {
       const response = await fetch(ITEM_API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders,
         body: JSON.stringify({
           name: newStock.name,
           category: newStock.category,
           unit: newStock.unit,
           quantity: Number(newStock.quantity),
-          expiry_date: newStock.expiry_date
+          expiry_date: formatDateForDB(newStock.expiry_date)
         })
       });
 
+      console.log("🚀 Add Stock Response Status:", response.status, response.statusText);
+      const responseData = await response.json();
+      console.log("📦 Add Stock Response Data:", responseData);
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to add stock");
+        throw new Error(responseData.error || "Failed to add stock");
       }
 
       // Refresh stock list
       const res = await fetch(ITEM_API);
-      setStockList(await res.json());
+      const stocks = await res.json();
+      console.log("📋 Fetched Stocks:", stocks);
+      setStockList(stocks);
 
       setIsAddStockModalOpen(false);
       setNewStock({ 
@@ -290,18 +325,33 @@ const authHeaders = {
     }).then(async (result) => {
       if (!result.isConfirmed) return;
 
-      await fetch(`${API_URL}/${id}`, {
-        method: "DELETE"
-      });
+      try {
+        const deleteRes = await fetch(`${API_URL}/${id}`, {
+          method: "DELETE",
+          headers: authHeaders
+        });
 
-      const res = await fetch(API_URL);
-      setPackages(await res.json());
+        if (!deleteRes.ok) {
+          throw new Error("Failed to delete package");
+        }
 
-      Swal.fire({
-        icon: "success",
-        title: "Deleted!",
-        confirmButtonColor: "#278659"
-      });
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("Failed to fetch packages");
+        setPackages(await res.json());
+
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          confirmButtonColor: "#278659"
+        });
+      } catch (err) {
+        console.error("Delete error:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Delete",
+          text: err.message
+        });
+      }
     });
   };
 
@@ -331,18 +381,31 @@ const authHeaders = {
     };
 
     try {
-      await fetch(`${API_URL}/${editingPackage.id}`, {
-  method: "PUT",
-  headers: authHeaders,
-  body: JSON.stringify(payload)
-});
+      console.log("🔄 Updating Package:", editingPackage.id, payload);
+      const updateRes = await fetch(`${API_URL}/${editingPackage.id}`, {
+        method: "PUT",
+        headers: authHeaders,
+        body: JSON.stringify(payload)
+      });
 
+      console.log("🚀 Update Package Response Status:", updateRes.status, updateRes.statusText);
+      const updateData = await updateRes.json();
+      console.log("📦 Update Package Response Data:", updateData);
+
+      if (!updateRes.ok) {
+        throw new Error(updateData.error || "Failed to update package");
+      }
 
       const res = await fetch(API_URL);
-      setPackages(await res.json());
+      if (!res.ok) throw new Error("Failed to fetch packages");
+      const packages = await res.json();
+      console.log("📋 Fetched Updated Packages:", packages);
+      setPackages(packages);
 
       setIsEditModalOpen(false);
       setEditingPackage(null);
+      setSelectedItemId("");
+      setSelectedItemQuantity(1);
 
       Swal.fire({
         icon: "success",
@@ -350,7 +413,7 @@ const authHeaders = {
         confirmButtonColor: "#278659"
       });
     } catch (err) {
-      console.error(err);
+      console.error("Update package error:", err);
       Swal.fire({
         icon: "error",
         title: "Failed to Update Package",
@@ -372,22 +435,33 @@ const authHeaders = {
     }).then(async (result) => {
       if (!result.isConfirmed) return;
 
-      await fetch(`${API_URL}/${id}`, {
-  method: "DELETE",
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-});
+      try {
+        const deleteRes = await fetch(`${ITEM_API}/${id}`, {
+          method: "DELETE",
+          headers: authHeaders
+        });
 
+        if (!deleteRes.ok) {
+          throw new Error("Failed to delete stock item");
+        }
 
-      const res = await fetch(ITEM_API);
-      setStockList(await res.json());
+        const res = await fetch(ITEM_API);
+        if (!res.ok) throw new Error("Failed to fetch stock list");
+        setStockList(await res.json());
 
-      Swal.fire({
-        icon: "success",
-        title: "Deleted!",
-        confirmButtonColor: "#278659"
-      });
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          confirmButtonColor: "#278659"
+        });
+      } catch (err) {
+        console.error("Delete error:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Delete",
+          text: err.message
+        });
+      }
     });
   };
 
@@ -399,29 +473,59 @@ const authHeaders = {
 
   // Update Stock Handler
   const handleUpdateStock = async () => {
-    await fetch(`${ITEM_API}/${editingStock.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: editingStock.name,
-        category: editingStock.category,
-        unit: editingStock.unit,
-        quantity: Number(editingStock.quantity),
-        expiry_date: editingStock.expiry_date
-      })
-    });
+    if (!editingStock.name || !editingStock.quantity || !editingStock.unit || !editingStock.expiry_date) {
+      Swal.fire({
+        icon: "error",
+        title: "Missing Information",
+        text: "Please fill in all required fields!"
+      });
+      return;
+    }
 
-    const res = await fetch(ITEM_API);
-    setStockList(await res.json());
+    try {
+      console.log("🔄 Updating Stock:", editingStock.id);
+      const updateRes = await fetch(`${ITEM_API}/${editingStock.id}`, {
+        method: "PUT",
+        headers: authHeaders,
+        body: JSON.stringify({
+          name: editingStock.name,
+          category: editingStock.category,
+          unit: editingStock.unit,
+          quantity: Number(editingStock.quantity),
+          expiry_date: formatDateForDB(editingStock.expiry_date)
+        })
+      });
 
-    setIsEditStockModalOpen(false);
-    setEditingStock(null);
+      console.log("🚀 Update Stock Response Status:", updateRes.status, updateRes.statusText);
+      const updateData = await updateRes.json();
+      console.log("📦 Update Stock Response Data:", updateData);
 
-    Swal.fire({
-      icon: "success",
-      title: "Stock Updated!",
-      confirmButtonColor: "#278659"
-    });
+      if (!updateRes.ok) {
+        throw new Error(updateData.error || "Failed to update stock");
+      }
+
+      const res = await fetch(ITEM_API);
+      if (!res.ok) throw new Error("Failed to fetch stock list");
+      const stocks = await res.json();
+      console.log("📋 Fetched Updated Stocks:", stocks);
+      setStockList(stocks);
+
+      setIsEditStockModalOpen(false);
+      setEditingStock(null);
+
+      Swal.fire({
+        icon: "success",
+        title: "Stock Updated!",
+        confirmButtonColor: "#278659"
+      });
+    } catch (err) {
+      console.error("Update error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to Update Stock",
+        text: err.message
+      });
+    }
   };
 
   // SORTING
@@ -454,17 +558,31 @@ const authHeaders = {
   );
 
   useEffect(() => {
+    console.log("👀 Fetching packages from:", API_URL);
     fetch(API_URL)
-      .then(res => res.json())
-      .then(data => setPackages(data))
-      .catch(err => console.error(err));
+      .then(res => {
+        console.log("🚀 Packages response status:", res.status);
+        return res.json();
+      })
+      .then(data => {
+        console.log("📋 Packages loaded:", data);
+        setPackages(data);
+      })
+      .catch(err => console.error("❌ Packages fetch error:", err));
   }, []);
 
   useEffect(() => {
+    console.log("👀 Fetching items from:", ITEM_API);
     fetch(ITEM_API)
-      .then(res => res.json())
-      .then(data => setStockList(data))
-      .catch(err => console.error(err));
+      .then(res => {
+        console.log("🚀 Items response status:", res.status);
+        return res.json();
+      })
+      .then(data => {
+        console.log("📋 Items/Stock loaded:", data);
+        setStockList(data);
+      })
+      .catch(err => console.error("❌ Items fetch error:", err));
   }, []);
 
   useEffect(() => {
@@ -696,7 +814,6 @@ const authHeaders = {
             </div>
           </section>
 
-          <Outlet />
         </section>
       </main>
 
@@ -1159,4 +1276,4 @@ const authHeaders = {
   );
 }
 
-export default StaffPackage;
+export default StaffDonation;

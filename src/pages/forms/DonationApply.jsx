@@ -16,7 +16,7 @@ export default function DonationApply() {
   const stepIcons = [UserIcon, UserIcon, BanknotesIcon];
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [packageQuantities, setPackageQuantities] = useState({ A: 0, B: 0, C: 0 });
+  const [packageQuantities, setPackageQuantities] = useState({});
   const [userDetails, setUserDetails] = useState({
     fullName: "",
     email: "",
@@ -25,32 +25,73 @@ export default function DonationApply() {
   });
   const [uploadedFile, setUploadedFile] = useState(null);
   const [fileName, setFileName] = useState("");
+  const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   //For Auto-fill user details if logged in
- useEffect(() => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
 
-  if (user && user.role === "donor") {
-    setUserDetails((prev) => ({
-      ...prev,
-      fullName: user.full_name || "",
-      email: user.email || "",
-    }));
-  }
-}, []);
+    if (user && user.role === "donor") {
+      setUserDetails((prev) => ({
+        ...prev,
+        fullName: user.full_name || "",
+        email: user.email || "",
+      }));
+    }
+  }, []);
 
+  // Fetch packages from database
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:5000/api/packages");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch packages: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("📦 Fetched packages:", data);
+        
+        // Transform packages to include items
+        const transformedPackages = data.map((pkg) => ({
+          id: pkg.id,
+          name: pkg.name,
+          price: pkg.price,
+          pax: pkg.pax || `FOR ${pkg.quantity || '1-3'} PAX`,
+          items: pkg.items && Array.isArray(pkg.items) ? pkg.items.map(item => item.name) : []
+        }));
+        
+        setPackages(transformedPackages);
+        
+        // Initialize packageQuantities for all packages
+        const quantitiesObj = {};
+        transformedPackages.forEach(pkg => {
+          quantitiesObj[pkg.id] = 0;
+        });
+        setPackageQuantities(quantitiesObj);
+      } catch (error) {
+        console.error("❌ Error fetching packages:", error);
+        // Fallback to empty packages array on error
+        setPackages([]);
+        setPackageQuantities({});
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const packages = [
-    { id: "A", name: "PACKAGE A", price: 20, pax: "FOR 1-3 PAX", items: ["RICE", "BREAD", "BISCUITS"] },
-    { id: "B", name: "PACKAGE B", price: 50, pax: "FOR 4-6 PAX", items: ["RICE", "BREAD", "BISCUITS"] },
-    { id: "C", name: "PACKAGE C", price: 70, pax: "FOR 7-10 PAX", items: ["RICE", "BREAD", "BISCUITS"] },
-  ];
+    fetchPackages();
+  }, []);
 
-  const packageImages = { A: PackageA, B: PackageB, C: PackageC };
+  // Placeholder package image
+  const getPackageImage = (packageId) => {
+    // Use a placeholder or generate a default image
+    return PackageA; // Default to PackageA for all packages
+  };
   const steps = ["Select Package", "Donor Details", "Payment"];
 
   const handleQuantityChange = (pkgId, change) => {
-    setPackageQuantities(prev => ({ ...prev, [pkgId]: Math.max(0, prev[pkgId] + change) }));
+    setPackageQuantities(prev => ({ ...prev, [pkgId]: Math.max(0, (prev[pkgId] || 0) + change) }));
   };
 
   const isDonorStepValid = () =>
@@ -61,10 +102,10 @@ export default function DonationApply() {
     .map(pkg => ({ ...pkg, quantity: packageQuantities[pkg.id], subtotal: pkg.price * packageQuantities[pkg.id] }));
 
   const calculateTotal = () =>
-    packages.reduce((total, pkg) => total + pkg.price * packageQuantities[pkg.id], 0);
+    packages.reduce((total, pkg) => total + pkg.price * (packageQuantities[pkg.id] || 0), 0);
 
   const getTotalItems = () =>
-    Object.values(packageQuantities).reduce((sum, qty) => sum + qty, 0);
+    Object.values(packageQuantities).reduce((sum, qty) => sum + (qty || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col sm:flex-row p-4 sm:p-0">
@@ -126,7 +167,19 @@ export default function DonationApply() {
             {/* STEP 1: Select Package */}
             {currentStep === 1 && (
               <section>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 max-w-6xl mx-auto">
+                {loading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                      <p className="text-gray-600">Loading packages...</p>
+                    </div>
+                  </div>
+                ) : packages.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-gray-600 text-lg">No packages available at the moment.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 max-w-6xl mx-auto">
                   {packages.map((pkg) => (
                     <div key={pkg.id} className="flex flex-col">
                       <div className="text-center mb-4">
@@ -137,12 +190,12 @@ export default function DonationApply() {
 
                       <div
                         className={`bg-white rounded-[16px] shadow-md transition-all overflow-hidden ${
-                          packageQuantities[pkg.id] > 0 ? "ring-4 ring-[#019461]" : "hover:shadow-lg"
+                          (packageQuantities[pkg.id] || 0) > 0 ? "ring-4 ring-[#019461]" : "hover:shadow-lg"
                         }`}
                       >
                         <div className="h-[180px] flex items-center justify-center relative overflow-hidden">
-                          <img src={packageImages[pkg.id]} alt={pkg.name} className="h-full object-contain" />
-                          {packageQuantities[pkg.id] > 0 && (
+                          <img src={getPackageImage(pkg.id)} alt={pkg.name} className="h-full object-contain" />
+                          {(packageQuantities[pkg.id] || 0) > 0 && (
                             <div className="absolute top-3 right-3 bg-[#019461] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-[14px]">
                               {packageQuantities[pkg.id]}
                             </div>
@@ -166,7 +219,7 @@ export default function DonationApply() {
                             <button
                               type="button"
                               onClick={() => handleQuantityChange(pkg.id, -1)}
-                              disabled={packageQuantities[pkg.id] === 0}
+                              disabled={(packageQuantities[pkg.id] || 0) === 0}
                               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                                 packageQuantities[pkg.id] === 0
                                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -175,7 +228,7 @@ export default function DonationApply() {
                             >
                               <Minus className="w-5 h-5" />
                             </button>
-                            <span className="text-[20px] font-bold text-gray-900 w-12 text-center">{packageQuantities[pkg.id]}</span>
+                            <span className="text-[20px] font-bold text-gray-900 w-12 text-center">{packageQuantities[pkg.id] || 0}</span>
                             <button
                               type="button"
                               onClick={() => handleQuantityChange(pkg.id, 1)}
@@ -188,7 +241,8 @@ export default function DonationApply() {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+                )}
 
                 <div className="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
                   {getTotalItems() > 0 && (

@@ -1,10 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import Navigator from "../LandingPage_cmp/Navigator";
 import DonateImg from "../images/People3.jpg"; 
 import Footer from "../LandingPage_cmp/Footer";
 import { motion } from "framer-motion";
 
 function Donations() {
+  const navigate = useNavigate();
   return (
     <motion.div
       className="bg-[#EDEDED] min-h-screen min-w-screen font-sans"
@@ -58,7 +60,7 @@ function Donations() {
           </ul>
 
           <button
-            onClick={() => alert("Thank you for your kindness! (Demo Button)")}
+            onClick={() => navigate("/donation-apply")}
             className="bg-[#019461] text-white font-semibold text-[15px] px-8 py-3 rounded-[12px] shadow-md hover:bg-[#017c53] transition-all duration-200"
           >
             Donate Now
@@ -94,12 +96,14 @@ function Donations() {
             </div>
 
             {/* Option 3 */}
-            <div className="bg-[#F8F8F8] p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
+            <div 
+              onClick={() => navigate("/donation-apply")}
+              className="bg-[#F8F8F8] p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer hover:bg-[#EFEFEF]"
+            >
               <div className="text-4xl mb-4">📦</div>
               <h3 className="text-[22px] text-black/60 font-semibold mb-2">Food Donations</h3>
               <p className="text-black/60 text-[15px]">
-                Contribute non-perishable food items and essentials to our
-                community pantry.
+                View and contribute food packages to our community pantry.
               </p>
             </div>
           </div>

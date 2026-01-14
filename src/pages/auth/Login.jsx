@@ -63,6 +63,12 @@ const handleLogin = async (e) => {
     // 🔥 IMPORTANT: clear any old user data
     localStorage.clear();
 
+    // 💾 Save token (REQUIRED for API calls)
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      console.log("✅ Token saved to localStorage");
+    }
+
     // 💾 Save user (统一 format)
     localStorage.setItem(
       "user",

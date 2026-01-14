@@ -6,6 +6,7 @@ const { Pool } = require("pg");
 
 // =====================
 // MariaDB / MySQL Databases
+// MariaDB / MySQL Connections
 // =====================
 
 const donationDB = mysql.createPool({

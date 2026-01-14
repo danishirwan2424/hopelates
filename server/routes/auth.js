@@ -8,7 +8,7 @@ const router = express.Router();
 // ======================
 router.post("/register", async (req, res) => {
   try {
-    console.log("SIGNUP BODY:", req.body);
+    console.log("SIGNUP BODY:", req.body); // Debug
 
     const { full_name, email, password, role } = req.body;
     if (!full_name || !email || !password || !role) {
@@ -28,6 +28,7 @@ router.post("/register", async (req, res) => {
         [full_name, email, hashedPassword]
       );
 
+      await authPool.query("INSERT INTO donor (full_name, email, password) VALUES ($1,$2,$3)", [full_name, email, hashedPassword]);
       return res.status(201).json({ message: "Donor signup successful" });
     }
 
@@ -83,15 +84,7 @@ router.post("/login", async (req, res) => {
       const match = await bcrypt.compare(password, beneficiary.password);
       if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
-      return res.json({
-        message: "Login successful",
-        role: "applicant",
-        user: {
-          beneficiary_id: beneficiary.beneficiary_id,
-          full_name: beneficiary.full_name,
-          email: beneficiary.email,
-        },
-      });
+      return res.json({ message: "Login successful", role: "applicant", user: { beneficiary_id: beneficiary.beneficiary_id, full_name: beneficiary.full_name, email: beneficiary.email } });
     }
 
     // Check staff from authDb.staff table

@@ -150,9 +150,10 @@ function StaffReceipt() {
       <main className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] max-h-screen">
         <StaffPanelBar />
 
-        <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 max-h-screen overflow-hidden">
+<section className="flex-1 flex flex-col gap-4 overflow-auto">
+        <section className="flex flex-col flex-1 bg-[#F2F1F1] rounded-xl shadow-sm p-4 max-h-screen overflow-auto">
           {/* Header */}
-          <header className="flex-shrink-0">
+          <header className="flex-shrink-0 overflow-auto">
             <h1 className="text-[20px] text-gray-800">Staff Receipt</h1>
             <p className="text-[12px] text-black opacity-[50%] mb-2">
               Manage and review all donation records efficiently
@@ -160,7 +161,7 @@ function StaffReceipt() {
           </header>
 
           {/* Stats */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-2 flex-shrink-0">
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-2 flex-shrink-0 overflow-auto">
             {loading
               ? Array(3).fill(0).map((_, i) => (
                   <div key={i} className="bg-gray-200 animate-pulse rounded-[15px] h-[167px]" />
@@ -183,9 +184,10 @@ function StaffReceipt() {
           </section>
 
           {/* Donation List + Chart */}
-          <section className="flex-1 flex flex-col gap-4 overflow-hidden">
+          
             {/* Donation List */}
-            <div className="flex-1 bg-white rounded-[15px] shadow-md p-4 flex flex-col overflow-auto">
+            <div className="bg-white rounded-[15px] shadow-md p-4 flex flex-col overflow-auto min-h-[300px] mb-4">
+
               <div className="flex items-center justify-between w-full bg-white rounded-lg px-3 py-2 mb-0">
                 <h2 className="text-[16px] font-semibold text-gray-700 shrink-0">Donation List</h2>
                 <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1 w-64">
@@ -200,7 +202,7 @@ function StaffReceipt() {
                 </div>
               </div>
 
-              <div className="relative flex-1 overflow-auto rounded-lg border border-gray-200 mt-2">
+              <div className="relative overflow-auto rounded-lg border border-gray-200 mt-2 max-h-[400px]">
                 {loading ? (
                   <div className="animate-pulse">
                     {Array(4).fill(0).map((_, i) => (
@@ -275,7 +277,7 @@ function StaffReceipt() {
             </div>
 
             {/* Donations by Category Chart */}
-            <div className="h-[300px] bg-white p-4 rounded-xl shadow-md flex flex-col">
+            <div className="h-[400px] bg-white p-4 rounded-xl shadow-md flex flex-col">
               <h2 className="text-[15px] font-semibold text-gray-700 mb-3">Donations by Category</h2>
               <div className="flex-1">
                 {loading ? (

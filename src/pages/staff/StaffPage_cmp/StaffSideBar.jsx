@@ -51,7 +51,7 @@ function StaffSideBar() {
   const superAdminMenu = [
     {
       name: "STAFF MANAGEMENT",
-      path: "/staff-management",
+      path: "/staff-manage",
       icon: ProfileIcon,
     },
   ];

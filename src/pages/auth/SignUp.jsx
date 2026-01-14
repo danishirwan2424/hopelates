@@ -8,21 +8,26 @@ import "../../index.css";
 function SignUp() {
   const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // form states
-  const [full_name, setFullName] = useState("");
+  // ======================
+  // STATE
+  // ======================
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("donor");
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // ======================
+  // SUBMIT
+  // ======================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!full_name || !email || !password || !confirmPassword) {
-      alert("Please fill in all fields");
+    if (!fullName || !email || !password || !confirmPassword || !role) {
+      alert("All fields are required");
       return;
     }
 
@@ -32,10 +37,15 @@ function SignUp() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ full_name, email, password, role }),
+        body: JSON.stringify({
+          full_name: fullName,
+          email: email.trim().toLowerCase(),
+          password,
+          role,
+        }),
       });
 
       const data = await res.json();
@@ -48,22 +58,19 @@ function SignUp() {
       alert("Signup successful!");
       navigate("/login");
     } catch (err) {
-      console.error(err);
-      alert("Server error");
+      console.error("Signup error:", err);
+      alert("Server error during signup");
     }
   };
 
   return (
     <div className="h-screen w-screen flex flex-col md:flex-row font-sans overflow-hidden bg-white">
+      {/* LEFT */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-8 md:px-16">
         <div className="w-full max-w-sm">
           <div className="text-center mb-8">
-            <img
-              src={logo}
-              alt="HopeLates Logo"
-              className="h-10 w-auto object-contain mx-auto mb-3"
-            />
-            <h2 className="text-[30px] font-bold text-gray-800 leading-snug mb-3">
+            <img src={logo} alt="HopePlates Logo" className="h-10 mx-auto mb-3" />
+            <h2 className="text-[30px] font-bold text-gray-800 mb-3">
               Join HopePlates <br /> And Make a Difference
             </h2>
             <p className="text-gray-500 text-[14px]">
@@ -72,124 +79,108 @@ function SignUp() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
+            {/* Full Name */}
             <div>
-              <label className="block text-gray-600 text-sm font-medium mb-1">
-                Full Name
-              </label>
+              <label className="block text-gray-600 text-sm mb-1">Full Name</label>
               <input
                 type="text"
-                placeholder="Enter your full name"
-                value={full_name}
+                value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
+                placeholder="Enter your full name"
+                className="w-full border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#019461]"
               />
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-gray-600 text-sm font-medium mb-1">
-                Email Address
-              </label>
+              <label className="block text-gray-600 text-sm mb-1">Email</label>
               <input
                 type="email"
-                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
+                placeholder="Enter your email"
+                className="w-full border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#019461]"
               />
             </div>
 
+            {/* Password */}
             <div>
-              <label className="block text-gray-600 text-sm font-medium mb-1">
-                Password
-              </label>
+              <label className="block text-gray-600 text-sm mb-1">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
+                  className="w-full border rounded-lg px-3 py-2.5 pr-10 text-sm focus:ring-2 focus:ring-[#019461]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
             </div>
 
+            {/* Confirm Password */}
             <div>
-              <label className="block text-gray-600 text-sm font-medium mb-1">
+              <label className="block text-gray-600 text-sm mb-1">
                 Confirm Password
               </label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm text-gray-700 placeholder-gray-500 focus:ring-2 focus:ring-[#019461] focus:outline-none"
+                  className="w-full border rounded-lg px-3 py-2.5 pr-10 text-sm focus:ring-2 focus:ring-[#019461]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((v) => !v)}
-                  className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showConfirmPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
             </div>
 
-            <div className="mb-4">
-              <p className="block text-gray-600 text-sm font-medium mb-2">
-                I am a
-              </p>
+            {/* Role */}
+            <div>
+              <p className="text-gray-600 text-sm mb-2">I am a</p>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2">
                   <input
                     type="radio"
                     name="role"
+                    value="donor"
                     checked={role === "donor"}
                     onChange={() => setRole("donor")}
-                    className="w-4 h-4 text-[#019461] focus:ring-[#019461] border-gray-300"
                   />
-                  <span className="text-gray-700 text-sm">Donor</span>
+                  Donor
                 </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2">
                   <input
                     type="radio"
                     name="role"
+                    value="applicant"
                     checked={role === "applicant"}
                     onChange={() => setRole("applicant")}
-                    className="w-4 h-4 text-[#019461] focus:ring-[#019461] border-gray-300"
                   />
-                  <span className="text-gray-700 text-sm">Applicant</span>
+                  Applicant
                 </label>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 pt-3">
-              <button
-                type="submit"
-                className="bg-[#019461] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#017b54] transition-colors duration-200"
-              >
-                Sign Up
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="w-full bg-[#019461] text-white py-2.5 rounded-lg text-sm font-medium hover:bg-[#017b54]"
+            >
+              Sign Up
+            </button>
           </form>
 
-          <div className="text-center mt-5 text-[14px] text-gray-600">
+          <div className="text-center mt-5 text-sm text-gray-600">
             Already have an account?{" "}
             <button
               onClick={() => navigate("/login")}
@@ -201,12 +192,9 @@ function SignUp() {
         </div>
       </div>
 
-      <div className="hidden md:flex w-full md:w-1/2 h-full">
-        <img
-          src={leaves}
-          alt="Charity theme background"
-          className="w-full h-full object-cover"
-        />
+      {/* RIGHT */}
+      <div className="hidden md:flex w-1/2 h-full">
+        <img src={leaves} alt="Background" className="w-full h-full object-cover" />
       </div>
     </div>
   );

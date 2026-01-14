@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+
 import { Doughnut, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -17,7 +18,6 @@ import {
 // Components
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
-import { ZAxis } from "recharts";
 
 // ChartJS Setup
 ChartJS.register(
@@ -36,13 +36,12 @@ function StaffDash() {
   // ======================================================
   const [dashboardData, setDashboardData] = useState({
     totalApplications: 0,
-    totalFamilies: 0,
-    totalSalary: 0,
+    completedDistributions: 0,
     applicationsByStatus: { Approved: 0, Pending: 0, Rejected: 0 },
     latestApplications: [],
   });
 
-  // Animated counter animatedApproved
+  // Animated counters
   const [animatedTotal, setAnimatedTotal] = useState(0);
   const [animatedCompleted, setAnimatedCompleted] = useState(0);
   const [animatedApproved, setAnimatedApproved] = useState(0);
@@ -52,81 +51,91 @@ function StaffDash() {
   // FETCH DASHBOARD DATA FROM BACKEND
   // ======================================================
   useEffect(() => {
-  async function fetchDashboardData() {
-    try {
-      const res = await fetch("http://localhost:5000/api/staffDash");
-      const data = await res.json();
+    async function fetchDashboardData() {
+      try {
+        // IMPORTANT: relative path so Vite proxy can work
+        const res = await fetch("/api/staffDash");
+        const data = await res.json();
 
-      // Ensure completedDistributions always exists
-      setDashboardData({
-        totalApplications: data?.totalApplications || 0,
-        completedDistributions: data?.completedDistributions || 0,
-        completedApplications2: data?.completedApplications2 || 0,
-        applicationsByStatus: data?.applicationsByStatus || { Approved: 0, Pending: 0, Rejected: 0 },
-        latestApplications: data?.latestApplications || [],
-      });
+        setDashboardData({
+          totalApplications: data?.totalApplications || 0,
+          completedDistributions: data?.completedDistributions || 0,
+          applicationsByStatus:
+            data?.applicationsByStatus || { Approved: 0, Pending: 0, Rejected: 0 },
+          latestApplications: data?.latestApplications || [],
+        });
 
-      console.log("Dashboard data received:", data);
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      setDashboardData({
-        totalApplications: 0,
-        completedDistributions: 0,
-        completedApplications2: 0,
-        applicationsByStatus: { Approved: 0, Pending: 0, Rejected: 0 },
-        latestApplications: [],
-      });
+        console.log("Dashboard data received:", data);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        setDashboardData({
+          totalApplications: 0,
+          completedDistributions: 0,
+          applicationsByStatus: { Approved: 0, Pending: 0, Rejected: 0 },
+          latestApplications: [],
+        });
+      }
     }
-  }
-  fetchDashboardData();
-}, []);
 
-
-  // ======================================================
-  // ANIMATE TOTALS
-  // ======================================================
-useEffect(() => {
-  const totalApps = dashboardData?.totalApplications || 0;
-const completed = dashboardData?.completedDistributions || 0;
-const approved = dashboardData?.applicationsByStatus?.Approved || 0;
-const pending = dashboardData?.applicationsByStatus?.Pending || 0;
-
-// Initialize animation counters
-let t = 0, c = 0, a = 0, p = 0;
-const step = 1;
-
-const timer = setInterval(() => {
-  let finished = true;
-
-  if (t < totalApps) { t += step; finished = false; }
-  if (c < completed) { c += step; finished = false; }
-  if (a < approved) { a += step; finished = false; }
-  if (p < pending) { p += step; finished = false; }
-
-  setAnimatedTotal(Math.min(t, totalApps));
-  setAnimatedCompleted(Math.min(c, completed));
-  setAnimatedApproved(Math.min(a, approved));
-  setAnimatedPending(Math.min(p, pending));
-
-  if (finished) clearInterval(timer);
-}, 30);
-
-
-
-  return () => clearInterval(timer);
-}, [dashboardData]);
-
-
-
-
+    fetchDashboardData();
+  }, []);
 
   // ======================================================
-  // PANEL 4: DOUGHNUT & BAR CHARTS
+  // ANIMATE TOTALS (whenever dashboardData changes)
+  // ======================================================
+  useEffect(() => {
+    const totalApps = Number(dashboardData?.totalApplications || 0);
+    const completed = Number(dashboardData?.completedDistributions || 0);
+    const approved = Number(dashboardData?.applicationsByStatus?.Approved || 0);
+    const pending = Number(dashboardData?.applicationsByStatus?.Pending || 0);
+
+    let t = 0,
+      c = 0,
+      a = 0,
+      p = 0;
+    const step = 1;
+
+    const timer = setInterval(() => {
+      let finished = true;
+
+      if (t < totalApps) {
+        t += step;
+        finished = false;
+      }
+      if (c < completed) {
+        c += step;
+        finished = false;
+      }
+      if (a < approved) {
+        a += step;
+        finished = false;
+      }
+      if (p < pending) {
+        p += step;
+        finished = false;
+      }
+
+      setAnimatedTotal(Math.min(t, totalApps));
+      setAnimatedCompleted(Math.min(c, completed));
+      setAnimatedApproved(Math.min(a, approved));
+      setAnimatedPending(Math.min(p, pending));
+
+      if (finished) clearInterval(timer);
+    }, 30);
+
+    return () => clearInterval(timer);
+  }, [dashboardData]);
+
+  // ======================================================
+  // CHARTS: DOUGHNUT & BAR
   // ======================================================
   const statusLabels = ["Approved", "Pending", "Rejected"];
-  const doughnutData = statusLabels.map(
-    (label) => dashboardData?.applicationsByStatus?.[label] || 0
+
+  const doughnutData = useMemo(
+    () => statusLabels.map((label) => dashboardData?.applicationsByStatus?.[label] || 0),
+    [dashboardData]
   );
+
   const doughnutColors = doughnutData.some((val) => val > 0)
     ? ["#3B82F6", "#8B5CF6", "#EC4899"]
     : ["#d1d5db", "#d1d5db", "#d1d5db"];
@@ -145,22 +154,24 @@ const timer = setInterval(() => {
     "Nov",
     "Dec",
   ];
-  const monthlyApplicants = Array(12).fill(0);
 
-  dashboardData?.latestApplications?.forEach((app) => {
-    if (app?.created_at) {
-      const monthIndex = new Date(app.created_at).getMonth();
-      monthlyApplicants[monthIndex]++;
-    }
-  });
+  const monthlyApplicants = useMemo(() => {
+    const arr = Array(12).fill(0);
+    (dashboardData?.latestApplications || []).forEach((app) => {
+      if (app?.created_at) {
+        const monthIndex = new Date(app.created_at).getMonth();
+        if (monthIndex >= 0 && monthIndex <= 11) arr[monthIndex] += 1;
+      }
+    });
+    return arr;
+  }, [dashboardData]);
 
-  const barData = monthlyApplicants;
-  const barColors = barData.some((val) => val > 0)
-    ? barData.map((_, i) => ["#3B82F6", "#8B5CF6", "#EC4899"][i % 3])
+  const barColors = monthlyApplicants.some((val) => val > 0)
+    ? monthlyApplicants.map((_, i) => ["#3B82F6", "#8B5CF6", "#EC4899"][i % 3])
     : Array(12).fill("#d1d5db");
 
   // ======================================================
-  // DONATION STOCK PANEL
+  // DONATION STOCK PANEL (optional; keep your existing endpoint)
   // ======================================================
   const [donationStock, setDonationStock] = useState([]);
   const colorMap = {
@@ -176,7 +187,7 @@ const timer = setInterval(() => {
       try {
         const res = await fetch("/api/donation-stock");
         const data = await res.json();
-        setDonationStock(data || []);
+        setDonationStock(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error fetching donation stock:", error);
         setDonationStock([]);
@@ -185,12 +196,15 @@ const timer = setInterval(() => {
     fetchDonationStock();
   }, []);
 
-  const allCategories = Object.keys(colorMap);
-  const categoryData = allCategories.reduce((acc, category) => {
-    const item = donationStock?.find((d) => d?.category === category);
-    acc[category] = item?.quantity || 0;
-    return acc;
-  }, {});
+  const categoryData = useMemo(() => {
+    const allCategories = Object.keys(colorMap);
+    return allCategories.reduce((acc, category) => {
+      const item = donationStock?.find((d) => d?.category === category);
+      acc[category] = item?.quantity || 0;
+      return acc;
+    }, {});
+  }, [donationStock]);
+
   const maxQuantity = Math.max(...Object.values(categoryData), 1);
 
   // ======================================================
@@ -199,8 +213,10 @@ const timer = setInterval(() => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <StaffSideBar />
+
       <div className="flex-1 flex flex-col bg-white pt-[20px] px-8 pb-[20px] min-h-0 h-screen overflow-hidden">
         <StaffPanelBar />
+
         <div
           className="flex-1 overflow-auto rounded-xl shadow-sm p-4 pb-1"
           style={{ backgroundColor: "#F2F1F1" }}
@@ -213,25 +229,26 @@ const timer = setInterval(() => {
           {/* ================= STAT PANELS ================= */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-2">
             <div className="bg-gradient-to-b from-[#11452E] to-[#278659] rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
-              <p className="text-[15px] text-white mb-2">
-                Daily Total Application
-              </p>
+              <p className="text-[15px] text-white mb-2">Daily Total Application</p>
               <h2 className="text-[64px] font-bold text-white leading-none">
-                {animatedTotal} 
+                {animatedTotal}
               </h2>
             </div>
+
             <div className="bg-white rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
               <p className="text-[15px] text-black mb-2">Completed Distributions</p>
               <h2 className="text-[64px] font-bold text-black leading-none">
                 {animatedCompleted}
               </h2>
             </div>
+
             <div className="bg-white rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
               <p className="text-[15px] text-black mb-2">Application Approved</p>
               <h2 className="text-[64px] font-bold text-black leading-none">
                 {animatedApproved}
               </h2>
             </div>
+
             <div className="bg-white rounded-[15px] shadow-md flex flex-col items-start justify-start text-left h-[167px] p-4">
               <p className="text-[15px] text-black mb-2">Pending Approvement</p>
               <h2 className="text-[64px] font-bold text-black leading-none">
@@ -272,7 +289,13 @@ const timer = setInterval(() => {
                 <Bar
                   data={{
                     labels: months,
-                    datasets: [{ data: barData, backgroundColor: barColors, borderRadius: 6 }],
+                    datasets: [
+                      {
+                        data: monthlyApplicants,
+                        backgroundColor: barColors,
+                        borderRadius: 6,
+                      },
+                    ],
                   }}
                   options={{
                     plugins: { legend: { display: false } },
@@ -291,15 +314,19 @@ const timer = setInterval(() => {
               <h2 className="text-[15px] font-semibold text-gray-700 mb-3">
                 Donation Stock
               </h2>
+
               <div className="flex flex-col gap-4 mt-2 overflow-scroll pb-7">
                 {Object.entries(categoryData).map(([category, qty]) => {
                   const widthPercent = Math.min((qty / maxQuantity) * 100, 100);
                   const color = qty > 0 ? colorMap[category] : "#d1d5db";
+
                   return (
                     <div key={category}>
                       <div className="flex justify-between items-center mb-1">
                         <p className="text-[13px] text-gray-600">{category}</p>
-                        <span className="text-[13px] text-black/50 font-semibold pr-6">{qty}</span>
+                        <span className="text-[13px] text-black/50 font-semibold pr-6">
+                          {qty}
+                        </span>
                       </div>
                       <div className="h-4 w-full bg-gray-200 rounded">
                         <div

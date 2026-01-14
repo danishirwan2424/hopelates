@@ -1,15 +1,21 @@
 console.log("✅ RUNNING INDEX:", __filename);
+
+// ==============================================
+// BIGINT SERIALIZATION FIX
+// ==============================================
+BigInt.prototype.toJSON = function () {
+  return Number(this);
+};
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
 
-app.use((req, res, next) => {
-  console.log("➡️", req.method, req.url);
-  next();
-});
-
+// ======================
+// MIDDLEWARE (ONCE)
+// ======================
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
@@ -17,7 +23,13 @@ app.use(
   })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+app.use((req, res, next) => {
+  console.log("➡️", req.method, req.url);
+  next();
+});
 
 // ======================
 // HEALTH CHECK
@@ -27,39 +39,21 @@ app.get("/ping", (req, res) => {
 });
 
 // ======================
-// USER ACCESS AND MANAGEMENT ROUTES
+// ROUTES
 // ======================
 const authRoutes = require("./routes/auth");
-app.use("/api/auth", authRoutes);
-
-// ======================
-// APPLICATION ROUTES
-// ======================
 const applicationRoutes = require("./routes/application");
-app.use("/api/application", applicationRoutes);
-
-// ======================
-// DONATION TEST ROUTE
-// ======================
 const donationTestRoutes = require("./routes/donationTest");
-console.log("donationTestRoutes loaded");
-app.use("/api/test", donationTestRoutes);
-
-// ======================
-// STAFF DISTRIBUTION ROUTES
-// ======================
 const distributionRoutes = require("./routes/distribution");
-app.use("/api/staff-distribution", distributionRoutes);
-
-const staffDashRoutes = require("./routes/staffDash");
-app.use("/api/staffDash", staffDashRoutes);
-
-
-// ======================
-// STAFF APPLICATION ROUTES
-// ======================
 const staffApplicationRoutes = require("./routes/staffApplication");
+const staffDashRoutes = require("./routes/staffDash");
+
+app.use("/api/auth", authRoutes);
+app.use("/api/application", applicationRoutes);
+app.use("/api/test", donationTestRoutes);
+app.use("/api/staff-distribution", distributionRoutes);
 app.use("/api/staff-application", staffApplicationRoutes);
+app.use("/api/staffDash", staffDashRoutes);
 
 // ======================
 // ERROR HANDLER
@@ -77,8 +71,9 @@ app.use((req, res) => {
 });
 
 // ======================
-// START SERVER
+// START SERVER (ONCE)
 // ======================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-
+app.listen(PORT, () =>
+  console.log(`Server running on http://localhost:${PORT}`)
+);

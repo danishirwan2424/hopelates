@@ -30,6 +30,7 @@ import StaffDistribution from "./pages/staff/StaffDistribution";
 import StaffDonation from "./pages/staff/StaffDonation";
 import StaffReport from "./pages/staff/StaffReport";
 import StaffReceipt from "./pages/staff/StaffReceipt";
+import StaffManage from "./pages/staff/StaffManage";
 
 // ✅ Auth Pages
 import Login from "./pages/auth/Login";
@@ -129,6 +130,7 @@ function App() {
           <Route path="/staff-report" element={<StaffReport />} />
           <Route path="/staff-receipt" element={<StaffReceipt />} />
           <Route path="/pdf-report" element={<PdfExp />} />
+          <Route path="/staff-manage" element={<StaffManage />} />
         </Route>
 
         {/* ✅ Auth Pages (animated) */}

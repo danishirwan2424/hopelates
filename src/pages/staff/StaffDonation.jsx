@@ -1,52 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import { Plus, Minus, Search, Edit2, Trash2 } from "lucide-react";
+import { Plus, Minus, Search, Edit2, Trash2, X } from "lucide-react";
 import Swal from "sweetalert2";
 
 import StaffSideBar from "./StaffPage_cmp/StaffSideBar";
 import StaffPanelBar from "./StaffPage_cmp/StaffPanelBar";
 
 function StaffPackage() {
+  const API_URL = "http://localhost:5000/api/packages";
+  const ITEM_API = "http://localhost:5000/api/items";
+
   // Package data
-  const [packages, setPackages] = useState([
-    {
-      id: 1,
-      name: "PACKAGE A",
-      price: 20,
-      pax: "FOR 1-3 PAX",
-      items: ["RICE", "CANNED SARDINES", "COOKING OIL", "INSTANT NOODLE", "CHOCOLATE DRINK"],
-      image: "/path-to-package-a-image.jpg",
-    },
-    {
-      id: 2,
-      name: "PACKAGE B",
-      price: 50,
-      pax: "FOR 4-6 PAX",
-      items: ["RICE", "CANNED SARDINES", "COOKING OIL", "INSTANT NOODLE", "CHOCOLATE DRINK"],
-      image: "/path-to-package-b-image.jpg",
-    },
-    {
-      id: 3,
-      name: "PACKAGE C",
-      price: 70,
-      pax: "FOR 7-10 PAX",
-      items: ["RICE", "CANNED SARDINES", "COOKING OIL", "INSTANT NOODLE", "CHOCOLATE DRINK"],
-      image: "/path-to-package-c-image.jpg",
-    }
-  ]);
+  const [packages, setPackages] = useState([]);
 
   // Stock data
-  const [stockList, setStockList] = useState([
-    { id: 1, name: "Rice", quantity: 50, unit: "packs", category: "Dry Food" },
-    { id: 2, name: "Canned Sardines", quantity: 80, unit: "cans", category: "Canned Food" },
-    { id: 3, name: "Cooking Oil", quantity: 34, unit: "bottles", category: "Dry Food" },
-    { id: 4, name: "Instant Noodle", quantity: 120, unit: "packs", category: "Dry Food" },
-    { id: 5, name: "Chocolate Drink", quantity: 30, unit: "sachets", category: "Beverages" }
-  ]);
-
-  const [packageQuantities, setPackageQuantities] = useState(
-    packages.reduce((acc, pkg) => ({ ...acc, [pkg.id]: 0 }), {})
-  );
+  const [stockList, setStockList] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState(null);
@@ -62,7 +30,7 @@ function StaffPackage() {
     name: "",
     price: "",
     pax: "",
-    items: "",
+    items: [], // Changed to array of {id, name, quantity}
     image: ""
   });
 
@@ -72,7 +40,8 @@ function StaffPackage() {
     name: "",
     category: "Dry Food",
     quantity: "",
-    unit: ""
+    unit: "",
+    expiry_date: ""
   });
 
   // Edit Package Modal
@@ -83,58 +52,148 @@ function StaffPackage() {
   const [isEditStockModalOpen, setIsEditStockModalOpen] = useState(false);
   const [editingStock, setEditingStock] = useState(null);
 
-  const handleIncrement = (id) => {
-    setPackageQuantities((prev) => ({
-      ...prev,
-      [id]: prev[id] + 1
-    }));
-  };
+  // Item selection for package
+  const [selectedItemId, setSelectedItemId] = useState("");
+  const [selectedItemQuantity, setSelectedItemQuantity] = useState(1);
 
-  const handleDecrement = (id) => {
-    setPackageQuantities((prev) => ({
-      ...prev,
-      [id]: Math.max(0, prev[id] - 1)
-    }));
-  };
-
-  // Add Package Handler
-  const handleAddPackage = () => {
-    if (!newPackage.name || !newPackage.price || !newPackage.pax || !newPackage.items) {
+  // Add item to package
+  const handleAddItemToPackage = (isEdit = false) => {
+    if (!selectedItemId) {
       Swal.fire({
-        icon: "error",
-        title: "Missing Information",
-        text: "Please fill in all required fields!",
+        icon: "warning",
+        title: "No Item Selected",
+        text: "Please select an item first!"
       });
       return;
     }
 
-    const itemsArray = newPackage.items.split(',').map(item => item.trim().toUpperCase());
-    
-    const packageToAdd = {
-      id: packages.length + 1,
-      name: newPackage.name.toUpperCase(),
-      price: parseInt(newPackage.price),
-      pax: newPackage.pax.toUpperCase(),
-      items: itemsArray,
-      image: newPackage.image || ""
+    const selectedStock = stockList.find(s => s.id === parseInt(selectedItemId));
+    if (!selectedStock) return;
+
+    const newItem = {
+      id: selectedStock.id,
+      name: selectedStock.name,
+      quantity: selectedItemQuantity
     };
 
-    setPackages([...packages, packageToAdd]);
-    setIsAddModalOpen(false);
-    setNewPackage({
-      name: "",
-      price: "",
-      pax: "",
-      items: "",
-      image: ""
-    });
+    if (isEdit) {
+      // Check if item already exists
+      const exists = editingPackage.items.find(i => i.id === newItem.id);
+      if (exists) {
+        Swal.fire({
+          icon: "warning",
+          title: "Item Already Added",
+          text: "This item is already in the package. You can edit its quantity."
+        });
+        return;
+      }
+      setEditingPackage({
+        ...editingPackage,
+        items: [...editingPackage.items, newItem]
+      });
+    } else {
+      // Check if item already exists
+      const exists = newPackage.items.find(i => i.id === newItem.id);
+      if (exists) {
+        Swal.fire({
+          icon: "warning",
+          title: "Item Already Added",
+          text: "This item is already in the package. You can edit its quantity."
+        });
+        return;
+      }
+      setNewPackage({
+        ...newPackage,
+        items: [...newPackage.items, newItem]
+      });
+    }
 
-    Swal.fire({
-      icon: "success",
-      title: "Package Added!",
-      text: "New package has been added successfully.",
-      confirmButtonColor: "#278659"
-    });
+    // Reset selection
+    setSelectedItemId("");
+    setSelectedItemQuantity(1);
+  };
+
+  // Remove item from package
+  const handleRemoveItemFromPackage = (itemId, isEdit = false) => {
+    if (isEdit) {
+      setEditingPackage({
+        ...editingPackage,
+        items: editingPackage.items.filter(i => i.id !== itemId)
+      });
+    } else {
+      setNewPackage({
+        ...newPackage,
+        items: newPackage.items.filter(i => i.id !== itemId)
+      });
+    }
+  };
+
+  // Update item quantity in package
+  const handleUpdateItemQuantity = (itemId, newQuantity, isEdit = false) => {
+    if (newQuantity < 1) return;
+
+    if (isEdit) {
+      setEditingPackage({
+        ...editingPackage,
+        items: editingPackage.items.map(i =>
+          i.id === itemId ? { ...i, quantity: newQuantity } : i
+        )
+      });
+    } else {
+      setNewPackage({
+        ...newPackage,
+        items: newPackage.items.map(i =>
+          i.id === itemId ? { ...i, quantity: newQuantity } : i
+        )
+      });
+    }
+  };
+
+  // Add Package Handler
+  const handleAddPackage = async () => {
+    if (!newPackage.name || !newPackage.price || !newPackage.pax || newPackage.items.length === 0) {
+      Swal.fire({
+        icon: "error",
+        title: "Missing Information",
+        text: "Please fill in all required fields and add at least one item!"
+      });
+      return;
+    }
+
+    const payload = {
+      name: newPackage.name.toUpperCase(),
+      price: Number(newPackage.price),
+      pax: newPackage.pax.toUpperCase(),
+      items: newPackage.items, // Array of {id, name, quantity}
+      image: newPackage.image || null
+    };
+
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const res = await fetch(API_URL);
+      setPackages(await res.json());
+
+      setIsAddModalOpen(false);
+      setNewPackage({ name: "", price: "", pax: "", items: [], image: "" });
+
+      Swal.fire({
+        icon: "success",
+        title: "Package Added!",
+        confirmButtonColor: "#278659"
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to Add Package",
+        text: err.message
+      });
+    }
   };
 
   // Handle image file upload
@@ -154,39 +213,60 @@ function StaffPackage() {
   };
 
   // Add Stock Handler
-  const handleAddStock = () => {
-    if (!newStock.name || !newStock.quantity || !newStock.unit) {
+  const handleAddStock = async () => {
+    if (!newStock.name || !newStock.quantity || !newStock.unit || !newStock.expiry_date) {
       Swal.fire({
         icon: "error",
         title: "Missing Information",
-        text: "Please fill in all required fields!",
+        text: "Please fill in all required fields!"
       });
       return;
     }
 
-    const stockToAdd = {
-      id: stockList.length + 1,
-      name: newStock.name,
-      category: newStock.category,
-      quantity: parseInt(newStock.quantity),
-      unit: newStock.unit
-    };
+    try {
+      const response = await fetch(ITEM_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newStock.name,
+          category: newStock.category,
+          unit: newStock.unit,
+          quantity: Number(newStock.quantity),
+          expiry_date: newStock.expiry_date
+        })
+      });
 
-    setStockList([...stockList, stockToAdd]);
-    setIsAddStockModalOpen(false);
-    setNewStock({
-      name: "",
-      category: "Dry Food",
-      quantity: "",
-      unit: ""
-    });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to add stock");
+      }
 
-    Swal.fire({
-      icon: "success",
-      title: "Stock Added!",
-      text: "New stock item has been added successfully.",
-      confirmButtonColor: "#278659"
-    });
+      // Refresh stock list
+      const res = await fetch(ITEM_API);
+      setStockList(await res.json());
+
+      setIsAddStockModalOpen(false);
+      setNewStock({ 
+        name: "", 
+        category: "Dry Food", 
+        quantity: "", 
+        unit: "", 
+        expiry_date: "" 
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Stock Added!",
+        confirmButtonColor: "#278659"
+      });
+    } catch (error) {
+      console.error("Error adding stock:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to Add Stock",
+        text: error.message
+      });
+    }
   };
 
   // Delete Package Handler
@@ -199,62 +279,75 @@ function StaffPackage() {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setPackages(packages.filter(pkg => pkg.id !== id));
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          text: "Package has been removed.",
-          confirmButtonColor: "#278659"
-        });
-      }
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+
+      await fetch(`${API_URL}/${id}`, {
+        method: "DELETE"
+      });
+
+      const res = await fetch(API_URL);
+      setPackages(await res.json());
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        confirmButtonColor: "#278659"
+      });
     });
   };
 
   // Edit Package Handler
   const handleEditPackage = (pkg) => {
-    setEditingPackage({
-      ...pkg,
-      items: pkg.items.join(', ')
-    });
+    setEditingPackage({ ...pkg });
     setIsEditModalOpen(true);
   };
 
   // Update Package Handler
-  const handleUpdatePackage = () => {
-    if (!editingPackage.name || !editingPackage.price || !editingPackage.pax || !editingPackage.items) {
+  const handleUpdatePackage = async () => {
+    if (!editingPackage.name || !editingPackage.price || !editingPackage.pax || editingPackage.items.length === 0) {
       Swal.fire({
         icon: "error",
         title: "Missing Information",
-        text: "Please fill in all required fields!",
+        text: "Please fill in all required fields and add at least one item!"
       });
       return;
     }
 
-    const itemsArray = editingPackage.items.split(',').map(item => item.trim().toUpperCase());
-    
-    const updatedPackage = {
-      ...editingPackage,
+    const payload = {
       name: editingPackage.name.toUpperCase(),
-      price: parseInt(editingPackage.price),
+      price: Number(editingPackage.price),
       pax: editingPackage.pax.toUpperCase(),
-      items: itemsArray
+      items: editingPackage.items,
+      image: editingPackage.image || null
     };
 
-    setPackages(packages.map(pkg => 
-      pkg.id === updatedPackage.id ? updatedPackage : pkg
-    ));
-    
-    setIsEditModalOpen(false);
-    setEditingPackage(null);
+    try {
+      await fetch(`${API_URL}/${editingPackage.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-    Swal.fire({
-      icon: "success",
-      title: "Package Updated!",
-      text: "Package has been updated successfully.",
-      confirmButtonColor: "#278659"
-    });
+      const res = await fetch(API_URL);
+      setPackages(await res.json());
+
+      setIsEditModalOpen(false);
+      setEditingPackage(null);
+
+      Swal.fire({
+        icon: "success",
+        title: "Package Updated!",
+        confirmButtonColor: "#278659"
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to Update Package",
+        text: err.message
+      });
+    }
   };
 
   // Delete Stock Handler
@@ -267,16 +360,19 @@ function StaffPackage() {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setStockList(stockList.filter(stock => stock.id !== id));
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          text: "Stock item has been removed.",
-          confirmButtonColor: "#278659"
-        });
-      }
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+
+      await fetch(`${ITEM_API}/${id}`, { method: "DELETE" });
+
+      const res = await fetch(ITEM_API);
+      setStockList(await res.json());
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        confirmButtonColor: "#278659"
+      });
     });
   };
 
@@ -287,32 +383,28 @@ function StaffPackage() {
   };
 
   // Update Stock Handler
-  const handleUpdateStock = () => {
-    if (!editingStock.name || !editingStock.quantity || !editingStock.unit) {
-      Swal.fire({
-        icon: "error",
-        title: "Missing Information",
-        text: "Please fill in all required fields!",
-      });
-      return;
-    }
+  const handleUpdateStock = async () => {
+    await fetch(`${ITEM_API}/${editingStock.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: editingStock.name,
+        category: editingStock.category,
+        unit: editingStock.unit,
+        quantity: Number(editingStock.quantity),
+        expiry_date: editingStock.expiry_date
+      })
+    });
 
-    const updatedStock = {
-      ...editingStock,
-      quantity: parseInt(editingStock.quantity)
-    };
+    const res = await fetch(ITEM_API);
+    setStockList(await res.json());
 
-    setStockList(stockList.map(stock => 
-      stock.id === updatedStock.id ? updatedStock : stock
-    ));
-    
     setIsEditStockModalOpen(false);
     setEditingStock(null);
 
     Swal.fire({
       icon: "success",
       title: "Stock Updated!",
-      text: "Stock item has been updated successfully.",
       confirmButtonColor: "#278659"
     });
   };
@@ -333,7 +425,6 @@ function StaffPackage() {
     let x = a[sortBy];
     let y = b[sortBy];
 
-    // convert to lowercase if string
     if (typeof x === "string") x = x.toLowerCase();
     if (typeof y === "string") y = y.toLowerCase();
 
@@ -347,23 +438,29 @@ function StaffPackage() {
       .includes(searchTerm.toLowerCase())
   );
 
-  // Animated counters
   useEffect(() => {
-    let t = 0, v = 0, a = 0;
-    const step = 1;
-    const timer = setInterval(() => {
-      if (t < 3) t += 1;
-      if (v < 140) v += step;
-      if (a < 5) a += 1;
-
-      setTotalPackages(t > 3 ? 3 : t);
-      setTotalValue(v > 140 ? 140 : v);
-      setAvailableStock(a > 5 ? 5 : a);
-
-      if (t >= 3 && v >= 140 && a >= 5) clearInterval(timer);
-    }, 20);
-    return () => clearInterval(timer);
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => setPackages(data))
+      .catch(err => console.error(err));
   }, []);
+
+  useEffect(() => {
+    fetch(ITEM_API)
+      .then(res => res.json())
+      .then(data => setStockList(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    setTotalPackages(packages.length);
+    const total = packages.reduce(
+      (sum, pkg) => sum + Number(pkg.price || 0),
+      0
+    );
+    setTotalValue(total);
+    setAvailableStock(stockList.length);
+  }, [packages, stockList]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -449,9 +546,12 @@ function StaffPackage() {
                     {/* Items List */}
                     <ul className="flex-1 mb-4 space-y-1.5 text-sm">
                       {pkg.items.map((item, index) => (
-                        <li key={index} className="text-gray-700 flex items-center">
-                          <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>
-                          {item}
+                        <li key={index} className="text-gray-700 flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>
+                            {item.name}
+                          </div>
+                          <span className="text-xs font-semibold text-[#278659]">×{item.quantity}</span>
                         </li>
                       ))}
                     </ul>
@@ -507,7 +607,7 @@ function StaffPackage() {
             <div className="rounded-lg border border-gray-200">
               <table className="w-full text-left border-collapse text-sm">
                 <thead className="bg-gray-100 text-gray-700">
-                  <tr className="bg-gray-100 text-gray-700">
+                  <tr>
                     <th className="py-2 px-11 cursor-pointer" onClick={() => handleSort("name")}>
                       Item {sortBy === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
@@ -520,44 +620,62 @@ function StaffPackage() {
                     <th className="py-2 px-10 cursor-pointer" onClick={() => handleSort("unit")}>
                       Unit {sortBy === "unit" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                     </th>
+                    <th className="py-2 px-10 cursor-pointer" onClick={() => handleSort("expiry_date")}>
+                      Expiry Date {sortBy === "expiry_date" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+                    </th>
                     <th className="py-2 px-10 text-center">
                       Action
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredStock.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="p-[12px] pl-[30px]">{item.name}</td>
-                      <td className="p-[12px] pl-[30px]">{item.category}</td>
-                      <td className="p-[12px] pl-[30px]">
-                        <span className={`font-semibold ${
-                          item.quantity < 40 ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          {item.quantity}
-                        </span>
-                      </td>
-                      <td className="p-[12px] pl-[30px]">{item.unit}</td>
-                      <td className="p-[12px] text-center">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => handleEditStock(item)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded transition"
-                            title="Edit"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteStock(item.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded transition"
-                            title="Delete"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredStock.map((item) => {
+                    const expiryDate = new Date(item.expiry_date);
+                    const today = new Date();
+                    const daysUntilExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+                    const isExpiringSoon = daysUntilExpiry <= 30 && daysUntilExpiry >= 0;
+                    const isExpired = daysUntilExpiry < 0;
+
+                    return (
+                      <tr key={item.id} className="hover:bg-gray-50">
+                        <td className="p-[12px] pl-[30px]">{item.name}</td>
+                        <td className="p-[12px] pl-[30px]">{item.category}</td>
+                        <td className="p-[12px] pl-[30px]">
+                          <span className={`font-semibold ${
+                            item.quantity < 40 ? 'text-red-600' : 'text-green-600'
+                          }`}>
+                            {item.quantity}
+                          </span>
+                        </td>
+                        <td className="p-[12px] pl-[30px]">{item.unit}</td>
+                        <td className="p-[12px] pl-[30px]">
+                          <span className={`font-semibold ${
+                            isExpired ? 'text-red-600' : isExpiringSoon ? 'text-orange-600' : 'text-gray-700'
+                          }`}>
+                            {new Date(item.expiry_date).toLocaleDateString('en-GB')}
+                          </span>
+                        </td>
+                        <td className="p-[12px] text-center">
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() => handleEditStock(item)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded transition"
+                              title="Edit"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteStock(item.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded transition"
+                              title="Delete"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -570,7 +688,7 @@ function StaffPackage() {
       {/* ADD PACKAGE MODAL */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-[500px] p-6 animate-fadeIn max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg w-[600px] p-6 animate-fadeIn max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-semibold mb-4">Add New Package</h2>
 
             <label className="text-sm text-gray-700 font-medium">Package Name *</label>
@@ -597,16 +715,79 @@ function StaffPackage() {
               placeholder="e.g., FOR 10-15 PAX"
               value={newPackage.pax}
               onChange={(e) => setNewPackage({ ...newPackage, pax: e.target.value })}
-              className="w-full p-2 border rounded mb-3 text-sm"
+              className="w-full p-2 border rounded mb-4 text-sm"
             />
 
-            <label className="text-sm text-gray-700 font-medium">Food Items *</label>
-            <textarea
-              placeholder="Enter items separated by commas (e.g., RICE, CANNED SARDINES, COOKING OIL)"
-              value={newPackage.items}
-              onChange={(e) => setNewPackage({ ...newPackage, items: e.target.value })}
-              className="w-full p-2 border rounded mb-3 text-sm h-24 resize-none"
-            />
+            {/* Item Selection Section */}
+            <div className="bg-gray-50 p-4 rounded-lg mb-4">
+              <label className="text-sm text-gray-700 font-medium block mb-2">Add Items to Package *</label>
+              
+              <div className="flex gap-2 mb-3">
+                <select
+                  value={selectedItemId}
+                  onChange={(e) => setSelectedItemId(e.target.value)}
+                  className="flex-1 p-2 border rounded text-sm"
+                >
+                  <option value="">Select an item...</option>
+                  {stockList.map((stock) => (
+                    <option key={stock.id} value={stock.id}>
+                      {stock.name} ({stock.quantity} {stock.unit} available)
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  min="1"
+                  value={selectedItemQuantity}
+                  onChange={(e) => setSelectedItemQuantity(parseInt(e.target.value) || 1)}
+                  className="w-20 p-2 border rounded text-sm text-center"
+                  placeholder="Qty"
+                />
+
+                <button
+                  onClick={() => handleAddItemToPackage(false)}
+                  className="px-4 py-2 bg-[#278659] text-white rounded hover:bg-[#11452E] text-sm font-medium"
+                >
+                  Add
+                </button>
+              </div>
+
+              {/* Selected Items List */}
+              {newPackage.items.length > 0 && (
+                <div className="bg-white p-3 rounded border">
+                  <p className="text-xs text-gray-600 mb-2 font-medium">Selected Items ({newPackage.items.length}):</p>
+                  <div className="space-y-2">
+                    {newPackage.items.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                        <span className="text-sm text-gray-700">{item.name}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleUpdateItemQuantity(item.id, item.quantity - 1, false)}
+                            className="p-1 hover:bg-gray-200 rounded"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="text-sm font-semibold w-8 text-center">×{item.quantity}</span>
+                          <button
+                            onClick={() => handleUpdateItemQuantity(item.id, item.quantity + 1, false)}
+                            className="p-1 hover:bg-gray-200 rounded"
+                          >
+                            <Plus size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleRemoveItemFromPackage(item.id, false)}
+                            className="p-1 hover:bg-red-100 text-red-600 rounded ml-2"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <label className="text-sm text-gray-700 font-medium">Package Image (Optional)</label>
             <div className="mb-4">
@@ -638,9 +819,11 @@ function StaffPackage() {
                     name: "",
                     price: "",
                     pax: "",
-                    items: "",
+                    items: [],
                     image: ""
                   });
+                  setSelectedItemId("");
+                  setSelectedItemQuantity(1);
                 }}
               >
                 Cancel
@@ -700,6 +883,14 @@ function StaffPackage() {
               onChange={(e) => setNewStock({ ...newStock, unit: e.target.value })}
               className="w-full p-2 border rounded mb-4 text-sm"
             />
+            
+            <label className="text-sm text-gray-700 font-medium">Expiry Date *</label>
+            <input
+              type="date"
+              value={newStock.expiry_date}
+              onChange={(e) => setNewStock({ ...newStock, expiry_date: e.target.value })}
+              className="w-full p-2 border rounded mb-4 text-sm"
+            />
 
             <div className="flex justify-end gap-3">
               <button
@@ -710,7 +901,8 @@ function StaffPackage() {
                     name: "",
                     category: "Dry Food",
                     quantity: "",
-                    unit: ""
+                    unit: "",
+                    expiry_date: ""
                   });
                 }}
               >
@@ -730,7 +922,7 @@ function StaffPackage() {
       {/* EDIT PACKAGE MODAL */}
       {isEditModalOpen && editingPackage && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-[500px] p-6 animate-fadeIn max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg w-[600px] p-6 animate-fadeIn max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-semibold mb-4">Edit Package</h2>
 
             <label className="text-sm text-gray-700 font-medium">Package Name *</label>
@@ -757,16 +949,79 @@ function StaffPackage() {
               placeholder="e.g., FOR 10-15 PAX"
               value={editingPackage.pax}
               onChange={(e) => setEditingPackage({ ...editingPackage, pax: e.target.value })}
-              className="w-full p-2 border rounded mb-3 text-sm"
+              className="w-full p-2 border rounded mb-4 text-sm"
             />
 
-            <label className="text-sm text-gray-700 font-medium">Food Items *</label>
-            <textarea
-              placeholder="Enter items separated by commas (e.g., RICE, CANNED SARDINES, COOKING OIL)"
-              value={editingPackage.items}
-              onChange={(e) => setEditingPackage({ ...editingPackage, items: e.target.value })}
-              className="w-full p-2 border rounded mb-3 text-sm h-24 resize-none"
-            />
+            {/* Item Selection Section */}
+            <div className="bg-gray-50 p-4 rounded-lg mb-4">
+              <label className="text-sm text-gray-700 font-medium block mb-2">Package Items *</label>
+              
+              <div className="flex gap-2 mb-3">
+                <select
+                  value={selectedItemId}
+                  onChange={(e) => setSelectedItemId(e.target.value)}
+                  className="flex-1 p-2 border rounded text-sm"
+                >
+                  <option value="">Select an item...</option>
+                  {stockList.map((stock) => (
+                    <option key={stock.id} value={stock.id}>
+                      {stock.name} ({stock.quantity} {stock.unit} available)
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  min="1"
+                  value={selectedItemQuantity}
+                  onChange={(e) => setSelectedItemQuantity(parseInt(e.target.value) || 1)}
+                  className="w-20 p-2 border rounded text-sm text-center"
+                  placeholder="Qty"
+                />
+
+                <button
+                  onClick={() => handleAddItemToPackage(true)}
+                  className="px-4 py-2 bg-[#278659] text-white rounded hover:bg-[#11452E] text-sm font-medium"
+                >
+                  Add
+                </button>
+              </div>
+
+              {/* Selected Items List */}
+              {editingPackage.items.length > 0 && (
+                <div className="bg-white p-3 rounded border">
+                  <p className="text-xs text-gray-600 mb-2 font-medium">Selected Items ({editingPackage.items.length}):</p>
+                  <div className="space-y-2">
+                    {editingPackage.items.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                        <span className="text-sm text-gray-700">{item.name}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleUpdateItemQuantity(item.id, item.quantity - 1, true)}
+                            className="p-1 hover:bg-gray-200 rounded"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="text-sm font-semibold w-8 text-center">×{item.quantity}</span>
+                          <button
+                            onClick={() => handleUpdateItemQuantity(item.id, item.quantity + 1, true)}
+                            className="p-1 hover:bg-gray-200 rounded"
+                          >
+                            <Plus size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleRemoveItemFromPackage(item.id, true)}
+                            className="p-1 hover:bg-red-100 text-red-600 rounded ml-2"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <label className="text-sm text-gray-700 font-medium">Package Image (Optional)</label>
             <div className="mb-4">
@@ -795,6 +1050,8 @@ function StaffPackage() {
                 onClick={() => {
                   setIsEditModalOpen(false);
                   setEditingPackage(null);
+                  setSelectedItemId("");
+                  setSelectedItemQuantity(1);
                 }}
               >
                 Cancel
@@ -852,6 +1109,14 @@ function StaffPackage() {
               placeholder="e.g., packs, cans, bottles"
               value={editingStock.unit}
               onChange={(e) => setEditingStock({ ...editingStock, unit: e.target.value })}
+              className="w-full p-2 border rounded mb-4 text-sm"
+            />
+            
+            <label className="text-sm text-gray-700 font-medium">Expiry Date *</label>
+            <input
+              type="date"
+              value={editingStock.expiry_date}
+              onChange={(e) => setEditingStock({ ...editingStock, expiry_date: e.target.value })}
               className="w-full p-2 border rounded mb-4 text-sm"
             />
 

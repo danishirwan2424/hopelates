@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
 import { Edit, Trash2, Search } from "lucide-react";
 import "react-calendar/dist/Calendar.css";
 
@@ -23,10 +22,14 @@ function StaffApplication() {
     }
   };
 
+  // ===== Loading =====
+  const [isLoading, setIsLoading] = useState(true);
+
   // ===== Application List =====
   const [appList, setAppList] = useState([]);
 
   const fetchApplications = async () => {
+    setIsLoading(true);
     try {
       const res = await axios.get("http://localhost:5000/api/staff-application");
       const rows = res.data?.data || [];
@@ -34,13 +37,10 @@ function StaffApplication() {
       const mapped = rows.map((a) => ({
         id: a.application_id,
         applicationId: a.application_id,
-
         name: a.full_name || "N/A",
         email: a.email || "N/A",
-
         date: a.created_at ? new Date(a.created_at).toLocaleDateString() : "N/A",
         status: a.status || "Pending",
-
         ic: a.ic_no || "N/A",
         address: a.address || "N/A",
         postcode: a.postcode || "N/A",
@@ -49,8 +49,6 @@ function StaffApplication() {
         occupation: a.occupation || "N/A",
         salary: a.salary ?? "N/A",
         household: a.family_no ?? "N/A",
-
-        // ⚠️ your DB table doesn't show score column, so fallback
         score: a.score ?? 0,
       }));
 
@@ -58,6 +56,8 @@ function StaffApplication() {
     } catch (err) {
       console.error("Fetch applications error:", err);
       setAppList([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,13 +77,11 @@ function StaffApplication() {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (!result.isConfirmed) return;
-
       try {
         await axios.delete(`http://localhost:5000/api/staff-application/${id}`);
         setAppList((prev) => prev.filter((app) => app.id !== id));
         Swal.fire("Deleted!", "The application has been deleted.", "success");
-      } catch (e) {
-        console.error(e);
+      } catch {
         Swal.fire("Error", "Failed to delete application.", "error");
       }
     });
@@ -96,9 +94,7 @@ function StaffApplication() {
 
   const openEditModal = async (user) => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/staff-application/${user.id}`
-      );
+      const res = await axios.get(`http://localhost:5000/api/staff-application/${user.id}`);
       const detail = res.data?.data || res.data;
 
       setSelectedUser({
@@ -114,8 +110,7 @@ function StaffApplication() {
       });
 
       setShowModal(true);
-    } catch (e) {
-      console.error("Fetch detail error:", e);
+    } catch {
       setSelectedUser(user);
       setShowModal(true);
     }
@@ -127,22 +122,22 @@ function StaffApplication() {
   };
 
   useEffect(() => {
-    if (showModal && selectedUser) {
-      let start = 0;
-      const end = selectedUser.score || 0;
-      const step = Math.ceil(end / 30) || 1;
+    if (!showModal || !selectedUser) return;
 
-      const timer = setInterval(() => {
-        start += step;
-        if (start >= end) {
-          start = end;
-          clearInterval(timer);
-        }
-        setDisplayScore(start);
-      }, 30);
+    let start = 0;
+    const end = selectedUser.score || 0;
+    const step = Math.ceil(end / 30) || 1;
 
-      return () => clearInterval(timer);
-    }
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= end) {
+        start = end;
+        clearInterval(timer);
+      }
+      setDisplayScore(start);
+    }, 30);
+
+    return () => clearInterval(timer);
   }, [showModal, selectedUser]);
 
   // ===== Status Color =====
@@ -153,70 +148,6 @@ function StaffApplication() {
       Rejected: "text-red-700 bg-red-100",
     };
     return colors[status] || "text-gray-700 bg-gray-100";
-  };
-
-  // ===== Approve / Reject =====
-  const updateStatus = async (id, newStatus) => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const staffId = storedUser?.staff_id;
-
-    await axios.patch(
-      `http://localhost:5000/api/staff-application/${id}/status`,
-      { status: newStatus, staff_id: staffId }
-    );
-
-    setAppList((prev) =>
-      prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app))
-    );
-
-    if (selectedUser?.id === id)
-      setSelectedUser((p) => ({ ...p, status: newStatus }));
-  };
-
-  const handleApprove = (id) => {
-    Swal.fire({
-      title: "Approve Application?",
-      text: "This applicant will be marked as approved.",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#278659",
-      cancelButtonColor: "#B91C1C",
-      confirmButtonText: "Approve",
-    }).then(async (result) => {
-      if (!result.isConfirmed) return;
-
-      try {
-        await updateStatus(id, "Completed");
-        Swal.fire("Approved!", "The application is now approved.", "success");
-        closeModal();
-      } catch (e) {
-        console.error(e);
-        Swal.fire("Error", "Failed to approve application.", "error");
-      }
-    });
-  };
-
-  const handleReject = (id) => {
-    Swal.fire({
-      title: "Reject Application?",
-      text: "This applicant will be marked as rejected.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#B91C1C",
-      cancelButtonColor: "#6B7280",
-      confirmButtonText: "Reject",
-    }).then(async (result) => {
-      if (!result.isConfirmed) return;
-
-      try {
-        await updateStatus(id, "Rejected");
-        Swal.fire("Rejected!", "The application has been rejected.", "success");
-        closeModal();
-      } catch (e) {
-        console.error(e);
-        Swal.fire("Error", "Failed to reject application.", "error");
-      }
-    });
   };
 
   // ===== Stats =====
@@ -255,28 +186,26 @@ function StaffApplication() {
     .filter((app) => {
       const q = searchTerm.toLowerCase();
       return (
-        String(app.applicationId || "").toLowerCase().includes(q) ||
-        String(app.name || "").toLowerCase().includes(q) ||
-        String(app.email || "").toLowerCase().includes(q) ||
-        String(app.status || "").toLowerCase().includes(q)
+        String(app.applicationId).toLowerCase().includes(q) ||
+        String(app.name).toLowerCase().includes(q) ||
+        String(app.email).toLowerCase().includes(q) ||
+        String(app.status).toLowerCase().includes(q)
       );
     })
     .sort((a, b) => {
       if (!sortBy) return 0;
-      let valA = a[sortBy];
-      let valB = b[sortBy];
+      let A = a[sortBy];
+      let B = b[sortBy];
 
       if (sortBy === "date") {
-        const dA = new Date(valA);
-        const dB = new Date(valB);
-        return sortOrder === "asc" ? dA - dB : dB - dA;
+        return sortOrder === "asc" ? new Date(A) - new Date(B) : new Date(B) - new Date(A);
       }
 
-      valA = String(valA ?? "").toLowerCase();
-      valB = String(valB ?? "").toLowerCase();
+      A = String(A).toLowerCase();
+      B = String(B).toLowerCase();
 
-      if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-      if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+      if (A < B) return sortOrder === "asc" ? -1 : 1;
+      if (A > B) return sortOrder === "asc" ? 1 : -1;
       return 0;
     });
 
@@ -319,7 +248,7 @@ function StaffApplication() {
           </section>
 
           {/* Search */}
-          <section className="flex items-center bg-white rounded-lg px-4 py-2 mb-4 flex-shrink-0">
+          <section className="flex items-center bg-white rounded-lg px-4 py-2 mb-4">
             <Search className="text-gray-500 w-5 h-5 mr-2" />
             <input
               type="text"
@@ -336,52 +265,63 @@ function StaffApplication() {
               <table className="w-full text-left">
                 <thead className="bg-gray-50 sticky top-0">
                   <tr>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("applicationId")}>
-                      Application ID
-                    </th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("name")}>
-                      Name
-                    </th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("email")}>
-                      Email
-                    </th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("date")}>
-                      Date
-                    </th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort("status")}>
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-[12px] font-semibold text-gray-600">Actions</th>
+                    {["Application ID", "Name", "Email", "Date", "Status", "Actions"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          className="px-4 py-3 text-[12px] font-semibold text-gray-600 cursor-pointer"
+                          onClick={() =>
+                            handleSort(
+                              h === "Application ID"
+                                ? "applicationId"
+                                : h.toLowerCase()
+                            )
+                          }
+                        >
+                          {h}
+                        </th>
+                      )
+                    )}
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredApps.map((app) => (
-                    <tr key={app.id} className="border-t border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-[12px] text-gray-700">{app.applicationId}</td>
-                      <td className="px-4 py-3 text-[12px] text-gray-700">{app.name}</td>
-                      <td className="px-4 py-3 text-[12px] text-gray-700">{app.email}</td>
-                      <td className="px-4 py-3 text-[12px] text-gray-700">{app.date}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded-full text-[10px] font-medium ${getStatusColor(app.status)}`}>
-                          {app.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 flex space-x-2">
-                        <button
-                          onClick={() => openEditModal(app)}
-                          className="text-blue-500 hover:text-blue-700"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(app.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {isLoading
+                    ? Array.from({ length: 6 }).map((_, i) => (
+                        <tr key={i} className="border-t">
+                          {Array.from({ length: 6 }).map((__, j) => (
+                            <td key={j} className="px-4 py-3">
+                              <div className="h-3 w-full bg-gray-200 rounded animate-pulse" />
+                            </td>
+                          ))}
+                        </tr>
+                      ))
+                    : filteredApps.map((app) => (
+                        <tr key={app.id} className="border-t border-gray-300 hover:bg-gray-50">
+                          <td className="px-4 py-3 text-[12px]">{app.applicationId}</td>
+                          <td className="px-4 py-3 text-[12px]">{app.name}</td>
+                          <td className="px-4 py-3 text-[12px]">{app.email}</td>
+                          <td className="px-4 py-3 text-[12px]">{app.date}</td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`px-2 py-1 rounded-full text-[10px] ${getStatusColor(
+                                app.status
+                              )}`}
+                            >
+                              {app.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 flex space-x-2">
+                            <Edit
+                              onClick={() => openEditModal(app)}
+                              className="w-4 h-4 cursor-pointer text-blue-500"
+                            />
+                            <Trash2
+                              onClick={() => handleDelete(app.id)}
+                              className="w-4 h-4 cursor-pointer text-red-500"
+                            />
+                          </td>
+                        </tr>
+                      ))}
                 </tbody>
               </table>
             </div>
@@ -395,65 +335,38 @@ function StaffApplication() {
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-auto">
             <h2 className="text-xl font-bold mb-4">Application Details</h2>
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Application ID</label>
-                <p className="text-sm text-gray-900">{selectedUser.applicationId}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <p className="text-sm text-gray-900">{selectedUser.name}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <p className="text-sm text-gray-900">{selectedUser.email}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">IC Number</label>
-                <p className="text-sm text-gray-900">{selectedUser.ic}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Address</label>
-                <p className="text-sm text-gray-900">{selectedUser.address}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Postcode</label>
-                <p className="text-sm text-gray-900">{selectedUser.postcode}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">City</label>
-                <p className="text-sm text-gray-900">{selectedUser.city}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">State</label>
-                <p className="text-sm text-gray-900">{selectedUser.state}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Occupation</label>
-                <p className="text-sm text-gray-900">{selectedUser.occupation}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Salary</label>
-                <p className="text-sm text-gray-900">{selectedUser.salary}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Household Size</label>
-                <p className="text-sm text-gray-900">{selectedUser.household}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
-                <p className="text-sm text-gray-900">{selectedUser.status}</p>
-              </div>
+              {[
+                ["Application ID", selectedUser.applicationId],
+                ["Name", selectedUser.name],
+                ["Email", selectedUser.email],
+                ["IC Number", selectedUser.ic],
+                ["Address", selectedUser.address],
+                ["Postcode", selectedUser.postcode],
+                ["City", selectedUser.city],
+                ["State", selectedUser.state],
+                ["Occupation", selectedUser.occupation],
+                ["Salary", selectedUser.salary],
+                ["Household Size", selectedUser.household],
+                ["Status", selectedUser.status],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <label className="block text-sm font-medium text-gray-700">{label}</label>
+                  <p className="text-sm text-gray-900">{value}</p>
+                </div>
+              ))}
             </div>
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Score</label>
               <div className="w-full bg-gray-200 rounded-full h-4">
                 <div
                   className="bg-green-500 h-4 rounded-full"
                   style={{ width: `${(displayScore / 100) * 100}%` }}
-                ></div>
+                />
               </div>
               <p className="text-sm text-gray-600 mt-1">{displayScore}/100</p>
             </div>
+
             <div className="flex justify-end space-x-2">
               {selectedUser.status === "Pending" && (
                 <>

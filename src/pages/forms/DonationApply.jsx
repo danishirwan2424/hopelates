@@ -6,8 +6,8 @@ import DonorNav from "./Forms_cmp/DonorNav";
 import axios from "axios";
 
 import PackageA from "../../images/PACKAGEA.png";
-import PackageC from "../../images/PACKAGEB.png";
-import PackageB from "../../images/PACKAGEC.png";
+import PackageC from "../../images/PACKAGEC.png";
+import PackageB from "../../images/PACKAGEB.png";
 
 // THE NEW IMAGE IMPORT
 import QRCodeImg from "../../images/qr.png";

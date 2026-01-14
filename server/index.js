@@ -1,58 +1,74 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 
-// Load all database connections and test them
+// Load all database connections
 const { donationDB, inventoryDB, foodDB, beneficiaryDB } = require("./db");
 
 const app = express();
 
-app.use(cors());
+// ======================
+// MIDDLEWARE
+// ======================
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // ======================
-// EXISTING ROUTES (DO NOT TOUCH)
+// HELPER: Safe route loader
 // ======================
-const staffDashRoutes = require("./routes/staffDash");
-const authRoutes = require("./routes/auth");
-
-app.use("/api/staffDash", staffDashRoutes);
-app.use("/api/auth", authRoutes);
-
-// ======================
-// TEMPORARY DONATION DB TEST ROUTE
-// ======================
-const donationTestRoutes = require("./routes/donationTest");
-console.log("donationTestRoutes loaded");
-app.use("/api/test", donationTestRoutes);
-
-// ======================
-// NEW: INVENTORY DB TEST ROUTE (CONNECTION ONLY)
-// ======================
-const inventoryTestRoutes = require("./routes/inventoryTest");
-console.log("inventoryTestRoutes loaded");
-app.use("/api/inventory", inventoryTestRoutes);
+function safeRoute(routePath, mountPath) {
+  const fullPath = path.resolve(__dirname, routePath);
+  if (fs.existsSync(fullPath + ".js")) {
+    try {
+      const route = require(fullPath);
+      app.use(mountPath, route);
+      console.log(`✅ Route loaded: ${routePath} at ${mountPath}`);
+    } catch (err) {
+      console.warn(`⚠️  Failed to load route ${routePath} at ${mountPath}`);
+      console.warn(`    Error: ${err.message}`);
+    }
+  } else {
+    console.warn(`⚠️  Route file not found: ${routePath}, skipping ${mountPath}`);
+  }
+}
 
 // ======================
-// FOOD DISTRIBUTION DB TEST ROUTE
+// YOUR EXISTING ROUTES
 // ======================
-const foodTestRoutes = require("./routes/foodTest");
-console.log("foodTestRoutes loaded");
-app.use("/api/food", foodTestRoutes);
+safeRoute("./routes/staffDash", "/api/staffDash");
+safeRoute("./routes/auth", "/api/auth");
 
 // ======================
-// BENEFICIARY DB TEST ROUTE
+// TEMP TEST ROUTES
 // ======================
-const beneficiaryTestRoutes = require("./routes/beneficiaryTest");
-console.log("beneficiaryTestRoutes loaded");
-app.use("/api/beneficiary", beneficiaryTestRoutes);
+safeRoute("./routes/donationTest", "/api/test");
+safeRoute("./routes/inventoryTest", "/api/inventory");
+safeRoute("./routes/foodTest", "/api/food");
+safeRoute("./routes/beneficiaryTest", "/api/beneficiary");
+safeRoute("./routes/dbStatus", "/api/db-status");
 
+// ======================
+// FRIEND'S ADDITIONAL ROUTES
+// ======================
+safeRoute("./routes/distribution", "/api/staff-distribution");
+safeRoute("./routes/staffApplication", "/api/staff-application");
+
+// ======================
+// PING
+// ======================
+app.get("/ping", (req, res) => res.json({ ok: true }));
+
+// ======================
+// START SERVER
 // ======================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
-
-
-const dbStatusRoutes = require("./routes/dbStatus");
-app.use("/api/db-status", dbStatusRoutes);

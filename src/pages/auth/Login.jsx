@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import leaves from "../../images/leaves.jpg";
 import logo from "../../images/Logo2.png";
 import '../../index.css';
+import axios from "axios";
 
 function Login() {
   const navigate = useNavigate();
@@ -11,77 +12,38 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-
-const handleLogin = async (e) => {
+  const handleLogin = async (e) => {
   e.preventDefault();
 
-  const cleanEmail = email.trim().toLowerCase();
-  const cleanPassword = password.trim();
-
-  // ✅ VALIDATION FIRST
-  if (!cleanEmail || !cleanPassword) {
-    alert("Please enter email and password");
-    return;
-  }
-
-  // ✅ SUPERADMIN
-  if (cleanEmail === "superadmin@email.com" && cleanPassword === "password") {
-    localStorage.setItem("role", "superadmin");
-    navigate("/staff-dashboard");
-    return;
-  }
-
-  // ✅ STAFF
-  if (cleanEmail === "staff@email.com" && cleanPassword === "password") {
-    localStorage.setItem("role", "staff");
-    navigate("/staff-dashboard");
-    return;
-  }
-
-  // ✅ DONOR
-  if (cleanEmail === "donor@email.com" && cleanPassword === "password") {
-    localStorage.setItem("user", JSON.stringify({ role: "donor", email: cleanEmail }));
-    navigate("/donation");
-    return;
-  }
-
-  // ✅ APPLICANT
-  if (cleanEmail === "applicant@email.com" && cleanPassword === "password") {
-    localStorage.setItem("user", JSON.stringify({ role: "applicant", email: cleanEmail }));
-    navigate("/application");
-    return;
-  }
-
   try {
-    const res = await fetch("http://localhost:5000/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: cleanEmail,
-        password: cleanPassword
-      }),
+    const res = await axios.post("http://localhost:5000/api/auth/login", {
+      email,
+      password
     });
 
-    const data = await res.json();
+    const { token, role, user } = res.data;
 
-    if (!res.ok) {
-      alert(data.message || "Invalid email or password");
-      return;
+    // Save auth info
+    if (token) {
+      localStorage.setItem("token", token);
     }
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("role", role);
 
-    localStorage.setItem("user", JSON.stringify(data));
-
-    if (data.role === "donor") {
-      navigate("/donation");
-    } else if (data.role === "applicant") {
-      navigate("/application");
+    // Redirect based on role
+    if (role === "staff") {
+      navigate("/staff-dashboard");
+    } else if (role === "donor") {
+      navigate("/donor-dashboard");
+    } else if (role === "applicant") {
+      navigate("/applicant-dashboard");
     } else {
-      alert("Unknown user role");
+      alert("Unknown role");
     }
 
   } catch (err) {
-    console.error(err);
-    alert("Server error");
+    console.error("LOGIN ERROR:", err);
+    alert(err.response?.data?.message || "Login failed");
   }
 };
 

@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middleware/authMiddleware");
 const router = express.Router();
 const donationPool = require("../db/donationDb");
 
@@ -45,10 +46,12 @@ router.get("/", async (req, res) => {
 /**
  * ADD package (with inventory stock deduction)
  */
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
+   console.log("🔥 ADD PACKAGE HIT");
   let conn;
   try {
     const { name, price, pax, items, image } = req.body;
+    const staffId = req.user.staff_id;
 
     if (!name || !price || !pax || !items || items.length === 0) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -86,7 +89,7 @@ router.post("/", async (req, res) => {
       `INSERT INTO donation_package 
        (name, description, price, package_img, staff_id, pax, items)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, "", price, image, 1, pax, null]
+      [name, "", price, image, staffId, pax, null]
     );
 
     const packageId = Number(result.insertId);
@@ -129,7 +132,7 @@ router.post("/", async (req, res) => {
         await conn.query(
           `INSERT INTO inventory (item_id, staff_id, stock_in, stock_out, balance)
            VALUES (?, ?, 0, ?, ?)`,
-          [item.id, 1, item.quantity, -item.quantity]
+          [item.id, staffId, item.quantity, -item.quantity]
         );
       }
     }
@@ -155,7 +158,7 @@ router.post("/", async (req, res) => {
 /**
  * UPDATE package (with inventory adjustments)
  */
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   let conn;
   try {
     const { name, price, pax, items, image } = req.body;
@@ -292,7 +295,7 @@ router.put("/:id", async (req, res) => {
 /**
  * DELETE package (restore stock)
  */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   let conn;
   try {
     conn = await donationPool.getConnection();

@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const authPool = require("../db/authDb"); // PostgreSQL Pool
 const router = express.Router();
@@ -47,6 +48,39 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: "Email and password required" });
+
+    // Check staff
+const staffResult = await authPool.query(
+  "SELECT * FROM staff WHERE email = $1",
+  [email]
+);
+
+if (staffResult.rowCount > 0) {
+  const staff = staffResult.rows[0];
+  const match = await bcrypt.compare(password, staff.password);
+  if (!match) return res.status(401).json({ message: "Invalid credentials" });
+
+  // ✅ CREATE JWT WITH staff_id
+  const token = jwt.sign(
+    {
+      staff_id: staff.staff_id,   // IMPORTANT
+      role: "staff"
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
+
+  return res.json({
+    message: "Login successful",
+    role: "staff",
+    token,
+    user: {
+      staff_id: staff.staff_id,
+      full_name: staff.full_name,
+      email: staff.email
+    }
+  });
+}
 
     // Check donor
     const donorResult = await authPool.query("SELECT * FROM donor WHERE email = $1", [email]);

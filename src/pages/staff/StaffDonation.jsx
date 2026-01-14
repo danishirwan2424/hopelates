@@ -10,6 +10,13 @@ function StaffPackage() {
   const API_URL = "http://localhost:5000/api/packages";
   const ITEM_API = "http://localhost:5000/api/items";
 
+  const token = localStorage.getItem("token");
+
+const authHeaders = {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${token}`
+};
+
   // Package data
   const [packages, setPackages] = useState([]);
 
@@ -170,10 +177,11 @@ function StaffPackage() {
 
     try {
       await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  method: "POST",
+  headers: authHeaders,
+  body: JSON.stringify(payload)
+});
+
 
       const res = await fetch(API_URL);
       setPackages(await res.json());
@@ -324,10 +332,11 @@ function StaffPackage() {
 
     try {
       await fetch(`${API_URL}/${editingPackage.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  method: "PUT",
+  headers: authHeaders,
+  body: JSON.stringify(payload)
+});
+
 
       const res = await fetch(API_URL);
       setPackages(await res.json());
@@ -363,7 +372,13 @@ function StaffPackage() {
     }).then(async (result) => {
       if (!result.isConfirmed) return;
 
-      await fetch(`${ITEM_API}/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/${id}`, {
+  method: "DELETE",
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
+
 
       const res = await fetch(ITEM_API);
       setStockList(await res.json());

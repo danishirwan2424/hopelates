@@ -51,10 +51,8 @@
     "globals": "^16.4.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.16",
-    "vite": "npm:rolldown-vite@7.1.14"
-  },
-  "overrides": {
-    "vite": "npm:rolldown-vite@7.1.14"
+    "@vitejs/plugin-react": "^5.0.4",
+    "vite": "^5.4.0"
   },
   "description": "<<<<<<< HEAD\r # React + Vite",
   "main": "eslint.config.js",

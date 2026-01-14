@@ -1,9 +1,11 @@
 // server/db.js
+require("dotenv").config();
+
 const mysql = require("mysql2/promise");
 const { Pool } = require("pg");
 
 // =====================
-// MariaDB / MySQL Connections
+// MariaDB / MySQL Databases
 // =====================
 
 const donationDB = mysql.createPool({
@@ -11,7 +13,9 @@ const donationDB = mysql.createPool({
   user: process.env.DONATION_DB_USER,
   password: process.env.DONATION_DB_PASSWORD,
   database: process.env.DONATION_DB_NAME,
-  port: process.env.DONATION_DB_PORT,
+  port: Number(process.env.DONATION_DB_PORT),
+  waitForConnections: true,
+  connectionLimit: 10,
 });
 
 const inventoryDB = mysql.createPool({
@@ -19,7 +23,9 @@ const inventoryDB = mysql.createPool({
   user: process.env.INVENTORY_DB_USER,
   password: process.env.INVENTORY_DB_PASSWORD,
   database: process.env.INVENTORY_DB_NAME,
-  port: process.env.INVENTORY_DB_PORT,
+  port: Number(process.env.INVENTORY_DB_PORT),
+  waitForConnections: true,
+  connectionLimit: 10,
 });
 
 const foodDB = mysql.createPool({
@@ -27,77 +33,71 @@ const foodDB = mysql.createPool({
   user: process.env.FOOD_DB_USER,
   password: process.env.FOOD_DB_PASSWORD,
   database: process.env.FOOD_DB_NAME,
-  port: process.env.FOOD_DB_PORT,
+  port: Number(process.env.FOOD_DB_PORT),
+  waitForConnections: true,
+  connectionLimit: 10,
 });
 
 // =====================
-// Postgres Connection (Beneficiary DB)
+// PostgreSQL Databases
 // =====================
 
+// Beneficiary / Application DB
 const beneficiaryDB = new Pool({
   host: process.env.BENEFICIARY_DB_HOST,
   user: process.env.BENEFICIARY_DB_USER,
   password: process.env.BENEFICIARY_DB_PASSWORD,
   database: process.env.BENEFICIARY_DB_NAME,
-  port: process.env.BENEFICIARY_DB_PORT,
+  port: Number(process.env.BENEFICIARY_DB_PORT),
 });
 
-// Postgres Auth DB
+// Auth DB
 const authDB = new Pool({
   host: process.env.AUTH_DB_HOST,
   user: process.env.AUTH_DB_USER,
   password: process.env.AUTH_DB_PASSWORD,
   database: process.env.AUTH_DB_NAME,
-  port: process.env.AUTH_DB_PORT,
+  port: Number(process.env.AUTH_DB_PORT),
 });
 
-
 // =====================
-// Test all connections
+// Connection Test Helper
 // =====================
 async function testConnections() {
-  try {
-    await donationDB.query("SELECT 1");
-    console.log("✅ Connected to DONATION database");
-  } catch (err) {
-    console.error("❌ Donation DB connection failed:", err.message);
-  }
+  console.log("🔍 Checking database connections...");
 
-  try {
-    await inventoryDB.query("SELECT 1");
-    console.log("✅ Connected to INVENTORY database");
-  } catch (err) {
-    console.error("❌ Inventory DB connection failed:", err.message);
-  }
+  const tests = [
+    { name: "DONATION", db: donationDB, type: "mysql" },
+    { name: "INVENTORY", db: inventoryDB, type: "mysql" },
+    { name: "FOOD", db: foodDB, type: "mysql" },
+    { name: "BENEFICIARY", db: beneficiaryDB, type: "pg" },
+    { name: "AUTH", db: authDB, type: "pg" },
+  ];
 
-  try {
-    await foodDB.query("SELECT 1");
-    console.log("✅ Connected to FOOD database");
-  } catch (err) {
-    console.error("❌ Food DB connection failed:", err.message);
-  }
-
-  try {
-    await beneficiaryDB.query("SELECT 1");
-    console.log("✅ Connected to BENEFICIARY database");
-  } catch (err) {
-    console.error("❌ Beneficiary DB connection failed:", err.message);
-  }
-
+  for (const { name, db, type } of tests) {
     try {
-    await authDB.query("SELECT 1");
-    console.log("✅ Connected to AUTH database");
-  } catch (err) {
-    console.error("❌ Auth DB connection failed:", err.message);
+      if (type === "mysql") {
+        await db.query("SELECT 1");
+      } else {
+        await db.query("SELECT 1");
+      }
+      console.log(`✅ Connected to ${name} database`);
+    } catch (err) {
+      console.error(`❌ ${name} DB connection failed:`, err.message);
+    }
   }
 }
 
-// Run the test immediately
+// Run tests on server startup
 testConnections();
 
+// =====================
+// Exports
+// =====================
 module.exports = {
   donationDB,
   inventoryDB,
   foodDB,
   beneficiaryDB,
+  authDB,
 };

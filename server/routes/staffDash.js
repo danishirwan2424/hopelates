@@ -29,7 +29,7 @@ router.get("/", async (req, res) => {
     `);
 
     const completedDistributions =
-      Number(distRows[0]?.completed_distributions) || 0;
+       Number(distRows[0]?.completed_distributions) || 0;
 
     // =============================
     // 3. APPLICATIONS BY STATUS (Postgres) - Dummy JOIN
